@@ -2,6 +2,7 @@ import { BaseEntity } from '../../../../shared/domain/entities/base.entity';
 import { Email } from '../value-objects/email.vo';
 import { Password } from '../value-objects/Password.vo';
 import { BadRequestException } from '@nestjs/common';
+import { Role } from '../../policies/rbac.policy';
 
 // todo add value objects => Password, Email
 export class User extends BaseEntity {
@@ -9,6 +10,7 @@ export class User extends BaseEntity {
   _lastName: string;
   _email: Email;
   _password: Password;
+  _role: Role;
 
   constructor(props: {
     id?: string;
@@ -16,41 +18,39 @@ export class User extends BaseEntity {
     lastName: string;
     email: Email;
     password: Password;
+    role?: Role;
   }) {
     super(props.id);
     this._firstName = props.firstName;
     this._lastName = props.lastName;
     this._email = props.email;
     this._password = props.password;
+    this._role = props.role || Role.ACCOUNTANT;
 
     this.validate();
   }
+
   static create(
     email: string,
     password: string,
     firstName: string,
     lastName: string,
+    role?: Role,
   ): User {
-    // Check if password is undefined/null before creating Email VO
     if (password === undefined || password === null) {
-      console.error('ERROR: Password is undefined or null!');
       throw new BadRequestException('Password cannot be undefined or null');
     }
 
-    // Now create both for real
     const emailVO = new Email(email);
     const passwordVO = new Password(password);
 
-    console.log('=== Creating User entity ===');
-    const user = new User({
+    return new User({
       email: emailVO,
       password: passwordVO,
       firstName,
       lastName,
+      role,
     });
-
-    console.log('=== User creation completed successfully ===');
-    return user;
   }
 
   static fromPersistence(props: {
@@ -59,6 +59,7 @@ export class User extends BaseEntity {
     lastName: string;
     email: string;
     hashedPassword: string;
+    role: Role;
   }) {
     return new User({
       id: props.id,
@@ -66,6 +67,7 @@ export class User extends BaseEntity {
       lastName: props.lastName,
       email: new Email(props.email),
       password: new Password(props.hashedPassword),
+      role: props.role,
     });
   }
 
@@ -92,7 +94,13 @@ export class User extends BaseEntity {
   get firstName(): string {
     return this._firstName;
   }
+  get role(): Role {
+    return this._role;
+  }
   get lastName(): string {
     return this._lastName;
+  }
+  get fullName(): string {
+    return `${this._firstName} ${this._lastName}`;
   }
 }

@@ -11,9 +11,12 @@ import { ReportsModule } from './modules/reports/reports.module';
 import { LocationModule } from './modules/location/location.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AccessControlModule } from 'nest-access-control';
+import { roles } from './modules/auth/policies/rbac.policy';
 
 @Module({
   imports: [
+    AccessControlModule.forRoles(roles),
     TypeOrmModule.forRootAsync({
       useFactory: () => ({
         type: 'postgres',

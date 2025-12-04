@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, OnModuleInit } from '@nestjs/common';
 
 import { RegisterUseCase } from './application/use-cases/register.use-case.ts/register-use-case.service';
 import { ChangePasswordUseCase } from './application/use-cases/change-password.use-case/change-password-use-case.service';
@@ -16,6 +16,8 @@ import AuthRepository from './infrastructure/persistence/repository/auth.reposit
 import { PasswordHasherService } from './application/services/password-hasher-service/password-hasher-service.service';
 import { LoginUseCase } from './application/use-cases/login.use-case.ts/login.use-case';
 import { JwtService } from './application/services/jwt-service/jwt-service.service';
+import { AdminSeederService } from './application/services/admin-seeder/admin-seeder.service';
+import { ResetPasswordUseCase } from './application/use-cases/reset-password.use-case/reset-password.use-case';
 
 @Module({
   imports: [
@@ -41,6 +43,7 @@ import { JwtService } from './application/services/jwt-service/jwt-service.servi
     ChangePasswordUseCase,
     LoginUseCase,
     JwtService,
+    AdminSeederService,
 
     //Services
     PasswordHasherService,
@@ -54,8 +57,15 @@ import { JwtService } from './application/services/jwt-service/jwt-service.servi
       provide: IAuthRepository,
       useClass: AuthRepository,
     },
+
+    ResetPasswordUseCase,
   ],
   controllers: [AuthController],
-  exports: [IAuthRepository, IRefreshTokenRepository],
+  exports: [IAuthRepository, IRefreshTokenRepository, PasswordHasherService],
 })
-export class AuthModule {}
+export class AuthModule implements OnModuleInit {
+  constructor(private readonly adminSeederService: AdminSeederService) {}
+  async onModuleInit() {
+    await this.adminSeederService.seedDefaultAdmin();
+  }
+}

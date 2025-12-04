@@ -1,0 +1,34 @@
+@baseUrl = http://localhost:3300
+@contentType = application/json
+
+
+
+@user1Email = s.waweru@gmail.com
+@password = SecurePass123!@#
+@user2Email = s.ndegwa@gmail.com
+
+
+### 1.1 ✅ Successful Registration - User 1
+# @name registerUser1
+POST {{baseUrl}}/auth/register
+Content-Type: {{contentType}}
+
+{
+  "email": "{{user1Email}}",
+  "password": "{{password}}",
+  "firstName": "Sam",
+  "lastName": "Waweru"
+}
+
+
+### 1.2 ✅ Successful Registration - User 2 No Password
+POST {{baseUrl}}/auth/register
+Content-Type: {{contentType}}
+
+{
+  "email": "{{user2Email}}",
+  "firstName": "Sam",
+  "lastName": "Waweru"
+}
+
+

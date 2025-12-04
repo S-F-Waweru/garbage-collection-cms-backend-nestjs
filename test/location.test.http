@@ -1,0 +1,50 @@
+### Variables
+@baseUrl = http://localhost:3300
+@createLocation = variable value
+@locationId =f09b3e28-91dc-4389-8790-9e65011032fc
+
+### Create Location
+# @name createLocation
+POST {{baseUrl}}/locations
+Content-Type: application/json
+
+{
+  "city": "Nairobi",
+  "region": "Kilimani"
+}
+
+### Create Another Location
+POST {{baseUrl}}/locations
+Content-Type: application/json
+
+{
+  "city": "Mombasa",
+  "region": "Nyali"
+}
+
+### Get All Locations
+GET {{baseUrl}}/locations
+
+### Get Location By ID
+GET {{baseUrl}}/locations/{{locationId}}
+
+### Update Location
+PUT {{baseUrl}}/locations/{{locationId}}
+Content-Type: application/json
+
+{
+  "city": "Nairobi",
+  "region": "Kilimani"
+}
+
+### Delete Location
+DELETE {{baseUrl}}/locations/{{locationId}}
+
+### Duplicate Location Creation
+POST {{baseUrl}}/locations
+Content-Type: application/json
+
+{
+  "city": "Mombasa",
+  "region": "Nyali"
+}

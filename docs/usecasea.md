@@ -25,6 +25,10 @@
 - Filter clients by location/status - `GET /clients?location=&status=`
 - View client history - `GET /clients/:id/history`
 - Get client units count - `GET /clients/:id/units`
+ --------
+- Get clients by location - `GET /locations/:id/clients`
+- Get location statistics (client count, revenue) - `GET /locations/:id/statistics`
+
 
 ---
 
@@ -102,8 +106,6 @@
 - Delete location - `DELETE /locations/:id`
 - Get location by ID - `GET /locations/:id`
 - List all locations - `GET /locations`
-- Get clients by location - `GET /locations/:id/clients`
-- Get location statistics (client count, revenue) - `GET /locations/:id/statistics`
 
 ---
 
