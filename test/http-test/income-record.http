@@ -1,0 +1,40 @@
+### Variables
+@baseUrl = http://localhost:3000
+@categoryId = your-category-id-here
+@recordId = your-record-id-here
+
+### Get all income records
+GET {{baseUrl}}/income-records
+
+### Get income record by ID
+GET {{baseUrl}}/income-records/{{recordId}}
+
+### Create income record
+POST {{baseUrl}}/income-records
+Content-Type: application/json
+
+{
+  "categoryId": "{{categoryId}}",
+  "clientName": "John Doe",
+  "unitPrice": 100.50,
+  "unitCount": 5,
+  "unitType": "HOURS",
+  "notes": "Payment for consulting services",
+  "recordedBy": "user-id-123"
+}
+
+### Update income record
+PUT {{baseUrl}}/income-records/{{recordId}}
+Content-Type: application/json
+
+{
+  "categoryId": "{{categoryId}}",
+  "clientName": "Jane Doe",
+  "unitPrice": 150.00,
+  "unitCount": 10,
+  "unitType": "DAYS",
+  "notes": "Updated payment details"
+}
+
+### Delete income record
+DELETE {{baseUrl}}/income-records/{{recordId}}
