@@ -8,7 +8,7 @@ export class DeleteIncomeCategoryUseCase {
     private readonly incomeCategoryRepository: IIncomeCategoryRepository,
   ) {}
 
-  async execute(id: string): Promise<void> {
+  async execute(id: string): Promise<{ message: string }> {
     // 1. Check if category exists
     const category = await this.incomeCategoryRepository.findById(id);
     if (!category) {
