@@ -2,7 +2,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { LocationSchema } from '../schema/location.schema';
 import { IsNull, Repository } from 'typeorm';
 import { ILocationRepository } from '../../../domain/interface/location.repository.inteface';
-import { Location } from '../../../domain/enetites/location.entity'; // Assuming this is correct
+import { Location } from '../../../domain/entities/location.entity'; // Assuming this is correct
 
 export class LocationRepository implements ILocationRepository {
   constructor(

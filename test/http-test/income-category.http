@@ -1,0 +1,56 @@
+### Create Income Category: Scrap Metal
+POST http://localhost:3300/income-categories
+Content-Type: application/json
+
+{
+  "name": "Scrap Metal",
+  "description": "Income from scrap metal collection"
+}
+
+### Create Income Category: Plastic
+POST http://localhost:3300/income-categories
+Content-Type: application/json
+
+{
+  "name": "Plastic",
+  "description": "Income from plastic collection"
+}
+
+### Create Income Category: Broken Glass
+POST http://localhost:3300/income-categories
+Content-Type: application/json
+
+{
+  "name": "Broken Glass",
+  "description": "Income from broken glass collection"
+}
+
+### Create Income Category: Temporary Category (to test delete)
+POST http://localhost:3300/income-categories
+Content-Type: application/json
+
+{
+  "name": "Temporary",
+  "description": "This category will be deleted during test"
+}
+
+### List all Income Categories
+GET http://localhost:3300/income-categories
+Accept: application/json
+
+### Get Income Category by ID
+GET http://localhost:3300/income-categories/7e55ca40-a0fd-476a-a2bf-7735cd3a7dee
+Accept: application/json
+
+### Update Income Category
+PUT http://localhost:3300/income-categories/7e55ca40-a0fd-476a-a2bf-7735cd3a7dee
+Content-Type: application/json
+
+{
+  "name": "Updated Category",
+  "description": "Updated description"
+}
+
+### Delete Income Category: Temporary
+DELETE http://localhost:3300/income-categories/7e55ca40-a0fd-476a-a2bf-7735cd3a7dee
+

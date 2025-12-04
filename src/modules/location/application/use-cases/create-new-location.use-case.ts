@@ -1,7 +1,7 @@
 import { ConflictException, Inject, Injectable } from '@nestjs/common';
 import { ILocationRepository } from '../../domain/interface/location.repository.inteface';
 import { CreateLocationDto } from '../dto/location.dto';
-import { Location } from '../../domain/enetites/location.entity';
+import { Location } from '../../domain/entities/location.entity';
 
 @Injectable()
 export class CreateNewLocationUseCase {

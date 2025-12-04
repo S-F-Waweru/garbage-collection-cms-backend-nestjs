@@ -1,4 +1,4 @@
-import { Location } from '../enetites/location.entity';
+import { Location } from '../entities/location.entity';
 
 export interface ILocationRepository {
   findById(id: string): Promise<Location | null>;
