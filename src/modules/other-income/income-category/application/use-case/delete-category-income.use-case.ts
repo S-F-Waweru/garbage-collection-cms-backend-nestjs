@@ -17,5 +17,9 @@ export class DeleteIncomeCategoryUseCase {
 
     // 2. Delete the category
     await this.incomeCategoryRepository.delete(id);
+
+    return {
+      message: 'Income category deleted successfully',
+    };
   }
 }

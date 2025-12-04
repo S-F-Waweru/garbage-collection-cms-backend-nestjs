@@ -51,8 +51,8 @@ export class IncomeCategoryController {
   }
 
   @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async delete(@Param('id') id: string): Promise<void> {
+  @HttpCode(HttpStatus.OK) // change to 200 to return a message
+  async delete(@Param('id') id: string) {
     return this.deleteUseCase.execute(id);
   }
 }

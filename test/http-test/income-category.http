@@ -52,5 +52,5 @@ Content-Type: application/json
 }
 
 ### Delete Income Category: Temporary
-DELETE http://localhost:3300/income-categories/7e55ca40-a0fd-476a-a2bf-7735cd3a7dee
+DELETE http://localhost:3300/income-categories/da4db88b-6fd1-4bc8-9093-5bb9798fd2da
 
