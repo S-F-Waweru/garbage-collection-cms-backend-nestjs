@@ -1,7 +1,7 @@
 ### Variables
 @baseUrl = http://localhost:3300
 @categoryId = bf6b4007-9c9e-4344-8393-a43b4a24ef68
-@recordId = your-record-id-here
+@recordId = e8565af7-31fa-4488-8a8c-39d366cd8597
 
 ### Get all income records
 GET {{baseUrl}}/income-records
