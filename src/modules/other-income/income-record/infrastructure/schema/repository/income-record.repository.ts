@@ -7,7 +7,7 @@ import { IIncomeRecordRepository } from '../../../domain/interface/income-record
 import { IncomeCategorySchema } from '../../../../income-category/infrastructure/schema/IncomeCategory.schema';
 import { IncomeRecord } from '../../../domain/income-record.entity';
 import { IncomeCategory } from '../../../../income-category/domain/income-category.entity';
-import { IncomeRecordSchema } from '../income-record.shema';
+import { IncomeRecordSchema } from '../income-record.schema';
 import { Unit } from '../../../application/dto/income-record.dto';
 
 @Injectable()

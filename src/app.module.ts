@@ -14,6 +14,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AccessControlModule } from 'nest-access-control';
 import { roles } from './modules/auth/policies/rbac.policy';
 import { ConfigModule } from '@nestjs/config';
+import { IncomeRecordSchema } from './modules/other-income/income-record/infrastructure/schema/income-record.schema';
+import { RefreshTokenSchema } from './modules/auth/infrastructure/persistence/schema/refresh-token.schema';
+import { UserSchema } from './modules/auth/infrastructure/persistence/schema/user.schema';
+import { LocationSchema } from './modules/location/infrastracture/persistence/schema/location.schema';
+import { IncomeCategorySchema } from './modules/other-income/income-category/infrastructure/schema/IncomeCategory.schema';
 
 @Module({
   imports: [
@@ -30,9 +35,13 @@ import { ConfigModule } from '@nestjs/config';
         username: process.env.DB_USER || 'postgres',
         password: process.env.DB_PASSWORD || 'root',
         database: process.env.DB_NAME || 'gm_client_cms_db',
-        entities: [__dirname + '/**/*.schema{.ts,.js}'],
-        // synchronize: process.env.NODE_ENV !== 'production',
-        // logging: process.env.NODE_ENV === 'development',
+        entities: [
+          IncomeRecordSchema,
+          RefreshTokenSchema,
+          UserSchema,
+          LocationSchema,
+          IncomeCategorySchema,
+        ],
         synchronize: true,
         logging: true,
       }),

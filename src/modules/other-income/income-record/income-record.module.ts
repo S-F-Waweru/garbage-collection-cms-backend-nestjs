@@ -9,7 +9,7 @@ import { GetIncomeCategoryByIdUseCase } from '../income-category/application/use
 import { DeleteIncomeRecordUseCase } from './application/use-cases/get-income-record-by-id.use-case';
 import { UpdateIncomeRecordUseCase } from './application/use-cases/update-income-record.use-case';
 import { IncomeCategorySchema } from '../income-category/infrastructure/schema/IncomeCategory.schema';
-import { IncomeRecordSchema } from './infrastructure/schema/income-record.shema';
+import { IncomeRecordSchema } from './infrastructure/schema/income-record.schema';
 import { IncomeCategoryModule } from '../income-category/income-category.module';
 import { IIncomeCategoryRepository } from '../income-category/domain/interfaces/income-category.repository.interface';
 import { IncomeCategoryRepository } from '../income-category/infrastructure/repository/income-category.repository';
