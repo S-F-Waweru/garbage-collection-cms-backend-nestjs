@@ -5,7 +5,6 @@ import { IsNull, Repository } from 'typeorm';
 import { PettyCashSchema } from './petty-cash-schema';
 import { PettyCash } from '../domain/petty-cash.entity';
 import { Injectable } from '@nestjs/common';
-import { IncomeCategory } from '../../../other-income/income-category/domain/income-category.entity';
 
 @Injectable()
 export class PettyCashRepository implements IPettyCashRepository {
@@ -49,7 +48,7 @@ export class PettyCashRepository implements IPettyCashRepository {
     return count > 0;
   }
 
-  async findAll(): Promise<IncomeCategory[]> {
+  async findAll(): Promise<PettyCash[]> {
     const schemas = await this.repository.find({
       where: { deletedAt: IsNull() },
     });
