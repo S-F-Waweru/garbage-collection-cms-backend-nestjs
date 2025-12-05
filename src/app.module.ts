@@ -5,7 +5,7 @@ import { UsersModule } from './users/users.module';
 import { ClientsModule } from './modules/clients/clients.module';
 import { InvoicesModule } from './modules/invoices/invoices.module';
 import { PaymentsModule } from './modules/payments/payments.module';
-import { ExpencesModule } from './modules/expences/expences.module';
+import { ExpensesModule } from './modules/expences/expences.module';
 import { OtherIncomeModule } from './modules/other-income/other-income.module';
 import { ReportsModule } from './modules/reports/reports.module';
 import { LocationModule } from './modules/location/location.module';
@@ -19,6 +19,7 @@ import { RefreshTokenSchema } from './modules/auth/infrastructure/persistence/sc
 import { UserSchema } from './modules/auth/infrastructure/persistence/schema/user.schema';
 import { LocationSchema } from './modules/location/infrastracture/persistence/schema/location.schema';
 import { IncomeCategorySchema } from './modules/other-income/income-category/infrastructure/schema/IncomeCategory.schema';
+import { PettyCashSchema } from './modules/expences/petty-cash/infrastructure/petty-cash-schema';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { IncomeCategorySchema } from './modules/other-income/income-category/inf
           UserSchema,
           LocationSchema,
           IncomeCategorySchema,
+          PettyCashSchema,
         ],
         synchronize: true,
         logging: true,
@@ -50,7 +52,7 @@ import { IncomeCategorySchema } from './modules/other-income/income-category/inf
     ClientsModule,
     InvoicesModule,
     PaymentsModule,
-    ExpencesModule,
+    ExpensesModule,
     OtherIncomeModule,
     ReportsModule,
     LocationModule,

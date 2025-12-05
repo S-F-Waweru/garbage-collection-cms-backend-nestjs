@@ -27,11 +27,12 @@ export class PettyCashRepository implements IPettyCashRepository {
       id: schema.id,
       name: schema.name,
       totalAmount: schema.totalAmount,
+      createdBy: schema.createdBy,
       notes: schema.notes,
     });
   }
 
-  save(pettyCash: PettyCash) {
+  async save(pettyCash: PettyCash) {
     const schema = this.toSchema(pettyCash);
     const saved = await this.repository.save(schema);
     return this.toDomain(saved);
@@ -55,7 +56,7 @@ export class PettyCashRepository implements IPettyCashRepository {
     return schemas.map((s) => this.toDomain(s));
   }
 
-  findById(id: string): Promise<PettyCash | null> {
+  async findById(id: string): Promise<PettyCash | null> {
     const schema = await this.repository.findOne({ where: { id } });
     return schema ? this.toDomain(schema) : null;
   }

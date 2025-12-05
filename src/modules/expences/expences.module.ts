@@ -4,6 +4,6 @@ import { ExpenceModule } from './expence/expence.module';
 import { ExpenseCategoryModule } from './expense-category/expense-category.module';
 
 @Module({
-  imports: [PettyCashModule, ExpenceModule, ExpenseCategoryModule]
+  imports: [PettyCashModule, ExpenceModule, ExpenseCategoryModule],
 })
-export class ExpencesModule {}
+export class ExpensesModule {}
