@@ -34,11 +34,6 @@ export class CreateIncomeRecordUseCase {
       notes: dto.notes,
     });
 
-    console.log(
-      `========================Debug Info========================+++++++++++++++++++++++++++++++++++++++++++++++++++++++`,
-    );
-    console.log(incomeRecord);
-
     await this.repository.save(incomeRecord);
 
     return {

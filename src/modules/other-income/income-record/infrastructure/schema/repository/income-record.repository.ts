@@ -95,10 +95,6 @@ export class IncomeRecordRepository implements IIncomeRecordRepository {
 
   async save(record: IncomeRecord): Promise<IncomeRecord> {
     const schema = await this.toSchema(record);
-    console.log(
-      `==================================++++++++++++++++++++++++++++==Debug==================+++++++++++++++++++++++++++++++++++`,
-    );
-    console.log(schema);
     const saved = await this.repository.save(schema);
     return this.toDomain(saved);
   }
