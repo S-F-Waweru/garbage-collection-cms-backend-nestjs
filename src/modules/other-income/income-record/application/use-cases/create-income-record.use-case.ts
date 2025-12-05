@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  LoggerService,
-} from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { CreateIncomeRecordDto } from '../dto/income-record.dto';
 import { IncomeRecord } from '../../domain/income-record.entity';

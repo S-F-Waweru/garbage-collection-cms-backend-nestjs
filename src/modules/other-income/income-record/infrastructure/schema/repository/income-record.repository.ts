@@ -10,6 +10,7 @@ import { IncomeCategory } from '../../../../income-category/domain/income-catego
 import { IncomeRecordSchema } from '../income-record.schema';
 import { Unit } from '../../../application/dto/income-record.dto';
 
+// todo return more user fliendly data for the APIs
 @Injectable()
 export class IncomeRecordRepository implements IIncomeRecordRepository {
   constructor(
@@ -37,7 +38,6 @@ export class IncomeRecordRepository implements IIncomeRecordRepository {
       id: record.id, // optional for create, required for update
       notes: record.notes,
       unitType: record.unitType,
-      unitPrice: record.unitPrice,
       unitCount: record.unitCount,
       clientName: record.clientName,
       category, // now definitely not undefined

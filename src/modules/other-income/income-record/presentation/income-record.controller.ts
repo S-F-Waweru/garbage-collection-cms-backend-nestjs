@@ -21,7 +21,8 @@ import { GetAllIncomeRecordsUseCase } from '../application/use-cases/get-all-inc
 import { UpdateIncomeRecordUseCase } from '../application/use-cases/update-income-record.use-case';
 import { CurrentUser } from '../../../../shared/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
-import { AuthGuard } from '@nestjs/passport';
+
+// todo authentication and authorization of all routes at the end
 
 @Controller('income-records')
 export class IncomeRecordController {
