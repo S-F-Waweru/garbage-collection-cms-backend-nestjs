@@ -5,7 +5,7 @@ export class CreateIncomeRecordDto {
   unitCount: number;
   unitType: Unit;
   notes?: string;
-  recordedBy: string; // logged in user ID
+  // recordedBy?: string; // logged in user ID
 }
 
 export class UpdateIncomeRecordDto {

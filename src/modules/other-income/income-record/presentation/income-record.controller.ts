@@ -7,6 +7,7 @@ import {
   Param,
   Body,
   NotFoundException,
+  UseGuards,
 } from '@nestjs/common';
 
 import {
@@ -18,6 +19,9 @@ import { DeleteIncomeRecordUseCase } from '../application/use-cases/get-income-r
 import { GetIncomeCategoryByIdUseCase } from '../../income-category/application/use-case/get-income-category-by-id.use-case';
 import { GetAllIncomeRecordsUseCase } from '../application/use-cases/get-all-income-records.use-case';
 import { UpdateIncomeRecordUseCase } from '../application/use-cases/update-income-record.use-case';
+import { CurrentUser } from '../../../../shared/decorators/current-user.decorator';
+import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('income-records')
 export class IncomeRecordController {
@@ -50,9 +54,11 @@ export class IncomeRecordController {
   // -----------------------
   // CREATE
   // -----------------------
+  @UseGuards(JwtAuthGuard)
   @Post()
-  async create(@Body() dto: CreateIncomeRecordDto) {
-    return this.createUseCase.execute(dto);
+  create(@CurrentUser() user: any, @Body() dto: CreateIncomeRecordDto) {
+    // return console.log('Creating income record for user:', user);
+    return this.createUseCase.execute(user.userId, dto);
   }
 
   // -----------------------

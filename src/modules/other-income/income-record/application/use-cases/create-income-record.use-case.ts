@@ -1,4 +1,9 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  LoggerService,
+} from '@nestjs/common';
 
 import { CreateIncomeRecordDto } from '../dto/income-record.dto';
 import { IncomeRecord } from '../../domain/income-record.entity';
@@ -14,7 +19,7 @@ export class CreateIncomeRecordUseCase {
     private readonly categoryRepository: IIncomeCategoryRepository,
   ) {}
 
-  async execute(dto: CreateIncomeRecordDto) {
+  async execute(userId: string, dto: CreateIncomeRecordDto) {
     const category = await this.categoryRepository.findById(dto.categoryId);
     if (category === null) {
       throw new BadRequestException(`Category ${dto.categoryId} not found`);
@@ -25,9 +30,14 @@ export class CreateIncomeRecordUseCase {
       unitPrice: dto.unitPrice,
       unitCount: dto.unitCount,
       unitType: dto.unitType,
-      recordedBy: dto.recordedBy,
+      recordedBy: userId,
       notes: dto.notes,
     });
+
+    console.log(
+      `========================Debug Info========================+++++++++++++++++++++++++++++++++++++++++++++++++++++++`,
+    );
+    console.log(incomeRecord);
 
     await this.repository.save(incomeRecord);
 

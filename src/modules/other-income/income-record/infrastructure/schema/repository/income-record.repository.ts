@@ -37,6 +37,7 @@ export class IncomeRecordRepository implements IIncomeRecordRepository {
       id: record.id, // optional for create, required for update
       notes: record.notes,
       unitType: record.unitType,
+      unitPrice: record.unitPrice,
       unitCount: record.unitCount,
       clientName: record.clientName,
       category, // now definitely not undefined
@@ -94,6 +95,10 @@ export class IncomeRecordRepository implements IIncomeRecordRepository {
 
   async save(record: IncomeRecord): Promise<IncomeRecord> {
     const schema = await this.toSchema(record);
+    console.log(
+      `==================================++++++++++++++++++++++++++++==Debug==================+++++++++++++++++++++++++++++++++++`,
+    );
+    console.log(schema);
     const saved = await this.repository.save(schema);
     return this.toDomain(saved);
   }

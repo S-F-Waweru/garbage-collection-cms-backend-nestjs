@@ -1,6 +1,6 @@
 ### Variables
 @baseUrl = http://localhost:3300
-@categoryId = your-category-id-here
+@categoryId = bf6b4007-9c9e-4344-8393-a43b4a24ef68
 @recordId = your-record-id-here
 
 ### Get all income records
@@ -9,18 +9,21 @@ GET {{baseUrl}}/income-records
 ### Get income record by ID
 GET {{baseUrl}}/income-records/{{recordId}}
 
+
+###Access Token
+@accessToken =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1YzQxZjg3ZS0wNDE3LTRmNTUtOWNjMy0zZjI1MmRjODc3NmYiLCJlbWFpbCI6ImFkbWluQGdhcmJhZ2VjbXMuY29tIiwiaWF0IjoxNzY0OTIyMDg3LCJleHAiOjE3NjQ5MjI5ODd9.UfjGAf1-FiD0BTFbG7OovcsqukIfjiBT4GPQLpXh3K8
 ### Create income record
 POST {{baseUrl}}/income-records
 Content-Type: application/json
+Authorization: Bearer {{accessToken}}
 
 {
   "categoryId": "{{categoryId}}",
   "clientName": "John Doe",
   "unitPrice": 100.50,
   "unitCount": 5,
-  "unitType": "HOURS",
-  "notes": "Payment for consulting services",
-  "recordedBy": "user-id-123"
+  "unitType": "KG",
+  "notes": "Payment for consulting services"
 }
 
 ### Update income record
@@ -32,7 +35,7 @@ Content-Type: application/json
   "clientName": "Jane Doe",
   "unitPrice": 150.00,
   "unitCount": 10,
-  "unitType": "DAYS",
+  "unitType": "KG",
   "notes": "Updated payment details"
 }
 

@@ -6,7 +6,6 @@ import { Unit } from '../application/dto/income-record.dto';
 export class IncomeRecord extends BaseEntity {
   private _category: IncomeCategory;
   private _clientName: string;
-  private _amount: number; // optional, or derived from unitPrice*unitCount
   private _unitPrice: number;
   private _unitCount: number;
   private _unitType: Unit;
