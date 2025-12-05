@@ -1,0 +1,41 @@
+### Variables
+@baseUrl = http://localhost:3300
+@pettyCashId = 11111111-2222-3333-4444-555555555555
+
+### Access Token
+@accessToken = your_jwt_token_here
+
+
+### Create petty cash
+POST {{baseUrl}}/petty-cash
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "name": "Office Petty Cash",
+  "totalAmount": 3000,
+  "notes": "Initial petty cash for supplies"
+}
+
+
+### Update petty cash
+PUT {{baseUrl}}/petty-cash/{{pettyCashId}}
+Content-Type: application/json
+
+{
+  "name": "Office Petty Cash Updated",
+  "totalAmount": 4000,
+  "notes": "Added more funds"
+}
+
+
+### Get petty cash by ID
+GET {{baseUrl}}/petty-cash/{{pettyCashId}}
+
+
+### Get all petty cash
+GET {{baseUrl}}/petty-cash
+
+
+### Delete petty cash
+DELETE {{baseUrl}}/petty-cash/{{pettyCashId}}
