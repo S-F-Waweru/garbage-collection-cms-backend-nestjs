@@ -1,9 +1,12 @@
-import { Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { IAuthRepository } from '../../../domain/interfaces/auth.repository.interface';
 import { ChangePasswordDto } from '../../dto/auth.request.dto';
-import {
-  PasswordHasherService,
-} from '../../services/password-hasher-service/password-hasher-service.service';
+import { PasswordHasherService } from '../../services/password-hasher-service/password-hasher-service.service';
 
 @Injectable()
 export class ChangePasswordUseCase {
@@ -21,7 +24,7 @@ export class ChangePasswordUseCase {
     const user = await this.authRepository.findById(userId);
 
     if (!user) {
-      throw new Error('User not found');
+      throw new NotFoundException('User not found');
     }
 
     const isValid = await this.validatePassword(
@@ -30,7 +33,7 @@ export class ChangePasswordUseCase {
     );
 
     if (!isValid) {
-      throw new Error('Invalid current password');
+      throw new BadRequestException('Invalid current password');
     }
     const newHashedPassword = await this.passwordHasher.hash(newPassword);
 
@@ -48,9 +51,9 @@ export class ChangePasswordUseCase {
     password: string,
     hashedPassword: string,
   ): Promise<boolean> {
-    if (!password) throw new Error('Password cannot be empty');
+    if (!password) throw new BadRequestException('Password cannot be empty');
     const isValid = await this.passwordHasher.compare(password, hashedPassword);
-    if (!isValid) throw new Error('Invalid password');
+    if (!isValid) throw new BadRequestException('Invalid password');
     return true;
   }
 }

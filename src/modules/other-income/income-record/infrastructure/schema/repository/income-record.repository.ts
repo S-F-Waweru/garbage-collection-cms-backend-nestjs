@@ -1,5 +1,5 @@
 // TypeScript
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Repository } from 'typeorm';
 
@@ -30,13 +30,13 @@ export class IncomeRecordRepository implements IIncomeRecordRepository {
     });
 
     if (!category) {
-      throw new Error('Category not found');
+      throw new NotFoundException('Category not found');
     }
 
     const schema: IncomeRecordSchema = this.repository.create({
       id: record.id, // optional for create, required for update
       notes: record.notes,
-      unitType: record.unitType as Unit,
+      unitType: record.unitType,
       unitCount: record.unitCount,
       clientName: record.clientName,
       category, // now definitely not undefined

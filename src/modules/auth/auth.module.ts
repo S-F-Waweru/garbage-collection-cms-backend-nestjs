@@ -18,6 +18,7 @@ import { LoginUseCase } from './application/use-cases/login.use-case.ts/login.us
 import { JwtService } from './application/services/jwt-service/jwt-service.service';
 import { AdminSeederService } from './application/services/admin-seeder/admin-seeder.service';
 import { ResetPasswordUseCase } from './application/use-cases/reset-password.use-case/reset-password.use-case';
+import { JwtStrategy } from './presentation/strategies/jwt.strategy';
 
 @Module({
   imports: [
@@ -37,7 +38,7 @@ import { ResetPasswordUseCase } from './application/use-cases/reset-password.use
   ],
   providers: [
     // Strategies and guards
-
+    JwtStrategy,
     // use cases
     RegisterUseCase,
     ChangePasswordUseCase,
@@ -61,7 +62,12 @@ import { ResetPasswordUseCase } from './application/use-cases/reset-password.use
     ResetPasswordUseCase,
   ],
   controllers: [AuthController],
-  exports: [IAuthRepository, IRefreshTokenRepository, PasswordHasherService],
+  exports: [
+    IAuthRepository,
+    IRefreshTokenRepository,
+    PasswordHasherService,
+    JwtStrategy,
+  ],
 })
 export class AuthModule implements OnModuleInit {
   constructor(private readonly adminSeederService: AdminSeederService) {}

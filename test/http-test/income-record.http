@@ -1,5 +1,5 @@
 ### Variables
-@baseUrl = http://localhost:3000
+@baseUrl = http://localhost:3300
 @categoryId = your-category-id-here
 @recordId = your-record-id-here
 

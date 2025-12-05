@@ -13,9 +13,14 @@ import { AuthModule } from './modules/auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AccessControlModule } from 'nest-access-control';
 import { roles } from './modules/auth/policies/rbac.policy';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true, // <-- this makes it global
+      envFilePath: '.env', // optional: specify your .env file path
+    }),
     AccessControlModule.forRoles(roles),
     TypeOrmModule.forRootAsync({
       useFactory: () => ({

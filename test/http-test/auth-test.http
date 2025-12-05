@@ -5,7 +5,8 @@
 
 @user1Email = s.waweru@gmail.com
 @password = SecurePass123!@#
-@user2Email = s.ndegwa@gmail.com
+@user2Email = admin@garbagecms.com
+@password2 = Admin@123
 
 
 ### 1.1 ✅ Successful Registration - User 1
@@ -32,3 +33,23 @@ Content-Type: {{contentType}}
 }
 
 
+### 2.1 ✅ Successful Login - User 1
+# @name loginUser1
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+
+{
+  "email": "{{user2Email}}",
+   "password": "{{password2}}"
+}
+
+
+######
+@accessToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1YzQxZjg3ZS0wNDE3LTRmNTUtOWNjMy0zZjI1MmRjODc3NmYiLCJlbWFpbCI6ImFkbWluQGdhcmJhZ2VjbXMuY29tIiwiaWF0IjoxNzY0OTE5MDM3LCJleHAiOjE3NjQ5MTk5Mzd9.gfca_ZbX6ZGY9yitVYIfZrXSDv5_uUDRl8R1P2Bg7ro
+
+### 2.2 ✅ Successful Login \- User 2
+# @name loginUser2
+GET {{baseUrl}}/auth/me
+Content-Type: {{contentType}}
+Authorization: Bearer {{accessToken}}

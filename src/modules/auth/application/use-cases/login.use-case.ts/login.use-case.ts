@@ -1,4 +1,9 @@
-import { Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { IAuthRepository } from '../../../domain/interfaces/auth.repository.interface';
 import { PasswordHasherService } from '../../services/password-hasher-service/password-hasher-service.service';
 import { IRefreshTokenRepository } from '../../../domain/interfaces/refresh-token.repository';
@@ -22,10 +27,11 @@ export class LoginUseCase {
     const email = new Email(dto.email);
     const user = await this.authRepositor.findByEmail(email);
     if (!user) {
-      throw new Error('User not found');
+      throw new NotFoundException('Invalid Credentials');
     }
+
     if (!user.password) {
-      throw new Error('Password not found or invalid');
+      throw new BadRequestException('Missing or invalid password');
     }
 
     const isPasswordValid = await this.passwordHasher.compare(
@@ -33,7 +39,7 @@ export class LoginUseCase {
       user.password.value,
     );
     if (!isPasswordValid) {
-      throw new Error(' invalid credentials');
+      throw new BadRequestException(' invalid credentials');
     }
 
     // 5. Generate new access token (JWT) with user data
