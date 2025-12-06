@@ -10,9 +10,10 @@ import { FindAllPettyCashUseCase } from '../petty-cash/application/use-cases/fin
 import { IExpenseRepository } from './domain/expense.repository.interface';
 import { ExpenseRepository } from './infrastructure/expense.repository';
 import { FindAllExpensesUseCase } from './application/use-cases/find-all-expenses.use-case';
+import { PettyCashModule } from '../petty-cash/petty-cash.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ExpenseSchema])],
+  imports: [TypeOrmModule.forFeature([ExpenseSchema]), PettyCashModule],
   controllers: [ExpensesController],
   providers: [
     CreateExpenseUseCase,

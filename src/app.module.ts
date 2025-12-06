@@ -20,6 +20,7 @@ import { UserSchema } from './modules/auth/infrastructure/persistence/schema/use
 import { LocationSchema } from './modules/location/infrastracture/persistence/schema/location.schema';
 import { IncomeCategorySchema } from './modules/other-income/income-category/infrastructure/schema/IncomeCategory.schema';
 import { PettyCashSchema } from './modules/expences/petty-cash/infrastructure/petty-cash-schema';
+import { ExpenseSchema } from './modules/expences/expence/infrastructure/expense.schema';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { PettyCashSchema } from './modules/expences/petty-cash/infrastructure/pe
           LocationSchema,
           IncomeCategorySchema,
           PettyCashSchema,
+          ExpenseSchema,
         ],
         synchronize: true,
         logging: true,

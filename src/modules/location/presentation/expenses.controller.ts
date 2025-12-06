@@ -40,15 +40,14 @@ export class ExpensesController {
   update(@Param('id') id, @Body() dto: UpdateExpenseDto) {
     return this.updateExpenseUseCase.execute(id, dto);
   }
-
   @Get()
   findAll() {
-    return this.findAllExpensesUseCase.execute;
+    return this.findAllExpensesUseCase.execute(); // Add ()
   }
 
   @Get(':id')
   findById(@Param('id') id) {
-    return this.findAllExpensesUseCase.execute;
+    return this.findExpenseBydUseCase.execute(id); // Wrong use case + add ()
   }
 
   @Delete(':id')

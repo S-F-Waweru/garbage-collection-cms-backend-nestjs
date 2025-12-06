@@ -19,6 +19,7 @@ export class PettyCashRepository implements IPettyCashRepository {
       name: pettyCash.name,
       totalAmount: pettyCash.totalAmount,
       notes: pettyCash.notes,
+      createdBy: pettyCash.createdBy,
     };
   }
 

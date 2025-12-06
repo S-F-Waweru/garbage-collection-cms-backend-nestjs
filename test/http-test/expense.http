@@ -1,0 +1,60 @@
+### Variables
+@baseUrl = http://localhost:3300
+@expenseId = c856fdcf-de55-4645-a333-882c33e2f1ad
+@pettyCashId = 67523070-151a-4944-8501-bbbab99fcc07
+@category = Transport
+
+### Access Token
+@accessToken =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1YzQxZjg3ZS0wNDE3LTRmNTUtOWNjMy0zZjI1MmRjODc3NmYiLCJlbWFpbCI6ImFkbWluQGdhcmJhZ2VjbXMuY29tIiwiaWF0IjoxNzY1MDAzNjI0LCJleHAiOjE3NjUwMDQ1MjR9.QfCuf9Mxb3r6OKhzB_YoRPJYWqb5PZpThaqLVF_XJRI
+
+
+### ---------------------------------------------------------
+### Get all expenses
+### ---------------------------------------------------------
+GET {{baseUrl}}/expenses
+Authorization: Bearer {{accessToken}}
+
+### ---------------------------------------------------------
+### Get expense by ID
+### ---------------------------------------------------------
+GET {{baseUrl}}/expenses/{{expenseId}}
+Authorization: Bearer {{accessToken}}
+
+### ---------------------------------------------------------
+### Create expense
+### ---------------------------------------------------------
+POST {{baseUrl}}/expenses
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "category": "{{category}}",
+  "pettyCashId": "{{pettyCashId}}",
+  "amount": 450,
+  "description": "Fuel for company vehicle",
+  "notes": "Trip to Nairobi branch",
+  "expenseDate": "2025-12-06T09:30:00.000Z"
+}
+
+### ---------------------------------------------------------
+### Update expense
+### ---------------------------------------------------------
+PUT {{baseUrl}}/expenses/{{expenseId}}
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "category": "Maintenance",
+  "pettyCashId": "{{pettyCashId}}",
+  "amount": 800,
+  "description": "Car servicing",
+  "notes": "Changed brakes + oil",
+  "expenseDate": "2025-12-06T12:00:00.000Z",
+  "recordedBy": "admin-user-id"
+}
+
+### ---------------------------------------------------------
+### Delete expense
+### ---------------------------------------------------------
+DELETE {{baseUrl}}/expenses/{{expenseId}}
+Authorization: Bearer {{accessToken}}

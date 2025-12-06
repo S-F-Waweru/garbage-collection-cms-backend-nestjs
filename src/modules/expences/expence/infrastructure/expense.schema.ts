@@ -5,12 +5,14 @@ import {
   DeleteDateColumn,
   Entity,
   ManyToOne,
+  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { PettyCashSchema } from '../../petty-cash/infrastructure/petty-cash-schema';
 
 @Entity('expenses')
 export class ExpenseSchema {
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @ManyToOne(() => PettyCashSchema, { eager: true })

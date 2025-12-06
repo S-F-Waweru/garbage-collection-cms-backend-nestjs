@@ -18,6 +18,9 @@ export class CreatePettyCashUseCase {
       dto.notes ?? '',
     );
 
+    console.log(`DEGUG+++++++++++++++++++++++++++++++++++`);
+    console.log(pettyCash);
+
     const newPettyCash = await this.pettyCashRepository.save(pettyCash);
 
     return {
