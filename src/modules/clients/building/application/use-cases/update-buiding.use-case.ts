@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { IBuildingRepository } from '../../domain/interface/buidling.repsository.interface';
 import { IClientRepository } from '../../../client/domain/interface/client.repository.interface';
-import { LocationRepository } from '../../../../location/infrastracture/persistence/repository/location.repository';
+
 import { ILocationRepository } from '../../../../location/domain/interface/location.repository.inteface';
 import { UpdateBuildingDto } from '../dto/building.dto';
 
