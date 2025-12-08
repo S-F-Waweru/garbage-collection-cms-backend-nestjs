@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { UsersModule } from './users/users.module';
 import { ClientsModule } from './modules/clients/clients.module';
 import { InvoicesModule } from './modules/invoices/invoices.module';
 import { PaymentsModule } from './modules/payments/payments.module';
@@ -50,7 +49,6 @@ import { ExpenseSchema } from './modules/expences/expence/infrastructure/expense
         logging: true,
       }),
     }),
-    UsersModule,
     ClientsModule,
     InvoicesModule,
     PaymentsModule,

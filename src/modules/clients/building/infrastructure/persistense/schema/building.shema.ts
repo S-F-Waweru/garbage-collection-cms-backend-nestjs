@@ -1,0 +1,44 @@
+import {
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { LocationSchema } from '../../../../../location/infrastracture/persistence/schema/location.schema';
+import { ClientSchema } from '../../../../client/infrastructure/perisistence/schema/client.schema';
+
+@Entity('buildings')
+export class BuildingShema {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column()
+  name: string;
+
+  @OneToOne(() => LocationSchema, { eager: true })
+  @JoinColumn()
+  location: LocationSchema;
+
+  @ManyToOne(() => ClientSchema, { eager: true })
+  client: ClientSchema;
+
+  @Column('decimal', { precision: 10, scale: 2 })
+  unitPrice: number;
+
+  @Column('int')
+  unitCount: number;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
+
+  @DeleteDateColumn()
+  deletedAt?: Date;
+}
