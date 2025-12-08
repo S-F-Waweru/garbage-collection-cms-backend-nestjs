@@ -9,3 +9,5 @@ export interface IBuildingRepository {
     message: string;
   }>;
 }
+
+export const IBuildingRepository = Symbol('IBuildingRepository');

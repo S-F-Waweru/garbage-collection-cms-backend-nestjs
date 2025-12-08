@@ -6,3 +6,5 @@ export interface IClientRepository {
   save(client: Client): Promise<Client>;
   delete(id: string): Promise<{ message: string }>;
 }
+
+export const IClientRepository = Symbol('IClientRepository');
