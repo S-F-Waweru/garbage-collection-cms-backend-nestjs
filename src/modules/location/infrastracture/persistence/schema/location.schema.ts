@@ -4,9 +4,11 @@ import {
   DeleteDateColumn,
   Entity,
   Index,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { BuildingSchema } from '../../../../clients/building/infrastructure/persistense/schema/buildingSchema';
 
 @Entity('locations')
 @Index('IDX_city_region_active', ['city', 'region'], {
@@ -22,6 +24,9 @@ export class LocationSchema {
 
   @Column()
   region: string;
+
+  @OneToMany(() => BuildingSchema, (building) => building.location)
+  buildings: BuildingSchema[];
 
   @CreateDateColumn()
   createdAt: Date;

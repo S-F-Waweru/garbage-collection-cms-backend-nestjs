@@ -1,7 +1,7 @@
 ### Variables
 @baseUrl = http://localhost:3300
-@clientId = YOUR_CLIENT_ID_HERE
-@buildingId = YOUR_BUILDING_ID_HERE
+@clientId = 5c3f619e-28e7-4436-99b8-c6e2fa92c752
+@buildingId = 694ee07c-1ffb-4e63-8d0d-7449be516582
 @locationId = 36226714-8c2a-4f0b-a58c-bb495d8947da
 
 # ===================== CLIENT ENDPOINTS =====================
@@ -114,7 +114,7 @@ Content-Type: application/json
 
 {
   "companyName": "Real Estate Corp",
-  "KRAPin": "B987654321Y",
+  "KRAPin": "B987654921Y",
   "firstName": "Jane",
   "lastName": "Smith",
   "email": "jane.smith@realestate.com",

@@ -20,8 +20,8 @@ export class BuildingSchema {
   @Column()
   name: string;
 
-  @OneToOne(() => LocationSchema, { eager: true })
-  @JoinColumn()
+  @ManyToOne(() => LocationSchema, { eager: true }) // Changed from @OneToOne
+  @JoinColumn({ name: 'locationId' }) // Add explicit column name
   location: LocationSchema;
 
   @ManyToOne(() => ClientSchema, { eager: true })

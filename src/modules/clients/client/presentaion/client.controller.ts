@@ -9,7 +9,10 @@ import {
   Query,
 } from '@nestjs/common';
 
-import { CreateClientDto, UpdateClientDto } from '../application/dtos/client.dto';
+import {
+  CreateClientDto,
+  UpdateClientDto,
+} from '../application/dtos/client.dto';
 import { CreateClientUseCase } from '../application/use-cases/create-client.use-case';
 import { UpdateClientUseCase } from '../application/use-cases/update.use-case';
 import { DeleteClientUseCase } from '../application/use-cases/delete.client-use-case';
