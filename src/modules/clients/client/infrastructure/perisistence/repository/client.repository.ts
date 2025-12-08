@@ -35,6 +35,14 @@ export class ClientRepository implements IClientRepository {
     return schema ? this.toDomain(schema) : null;
   }
 
+  async findByKRAPin(KRAPin: string): Promise<Client | null> {
+    const schema = await this.repository.findOne({
+      where: { KRAPin, deletedAt: IsNull() },
+    });
+
+    return schema ? this.toDomain(schema) : null;
+  }
+
   async save(client: Client): Promise<Client> {
     const schema = this.toSchema(client);
     const saved = await this.repository.save(schema);

@@ -1,4 +1,9 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Client } from '../../domain/entities/client.entity';
 import { IClientRepository } from '../../domain/interface/client.repository.interface';
 import { Building } from '../../../building/domain/building.entity';
@@ -18,6 +23,10 @@ export class CreateClientUseCase {
   ) {}
 
   async execute(dto: CreateClientDto): Promise<Client> {
+    const existing = await this.clientRepository.findByKRAPin(dto.KRAPin);
+    if (existing) {
+      throw new ConflictException('Use with this KRAPin exist');
+    }
     // First, create the client WITHOUT buildings
     const client = Client.create({
       companyName: dto.companyName,
