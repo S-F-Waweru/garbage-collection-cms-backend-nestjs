@@ -1,5 +1,5 @@
 import { PaymentMethod } from 'src/modules/clients/building/domain/building.entity';
-import { BuildingShema } from 'src/modules/clients/building/infrastructure/persistense/schema/building.shema';
+import { BuildingSchema } from 'src/modules/clients/building/infrastructure/persistense/schema/buildingSchema';
 import {
   Column,
   CreateDateColumn,
@@ -36,10 +36,10 @@ export class ClientSchema {
   @Column()
   paymentMethod: PaymentMethod;
 
-  @OneToMany(() => BuildingShema, (building) => building.client, {
+  @OneToMany(() => BuildingSchema, (building) => building.client, {
     cascade: true,
   })
-  buildings: BuildingShema[];
+  buildings: BuildingSchema[];
 
   @CreateDateColumn()
   createdAt: Date;

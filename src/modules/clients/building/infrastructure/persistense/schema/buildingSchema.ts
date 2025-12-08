@@ -13,7 +13,7 @@ import { LocationSchema } from '../../../../../location/infrastracture/persisten
 import { ClientSchema } from '../../../../client/infrastructure/perisistence/schema/client.schema';
 
 @Entity('buildings')
-export class BuildingShema {
+export class BuildingSchema {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 

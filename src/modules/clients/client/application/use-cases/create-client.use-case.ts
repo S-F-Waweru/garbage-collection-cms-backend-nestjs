@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { Client } from '../../domain/entities/client.entity';
 import { IClientRepository } from '../../domain/interface/client.repository.interface';
 import { Building } from '../../../building/domain/building.entity';
@@ -9,8 +9,11 @@ import { CreateClientDto } from '../dtos/client.dto';
 @Injectable()
 export class CreateClientUseCase {
   constructor(
+    @Inject(IClientRepository)
     private readonly clientRepository: IClientRepository,
+    @Inject(IBuildingRepository)
     private readonly buildingRepository: IBuildingRepository,
+    @Inject(ILocationRepository)
     private readonly locationRepository: ILocationRepository,
   ) {}
 

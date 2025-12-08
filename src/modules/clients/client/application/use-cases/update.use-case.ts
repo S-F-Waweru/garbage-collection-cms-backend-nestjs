@@ -1,11 +1,14 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { IClientRepository } from '../../domain/interface/client.repository.interface';
 import { UpdateClientDto } from '../dtos/client.dto';
 import { Client } from '../../domain/entities/client.entity';
 
 @Injectable()
 export class UpdateClientUseCase {
-  constructor(private readonly clientRepository: IClientRepository) {}
+  constructor(
+    @Inject(IClientRepository)
+    private readonly clientRepository: IClientRepository,
+  ) {}
 
   async execute(id: string, dto: UpdateClientDto): Promise<Client> {
     // Find existing client

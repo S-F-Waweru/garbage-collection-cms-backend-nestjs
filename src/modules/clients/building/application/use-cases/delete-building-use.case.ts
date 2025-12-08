@@ -1,7 +1,7 @@
 import { Inject, NotFoundException } from '@nestjs/common';
 import { IBuildingRepository } from '../../domain/interface/buidling.repsository.interface';
 
-export class DeleteBuilidingUseCase {
+export class DeleteBuildingUseCase {
   constructor(
     @Inject(IBuildingRepository)
     private readonly buildingRepository: IBuildingRepository,

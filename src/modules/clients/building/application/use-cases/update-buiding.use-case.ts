@@ -17,7 +17,7 @@ export class UpdateBuildingUseCase {
     private readonly buildingRepository: IBuildingRepository,
     @Inject(IClientRepository)
     private readonly clientRepository: IClientRepository,
-    @Inject(LocationRepository)
+    @Inject(ILocationRepository)
     private readonly locationRepository: ILocationRepository,
   ) {}
 

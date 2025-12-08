@@ -1,19 +1,15 @@
 import { IBuildingRepository } from '../../../domain/interface/buidling.repsository.interface';
 import { InjectRepository } from '@nestjs/typeorm';
-import { BuildingShema } from '../schema/building.shema';
+import { BuildingSchema } from '../schema/buildingSchema';
 import { IsNull, Repository } from 'typeorm';
 import { Building } from '../../../domain/building.entity';
-import { ClientSchema } from '../../../../client/infrastructure/perisistence/schema/client.schema';
 import { Client } from '../../../../client/domain/entities/client.entity';
 import { Location } from 'src/modules/location/domain/entities/location.entity';
 
 export class BuildingRepository implements IBuildingRepository {
   constructor(
-    @InjectRepository(BuildingShema)
-    private readonly repository: Repository<BuildingShema>,
-
-    @InjectRepository(ClientSchema)
-    private readonly clientRepository: Repository<ClientSchema>,
+    @InjectRepository(BuildingSchema)
+    private readonly repository: Repository<BuildingSchema>,
   ) {}
 
   private toSchema(building: Building) {
@@ -29,7 +25,7 @@ export class BuildingRepository implements IBuildingRepository {
     return schema;
   }
 
-  private toDomain(schema: BuildingShema): Building {
+  private toDomain(schema: BuildingSchema): Building {
     const location = Location.fromPersistence({
       id: schema.location.id,
       city: schema.location.city,

@@ -20,6 +20,10 @@ import { LocationSchema } from './modules/location/infrastracture/persistence/sc
 import { IncomeCategorySchema } from './modules/other-income/income-category/infrastructure/schema/IncomeCategory.schema';
 import { PettyCashSchema } from './modules/expences/petty-cash/infrastructure/petty-cash-schema';
 import { ExpenseSchema } from './modules/expences/expence/infrastructure/expense.schema';
+import { ClientSchema } from './modules/clients/client/infrastructure/perisistence/schema/client.schema';
+import { BuildingController } from './modules/clients/building/presentation/building.controller';
+import { BuildingSchema } from './modules/clients/building/infrastructure/persistense/schema/buildingSchema';
+import { RepositoriesModule } from './shared/repositories/repositories.module';
 
 @Module({
   imports: [
@@ -44,6 +48,8 @@ import { ExpenseSchema } from './modules/expences/expence/infrastructure/expense
           IncomeCategorySchema,
           PettyCashSchema,
           ExpenseSchema,
+          ClientSchema,
+          BuildingSchema,
         ],
         synchronize: true,
         logging: true,
@@ -57,6 +63,7 @@ import { ExpenseSchema } from './modules/expences/expence/infrastructure/expense
     ReportsModule,
     LocationModule,
     AuthModule,
+    RepositoriesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

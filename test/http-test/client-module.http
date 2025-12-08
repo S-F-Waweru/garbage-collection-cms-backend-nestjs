@@ -1,0 +1,183 @@
+### Variables
+@baseUrl = http://localhost:3300
+@clientId = YOUR_CLIENT_ID_HERE
+@buildingId = YOUR_BUILDING_ID_HERE
+@locationId = 36226714-8c2a-4f0b-a58c-bb495d8947da
+
+# ===================== CLIENT ENDPOINTS =====================
+
+### Create Client
+POST {{baseUrl}}/clients
+Content-Type: application/json
+
+{
+  "companyName": "Tech Solutions Ltd",
+  "KRAPin": "A001234567Z",
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john.doe@techsolutions.com",
+  "phone": "+254712345678",
+  "paymentMethod": "MPESA",
+  "buildings": [
+    {
+      "name": "Main Office Building",
+      "location": "{{locationId}}",
+      "unitPrice": 50000.00,
+      "unitCount": 20
+    }
+  ]
+}
+
+### Get All Clients (with pagination)
+GET {{baseUrl}}/clients?page=1&limit=10
+
+### Get All Clients (default pagination)
+GET {{baseUrl}}/clients
+
+### Get Client by ID
+GET {{baseUrl}}/clients/{{clientId}}
+
+### Update Client
+PATCH {{baseUrl}}/clients/{{clientId}}
+Content-Type: application/json
+
+{
+  "companyName": "Tech Solutions Ltd - Updated",
+  "email": "updated.email@techsolutions.com",
+  "phone": "+254798765432",
+  "paymentMethod": "BANK_TRANSFER"
+}
+
+### Update Client (partial)
+PATCH {{baseUrl}}/clients/{{clientId}}
+Content-Type: application/json
+
+{
+  "phone": "+254700000000"
+}
+
+### Delete Client
+DELETE {{baseUrl}}/clients/{{clientId}}
+
+# ===================== BUILDING ENDPOINTS =====================
+
+### Create Building
+POST {{baseUrl}}/buildings
+Content-Type: application/json
+
+{
+  "name": "Tech Plaza",
+  "location": "{{locationId}}",
+  "clientId": "{{clientId}}",
+  "unitPrice": 75000.00,
+  "unitCount": 30
+}
+
+### Get All Buildings (with pagination)
+GET {{baseUrl}}/buildings?page=1&limit=10
+
+### Get All Buildings (default pagination)
+GET {{baseUrl}}/buildings
+
+### Get Building by ID
+GET {{baseUrl}}/buildings/{{buildingId}}
+
+### Get Buildings by Client
+GET {{baseUrl}}/buildings/client/{{clientId}}
+
+### Update Building
+PATCH {{baseUrl}}/buildings/{{buildingId}}
+Content-Type: application/json
+
+{
+  "name": "Tech Plaza - Renovated",
+  "unitPrice": 85000.00,
+  "unitCount": 35
+}
+
+### Update Building (partial)
+PATCH {{baseUrl}}/buildings/{{buildingId}}
+Content-Type: application/json
+
+{
+  "unitPrice": 80000.00
+}
+
+### Delete Building
+DELETE {{baseUrl}}/buildings/{{buildingId}}
+
+# ===================== TEST SCENARIOS =====================
+
+### Scenario 1: Create complete client with buildings
+POST {{baseUrl}}/clients
+Content-Type: application/json
+
+{
+  "companyName": "Real Estate Corp",
+  "KRAPin": "B987654321Y",
+  "firstName": "Jane",
+  "lastName": "Smith",
+  "email": "jane.smith@realestate.com",
+  "phone": "0712345678",
+  "paymentMethod": "CASH",
+  "buildings": [
+    {
+      "name": "Building A",
+      "location": "{{locationId}}",
+      "unitPrice": 60000.00,
+      "unitCount": 15
+    },
+    {
+      "name": "Building B",
+      "location": "{{locationId}}",
+      "unitPrice": 55000.00,
+      "unitCount": 12
+    }
+  ]
+}
+
+### Scenario 2: Invalid phone number (should fail validation)
+POST {{baseUrl}}/clients
+Content-Type: application/json
+
+{
+  "companyName": "Test Company",
+  "KRAPin": "C123456789X",
+  "firstName": "Test",
+  "lastName": "User",
+  "email": "test@example.com",
+  "phone": "1234567890",
+  "paymentMethod": "MPESA"
+}
+
+### Scenario 3: Invalid email (should fail validation)
+POST {{baseUrl}}/clients
+Content-Type: application/json
+
+{
+  "companyName": "Test Company",
+  "KRAPin": "C123456789X",
+  "firstName": "Test",
+  "lastName": "User",
+  "email": "invalid-email",
+  "phone": "+254712345678",
+  "paymentMethod": "MPESA"
+}
+
+### Scenario 4: Missing required fields (should fail validation)
+POST {{baseUrl}}/clients
+Content-Type: application/json
+
+{
+  "companyName": "Test Company",
+  "email": "test@example.com"
+}
+
+### Scenario 5: Get paginated results with different page sizes
+GET {{baseUrl}}/clients?page=1&limit=5
+
+###
+GET {{baseUrl}}/clients?page=2&limit=5
+
+###
+GET {{baseUrl}}/buildings?page=1&limit=20

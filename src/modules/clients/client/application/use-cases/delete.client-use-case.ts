@@ -1,9 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { IClientRepository } from '../../domain/interface/client.repository.interface';
 
 @Injectable()
 export class DeleteClientUseCase {
-  constructor(private readonly clientRepository: IClientRepository) {}
+  constructor(
+    @Inject(IClientRepository)
+    private readonly clientRepository: IClientRepository,
+  ) {}
 
   async execute(id: string): Promise<{ message: string }> {
     // Check if client exists

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { IClientRepository } from '../../domain/interface/client.repository.interface';
 import { Client } from '../../domain/entities/client.entity';
 
@@ -17,7 +17,10 @@ export interface PaginatedResult<T> {
 
 @Injectable()
 export class FindAllClientsUseCase {
-  constructor(private readonly clientRepository: IClientRepository) {}
+  constructor(
+    @Inject(IClientRepository)
+    private readonly clientRepository: IClientRepository,
+  ) {}
 
   async execute(params: PaginationParams): Promise<PaginatedResult<Client>> {
     const { page, limit } = params;

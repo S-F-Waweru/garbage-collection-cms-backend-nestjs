@@ -7,7 +7,7 @@ export class FindAllBuildingsUseCase {
     private readonly buildingRepository: IBuildingRepository,
   ) {}
 
-  async execute() {
+  async execute(p0: { page: number; limit: number }) {
     const buildings = await this.buildingRepository.findAll();
 
     if (buildings) {
