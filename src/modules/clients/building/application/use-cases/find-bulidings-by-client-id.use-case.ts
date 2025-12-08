@@ -8,7 +8,8 @@ export class FindBulidingsByClientIdUseCase {
   ) {}
 
   async execute(clientID: string) {
-    const buildings = this.buildingRepository.findClientBuildings(clientID);
+    const buildings =
+      await this.buildingRepository.findClientBuildings(clientID);
 
     if (buildings) {
       return buildings;

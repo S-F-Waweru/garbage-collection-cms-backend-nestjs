@@ -32,11 +32,13 @@ export class ClientSchema {
 
   @Column()
   phone: string;
-  
+
   @Column()
   paymentMethod: PaymentMethod;
 
-  @OneToMany(() => BuildingShema, (building) => building.client)
+  @OneToMany(() => BuildingShema, (building) => building.client, {
+    cascade: true,
+  })
   buildings: BuildingShema[];
 
   @CreateDateColumn()

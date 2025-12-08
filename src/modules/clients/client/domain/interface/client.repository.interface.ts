@@ -5,6 +5,7 @@ export interface IClientRepository {
   findAll(): Promise<Client[]>;
   save(client: Client): Promise<Client>;
   delete(id: string): Promise<{ message: string }>;
+  findAllPaginated(skip: number, limit: number): Promise<[Client[], number]>;
 }
 
 export const IClientRepository = Symbol('IClientRepository');

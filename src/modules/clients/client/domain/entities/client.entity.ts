@@ -127,7 +127,7 @@ export class Client extends BaseEntity {
     lastName?: string;
     email?: string;
     phone?: string;
-    paymentMethod: PaymentMethod;
+    paymentMethod?: PaymentMethod;
     buildings?: Building[];
   }) {
     if (props.companyName !== undefined) this._companyName = props.companyName;

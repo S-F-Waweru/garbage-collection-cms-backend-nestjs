@@ -41,6 +41,20 @@ export class ClientRepository implements IClientRepository {
     return this.toDomain(saved);
   }
 
+  async findAllPaginated(
+    skip: number,
+    limit: number,
+  ): Promise<[Client[], number]> {
+    const [schemas, total] = await this.repository.findAndCount({
+      where: { deletedAt: IsNull() },
+      skip,
+      take: limit,
+      relations: ['buildings'],
+    });
+
+    return [schemas.map((schema) => this.toDomain(schema)), total];
+  }
+
   toSchema(client: Client) {
     const data: {
       id: string;
