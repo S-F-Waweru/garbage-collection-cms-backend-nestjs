@@ -1,0 +1,216 @@
+### Variables
+@baseUrl = http://localhost:3300
+@clientId = your-client-uuid-here
+@anotherClientId = another-client-uuid-here
+
+### ============================================
+### CLIENT CREDIT MODULE TESTS
+### ============================================
+
+### 1. Create Client Credit (Initial Balance = 0)
+POST {{baseUrl}}/client-credit
+Content-Type: application/json
+
+{
+  "clientId": "{{clientId}}",
+  "balance": 0
+}
+
+### 2. Create Client Credit (With Initial Balance)
+POST {{baseUrl}}/client-credit
+Content-Type: application/json
+
+{
+  "clientId": "{{anotherClientId}}",
+  "balance": 5000
+}
+
+### 3. Get Client Credit by Client ID
+GET {{baseUrl}}/client-credit/client/{{clientId}}
+
+### 4. Get Client Credit Balance Only
+GET {{baseUrl}}/client-credit/client/{{clientId}}/balance
+
+### 5. Increment Balance (Simulate Excess Payment)
+PATCH {{baseUrl}}/client-credit/increment
+Content-Type: application/json
+
+{
+  "clientId": "{{clientId}}",
+  "amount": 2000
+}
+
+### 6. Increment Balance Again
+PATCH {{baseUrl}}/client-credit/increment
+Content-Type: application/json
+
+{
+  "clientId": "{{clientId}}",
+  "amount": 1500
+}
+
+### 7. Get Updated Balance
+GET {{baseUrl}}/client-credit/client/{{clientId}}/balance
+
+### 8. Decrement Balance (Simulate Invoice Generation with Credit)
+PATCH {{baseUrl}}/client-credit/decrement
+Content-Type: application/json
+
+{
+  "clientId": "{{clientId}}",
+  "amount": 1000
+}
+
+### 9. Get Balance After Decrement
+GET {{baseUrl}}/client-credit/client/{{clientId}}/balance
+
+### 10. Update Balance Directly
+PATCH {{baseUrl}}/client-credit/update
+Content-Type: application/json
+
+{
+  "clientId": "{{clientId}}",
+  "balance": 5000
+}
+
+### 11. Get Final Balance
+GET {{baseUrl}}/client-credit/client/{{clientId}}/balance
+
+### ============================================
+### ERROR SCENARIOS
+### ============================================
+
+### 12. Try to Create Duplicate Credit (Should Fail)
+POST {{baseUrl}}/client-credit
+Content-Type: application/json
+
+{
+  "clientId": "{{clientId}}",
+  "balance": 0
+}
+
+### 13. Try to Increment with Negative Amount (Should Fail)
+PATCH {{baseUrl}}/client-credit/increment
+Content-Type: application/json
+
+{
+  "clientId": "{{clientId}}",
+  "amount": -500
+}
+
+### 14. Try to Decrement More Than Balance (Should Fail)
+PATCH {{baseUrl}}/client-credit/decrement
+Content-Type: application/json
+
+{
+  "clientId": "{{clientId}}",
+  "amount": 999999
+}
+
+### 15. Try to Set Negative Balance (Should Fail)
+PATCH {{baseUrl}}/client-credit/update
+Content-Type: application/json
+
+{
+  "clientId": "{{clientId}}",
+  "balance": -1000
+}
+
+### 16. Get Credit for Non-Existent Client (Should Fail)
+GET {{baseUrl}}/client-credit/client/00000000-0000-0000-0000-000000000000
+
+### 17. Increment Balance for Non-Existent Client (Should Fail)
+PATCH {{baseUrl}}/client-credit/increment
+Content-Type: application/json
+
+{
+  "clientId": "00000000-0000-0000-0000-000000000000",
+  "amount": 1000
+}
+
+### ============================================
+### VALIDATION ERRORS
+### ============================================
+
+### 18. Create Credit Without clientId (Should Fail)
+POST {{baseUrl}}/client-credit
+Content-Type: application/json
+
+{
+  "balance": 1000
+}
+
+### 19. Create Credit With Invalid UUID (Should Fail)
+POST {{baseUrl}}/client-credit
+Content-Type: application/json
+
+{
+  "clientId": "invalid-uuid",
+  "balance": 1000
+}
+
+### 20. Increment Without Amount (Should Fail)
+PATCH {{baseUrl}}/client-credit/increment
+Content-Type: application/json
+
+{
+  "clientId": "{{clientId}}"
+}
+
+### 21. Decrement With Zero Amount (Should Fail)
+PATCH {{baseUrl}}/client-credit/decrement
+Content-Type: application/json
+
+{
+  "clientId": "{{clientId}}",
+  "amount": 0
+}
+
+### ============================================
+### TYPICAL WORKFLOW TEST
+### ============================================
+
+### 22. Complete Workflow - Create Client Credit
+POST {{baseUrl}}/client-credit
+Content-Type: application/json
+
+{
+  "clientId": "workflow-test-client-id",
+  "balance": 0
+}
+
+### 23. Workflow - Client Overpays Invoice (Excess goes to credit)
+PATCH {{baseUrl}}/client-credit/increment
+Content-Type: application/json
+
+{
+  "clientId": "workflow-test-client-id",
+  "amount": 3000
+}
+
+### 24. Workflow - Check Balance (Should be 3000)
+GET {{baseUrl}}/client-credit/client/workflow-test-client-id/balance
+
+### 25. Workflow - Generate Invoice, Apply Credit
+PATCH {{baseUrl}}/client-credit/decrement
+Content-Type: application/json
+
+{
+  "clientId": "workflow-test-client-id",
+  "amount": 2000
+}
+
+### 26. Workflow - Check Remaining Balance (Should be 1000)
+GET {{baseUrl}}/client-credit/client/workflow-test-client-id/balance
+
+### 27. Workflow - Another Payment Creates More Credit
+PATCH {{baseUrl}}/client-credit/increment
+Content-Type: application/json
+
+{
+  "clientId": "workflow-test-client-id",
+  "amount": 4000
+}
+
+### 28. Workflow - Final Balance Check (Should be 5000)
+GET {{baseUrl}}/client-credit/client/workflow-test-client-id/balance

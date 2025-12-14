@@ -1,0 +1,58 @@
+---
+
+## 9. HTTP Requests (REST Client / Postman)
+```http
+### Generate Invoice
+POST http://localhost:3000/invoices/generate
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "clientId": "uuid-here",
+  "billingPeriodStart": "2024-12-01",
+  "billingPeriodEnd": "2024-12-31",
+  "invoiceDate": "2024-12-14",
+  "notes": "Monthly garbage collection"
+}
+
+### Get Invoice by ID
+GET http://localhost:3000/invoices/{{invoiceId}}
+Authorization: Bearer {{token}}
+
+### List All Invoices
+GET http://localhost:3000/invoices
+Authorization: Bearer {{token}}
+
+### List Invoices with Filters
+GET http://localhost:3000/invoices?clientId={{clientId}}&status=PENDING&fromDate=2024-01-01&toDate=2024-12-31
+Authorization: Bearer {{token}}
+
+### Get Invoices by Client
+GET http://localhost:3000/invoices/client/{{clientId}}
+Authorization: Bearer {{token}}
+
+### Update Invoice Status
+PATCH http://localhost:3000/invoices/{{invoiceId}}/status
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "status": "OVERDUE"
+}
+```
+
+---
+
+## Summary
+
+✅ **Entity** - Domain model with business rules
+✅ **Repository Interface** - Contract for data access
+✅ **Schema** - TypeORM database mapping
+✅ **Repository Implementation** - PostgreSQL + sequential numbering
+✅ **Use Cases** - Generate, Get, List, Update Status, Auto-generate, Mark Overdue
+✅ **DTOs** - Request/Response validation
+✅ **Controller** - REST API endpoints
+✅ **Cron Jobs** - Daily invoice generation & overdue marking
+✅ **HTTP Examples** - Test requests
+
+**Next:** Create the database migration for the `invoice_number_seq` sequence!

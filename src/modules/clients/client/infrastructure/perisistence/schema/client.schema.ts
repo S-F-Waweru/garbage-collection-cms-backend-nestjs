@@ -1,3 +1,4 @@
+import { ClientCreditSchema } from 'src/modules/client-credit/infrastructure/persisitence/schema/client-credit.schema';
 import { PaymentMethod } from 'src/modules/clients/building/domain/building.entity';
 import { BuildingSchema } from 'src/modules/clients/building/infrastructure/persistense/schema/buildingSchema';
 import {
@@ -36,10 +37,17 @@ export class ClientSchema {
   @Column()
   paymentMethod: PaymentMethod;
 
-  @OneToMany(() => BuildingSchema, (building) => building.client, {
+  // realtions
+    @OneToMany(() => BuildingSchema, (building) => building.client, {
     cascade: true,
   })
   buildings: BuildingSchema[];
+
+  @OneToOne(() => ClientCreditSchema, (credit) => credit.client)
+  credit: ClientCreditSchema;
+  
+
+  // Dates
 
   @CreateDateColumn()
   createdAt: Date;
@@ -50,3 +58,7 @@ export class ClientSchema {
   @DeleteDateColumn()
   deletedAt: Date;
 }
+function OneToOne(arg0: () => any, arg1: (credit: any) => any): (target: ClientSchema, propertyKey: "credit") => void {
+  throw new Error('Function not implemented.');
+}
+
