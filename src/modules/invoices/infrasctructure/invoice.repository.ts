@@ -1,10 +1,13 @@
 // infrastructure/invoice.repository.ts
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource, Between } from 'typeorm';
-import { IInvoiceRepository, InvoiceFilters } from '../domain/invoice.repository.interface';
 import { Invoice, InvoiceStatus } from '../domain/invoice.entity';
-import { InvoiceSchema } from './invoice.schema';
+import {
+  IInvoiceRepository,
+  InvoiceFilters,
+} from '../domain/invoice.repository.intreface';
+import { InvoiceSchema } from './invoice.rschema';
 
 @Injectable()
 export class InvoiceRepository implements IInvoiceRepository {
@@ -36,7 +39,14 @@ export class InvoiceRepository implements IInvoiceRepository {
     const data = invoice.toObject();
     const schema = this.repo.create(data);
     const saved = await this.repo.save(schema);
-    return this.toDomain(saved);
+    const result = await this.repo.findOne({
+      where: { id: invoice.id },
+    });
+    if (!result) {
+      throw new NotFoundException('Resuls not found');
+    }
+
+    return this.toDomain(result);
   }
 
   async findById(id: string): Promise<Invoice | null> {
@@ -62,7 +72,9 @@ export class InvoiceRepository implements IInvoiceRepository {
       .createQueryBuilder('invoice')
       .where('invoice.clientId = :clientId', { clientId })
       .andWhere('invoice.balance > 0')
-      .andWhere('invoice.status != :cancelled', { cancelled: InvoiceStatus.CANCELLED })
+      .andWhere('invoice.status != :cancelled', {
+        cancelled: InvoiceStatus.CANCELLED,
+      })
       .orderBy('invoice.invoiceDate', 'ASC')
       .getMany();
 
@@ -73,26 +85,45 @@ export class InvoiceRepository implements IInvoiceRepository {
     const query = this.repo.createQueryBuilder('invoice');
 
     if (filters?.clientId) {
-      query.andWhere('invoice.clientId = :clientId', { clientId: filters.clientId });
+      query.andWhere('invoice.clientId = :clientId', {
+        clientId: filters.clientId,
+      });
     }
     if (filters?.status) {
       query.andWhere('invoice.status = :status', { status: filters.status });
     }
     if (filters?.fromDate) {
-      query.andWhere('invoice.invoiceDate >= :fromDate', { fromDate: filters.fromDate });
+      query.andWhere('invoice.invoiceDate >= :fromDate', {
+        fromDate: filters.fromDate,
+      });
     }
     if (filters?.toDate) {
-      query.andWhere('invoice.invoiceDate <= :toDate', { toDate: filters.toDate });
+      query.andWhere('invoice.invoiceDate <= :toDate', {
+        toDate: filters.toDate,
+      });
     }
 
-    const schemas = await query.orderBy('invoice.invoiceDate', 'DESC').getMany();
+    const schemas = await query
+      .orderBy('invoice.invoiceDate', 'DESC')
+      .getMany();
     return schemas.map((s) => this.toDomain(s));
   }
 
-  async update(id: string, invoice: Invoice): Promise<Invoice> {
-    const data = invoice.toObject();
-    await this.repo.update(id, data);
-    return this.findById(id);
+  async update(id: string, invoice: Invoice): Promise<Invoice | null> {
+      const data = invoice.toObject();
+      await this.repo.update(id, data);
+      const saved = await this.findById(id);
+      
+      if (!saved) {
+          return null;
+      }
+      
+      const result = this.toDomain(saved);
+  
+      if (Array.isArray(result)) {
+        return result[0];
+      }
+      return result;
   }
 
   async existsForPeriod(
@@ -114,7 +145,7 @@ export class InvoiceRepository implements IInvoiceRepository {
     // Find all active clients whose billing date is today
     // This would typically join with Client table
     // For now, return distinct clientIds with no invoice this month
-    
+
     const today = new Date();
     const firstOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     const lastOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
@@ -129,7 +160,7 @@ export class InvoiceRepository implements IInvoiceRepository {
       .getRawMany();
 
     const invoicedClientIds = result.map((r) => r.clientId);
-    
+
     // Return all clients NOT in this list (needs Client repository)
     // For now, return empty array - implement with Client repository
     return [];

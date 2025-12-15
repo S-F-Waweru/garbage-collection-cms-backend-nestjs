@@ -1,10 +1,11 @@
 // application/use-cases/list-invoices.use-case.ts
 import { Injectable, Inject } from '@nestjs/common';
-import {
+
+import { Invoice } from '../../domain/invoice.entity';
+import type {
   IInvoiceRepository,
   InvoiceFilters,
-} from '../../domain/invoice.repository.interface';
-import { Invoice } from '../../domain/invoice.entity';
+} from '../../domain/invoice.repository.intreface';
 
 @Injectable()
 export class ListInvoicesUseCase {

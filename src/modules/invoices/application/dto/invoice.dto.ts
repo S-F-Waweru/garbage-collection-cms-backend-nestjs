@@ -1,7 +1,15 @@
 // application/dto/generate-invoice.dto.ts
-import { IsUUID, IsDate, IsOptional, IsString } from 'class-validator';
+import {
+  IsUUID,
+  IsDate,
+  IsOptional,
+  IsString,
+  IsDateString,
+  IsEnum,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { InvoiceStatus } from '../../domain/invoice.entity';
 
 export class GenerateInvoiceDto {
   @ApiProperty()

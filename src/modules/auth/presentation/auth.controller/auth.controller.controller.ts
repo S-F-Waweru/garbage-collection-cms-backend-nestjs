@@ -24,7 +24,7 @@ export class AuthController {
     private readonly registerUseCase: RegisterUseCase,
     private readonly loginUseCase: LoginUseCase,
     private readonly changePasswordUseCase: ChangePasswordUseCase,
-    private readonly rereshTokenUseCase: RefreshTokenUseCase,
+    // private readonly rereshTokenUseCase: Refresh,
   ) {}
 
   // todo restrict to only the admins can create users
@@ -46,11 +46,11 @@ export class AuthController {
     return this.changePasswordUseCase.execute(dto);
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Post('/refresh')
-  refreshToken() {
-    return this.refreshTokenUsecase.execute();
-  }
+  // @UseGuards(JwtAuthGuard)
+  // @Post('/refresh')
+  // refreshToken() {
+  //   return this.refreshTokenUsecase.execute();
+  // }
 
   @UseGuards(JwtAuthGuard)
   @Get('/me')

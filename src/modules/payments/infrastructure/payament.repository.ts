@@ -2,12 +2,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
+
+import { Payment } from '../domain/payment.entity';
+import { PaymentSchema } from './payment.schema';
 import {
   IPaymentRepository,
   PaymentFilters,
-} from '../domain/payment.repository.interface';
-import { Payment } from '../domain/payment.entity';
-import { PaymentSchema } from './payment.schema';
+} from '../domain/payment.repositiory.interface';
 
 @Injectable()
 export class PaymentRepository implements IPaymentRepository {
@@ -39,7 +40,11 @@ export class PaymentRepository implements IPaymentRepository {
     const data = payment.toObject();
     const schema = this.repo.create(data);
     const saved = await this.repo.save(schema);
-    // todo check the errror here
+
+    // Handle array case
+    if (Array.isArray(saved)) {
+      return this.toDomain(saved[0]);
+    }
     return this.toDomain(saved);
   }
 

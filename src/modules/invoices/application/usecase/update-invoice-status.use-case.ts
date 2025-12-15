@@ -5,8 +5,9 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import { IInvoiceRepository } from '../../domain/invoice.repository.interface';
+
 import { Invoice, InvoiceStatus } from '../../domain/invoice.entity';
+import type { IInvoiceRepository } from '../../domain/invoice.repository.intreface';
 
 @Injectable()
 export class UpdateInvoiceStatusUseCase {
@@ -28,6 +29,12 @@ export class UpdateInvoiceStatusUseCase {
     }
 
     invoice.updateStatus(newStatus);
-    return this.invoiceRepo.update(id, invoice);
+    const updatedInvoice = await this.invoiceRepo.update(id, invoice);
+
+    if (!updatedInvoice) {
+      throw new NotFoundException('Error Updating');
+    }
+
+    return updatedInvoice;
   }
 }

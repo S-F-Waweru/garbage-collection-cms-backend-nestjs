@@ -6,7 +6,9 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinColumn,
   OneToMany,
+  OneToOne, // Make sure this is imported
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -37,18 +39,20 @@ export class ClientSchema {
   @Column()
   paymentMethod: PaymentMethod;
 
-  // realtions
-    @OneToMany(() => BuildingSchema, (building) => building.client, {
+  // relations
+  @OneToMany(() => BuildingSchema, (building) => building.client, {
     cascade: true,
   })
   buildings: BuildingSchema[];
 
-  @OneToOne(() => ClientCreditSchema, (credit) => credit.client)
+  @OneToOne(() => ClientCreditSchema, (credit) => credit.client, {
+    cascade: true, // Optional: add if you want cascade operations
+    nullable: true, // Optional: add if the relationship can be null
+  })
+  @JoinColumn() // This is important for OneToOne relations to specify the owner side
   credit: ClientCreditSchema;
-  
 
   // Dates
-
   @CreateDateColumn()
   createdAt: Date;
 
@@ -58,7 +62,3 @@ export class ClientSchema {
   @DeleteDateColumn()
   deletedAt: Date;
 }
-function OneToOne(arg0: () => any, arg1: (credit: any) => any): (target: ClientSchema, propertyKey: "credit") => void {
-  throw new Error('Function not implemented.');
-}
-

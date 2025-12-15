@@ -7,10 +7,12 @@ import {
   IsOptional,
   IsString,
   Min,
+  IsDateString,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { PaymentMethod } from '../../domain/payment.entity';
+import { PaymentMethod } from '../domain/payment.entity';
+
 
 export class RecordPaymentDto {
   @ApiProperty({
@@ -62,10 +64,6 @@ export class RecordPaymentDto {
   notes?: string;
 }
 
-// application/dto/list-payments.dto.ts
-import { IsOptional, IsUUID, IsEnum, IsDateString } from 'class-validator';
-import { ApiPropertyOptional } from '@nestjs/swagger';
-import { PaymentMethod } from '../../domain/payment.entity';
 
 export class ListPaymentsDto {
   @ApiPropertyOptional({
@@ -99,10 +97,6 @@ export class ListPaymentsDto {
   @IsDateString()
   endDate?: string;
 }
-
-// application/dto/payment-response.dto.ts
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { PaymentMethod, PaymentApplication } from '../../domain/payment.entity';
 
 export class PaymentApplicationDto {
   @ApiProperty({ description: 'Invoice UUID' })

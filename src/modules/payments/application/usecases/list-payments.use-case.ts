@@ -1,10 +1,11 @@
 // application/use-cases/list-payments.use-case.ts
 import { Injectable, Inject } from '@nestjs/common';
-import {
+
+import { Payment } from '../../domain/payment.entity';
+import type {
   IPaymentRepository,
   PaymentFilters,
-} from '../../domain/payment.repository.interface';
-import { Payment } from '../../domain/payment.entity';
+} from '../../domain/payment.repositiory.interface';
 
 @Injectable()
 export class ListPaymentsUseCase {

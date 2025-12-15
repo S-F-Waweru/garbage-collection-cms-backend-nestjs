@@ -18,14 +18,16 @@ import {
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { GenerateInvoiceUseCase } from '../application/use-cases/generate-invoice.use-case';
-import { GetInvoiceUseCase } from '../application/use-cases/get-invoice.use-case';
-import { ListInvoicesUseCase } from '../application/use-cases/list-invoices.use-case';
-import { UpdateInvoiceStatusUseCase } from '../application/use-cases/update-invoice-status.use-case';
-import { GenerateInvoiceDto } from '../application/dto/generate-invoice.dto';
-import { UpdateInvoiceStatusDto } from '../application/dto/update-invoice-status.dto';
-import { ListInvoicesDto } from '../application/dto/list-invoices.dto';
-import { InvoiceResponseDto } from '../application/dto/invoice-response.dto';
+import {
+  InvoiceResponseDto,
+  GenerateInvoiceDto,
+  ListInvoicesDto,
+  UpdateInvoiceStatusDto,
+} from '../application/dto/invoice.dto';
+import { GenerateInvoiceUseCase } from '../application/usecase/generate-invoice.usecase';
+import { GetInvoiceUseCase } from '../application/usecase/get-invoice.use-case';
+import { ListInvoicesUseCase } from '../application/usecase/list-invoices.use-case';
+import { UpdateInvoiceStatusUseCase } from '../application/usecase/update-invoice-status.use-case';
 
 @ApiTags('Invoices')
 @ApiBearerAuth()
@@ -44,9 +46,9 @@ export class InvoiceController {
   @ApiOperation({ summary: 'Generate invoice for a client' })
   @ApiResponse({ status: 201, type: InvoiceResponseDto })
   async generate(@Body() dto: GenerateInvoiceDto, @Req() req: any) {
-    const userId = req.user?.id || 'SYSTEM';
-    const invoice = await this.generateInvoiceUseCase.execute(dto, userId);
-    return InvoiceResponseDto.fromDomain(invoice);
+    // const userId = req.user?.id || 'SYSTEM';
+    // const invoice = await this.generateInvoiceUseCase.execute(dto, userId);
+    // return InvoiceResponseDto.fromDomain(invoice);
   }
 
   @Get()

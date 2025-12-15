@@ -1,7 +1,8 @@
 // application/use-cases/get-payment.use-case.ts
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
-import { IPaymentRepository } from '../../domain/payment.repository.interface';
+
 import { Payment } from '../../domain/payment.entity';
+import type { IPaymentRepository } from '../../domain/payment.repositiory.interface';
 
 @Injectable()
 export class GetPaymentUseCase {

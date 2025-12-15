@@ -2,11 +2,8 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ClientsModule } from './modules/clients/clients.module';
-import { InvoicesModule } from './modules/invoices/invoices.module';
-import { PaymentsModule } from './modules/payments/payments.module';
 import { ExpensesModule } from './modules/expences/expences.module';
 import { OtherIncomeModule } from './modules/other-income/other-income.module';
-import { ReportsModule } from './modules/reports/reports.module';
 import { LocationModule } from './modules/location/location.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -24,6 +21,9 @@ import { ClientSchema } from './modules/clients/client/infrastructure/perisisten
 import { BuildingController } from './modules/clients/building/presentation/building.controller';
 import { BuildingSchema } from './modules/clients/building/infrastructure/persistense/schema/buildingSchema';
 import { RepositoriesModule } from './shared/repositories/repositories.module';
+import { PaymentModule } from './modules/payments/payments.module';
+import { InvoiceModule } from './modules/invoices/invoices.module';
+import { ReportModule } from './modules/reports/reports.module';
 
 @Module({
   imports: [
@@ -56,11 +56,11 @@ import { RepositoriesModule } from './shared/repositories/repositories.module';
       }),
     }),
     ClientsModule,
-    InvoicesModule,
-    PaymentsModule,
+    InvoiceModule,
+    PaymentModule,
     ExpensesModule,
     OtherIncomeModule,
-    ReportsModule,
+    ReportModule,
     LocationModule,
     AuthModule,
     RepositoriesModule,

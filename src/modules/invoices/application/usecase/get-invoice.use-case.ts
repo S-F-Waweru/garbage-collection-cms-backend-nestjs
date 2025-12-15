@@ -1,7 +1,8 @@
 // application/use-cases/get-invoice.use-case.ts
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
-import { IInvoiceRepository } from '../../domain/invoice.repository.interface';
+
 import { Invoice } from '../../domain/invoice.entity';
+import type { IInvoiceRepository } from '../../domain/invoice.repository.intreface';
 
 @Injectable()
 export class GetInvoiceUseCase {

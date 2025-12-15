@@ -1,11 +1,14 @@
 // application/use-cases/record-payment.use-case.ts
 import { Injectable, Inject, BadRequestException } from '@nestjs/common';
 import { IClientRepository } from 'src/modules/clients/client/domain/interface/client.repository.interface';
-import { IInvoiceRepository } from 'src/modules/invoices/domain/invoice.repository.intreface';
+
 import { DataSource } from 'typeorm';
 import { Payment } from '../../domain/payment.entity';
-import { IPaymentRepository } from '../../domain/payment.repositiory.interface';
+
 import { RecordPaymentDto } from '../payment.dto';
+import type { IInvoiceRepository } from 'src/modules/invoices/domain/invoice.repository.intreface';
+import type { IPaymentRepository } from '../../domain/payment.repositiory.interface';
+import { ICreditClientRepository } from 'src/modules/client-credit/domain/client_credit.repository.interfacace';
 
 @Injectable()
 export class RecordPaymentUseCase {
@@ -15,7 +18,7 @@ export class RecordPaymentUseCase {
     @Inject('IInvoiceRepository')
     private readonly invoiceRepo: IInvoiceRepository,
     @Inject('IClientCreditRepository')
-    private readonly creditRepo: IClientCreditRepository,
+    private readonly creditRepo: ICreditClientRepository,
     @Inject('IClientRepository')
     private readonly clientRepo: IClientRepository,
     private readonly dataSource: DataSource,
