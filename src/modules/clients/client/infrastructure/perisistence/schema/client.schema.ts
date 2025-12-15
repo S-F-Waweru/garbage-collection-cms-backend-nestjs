@@ -39,6 +39,9 @@ export class ClientSchema {
   @Column()
   paymentMethod: PaymentMethod;
 
+  @Column()
+  billingDate: number;
+
   // relations
   @OneToMany(() => BuildingSchema, (building) => building.client, {
     cascade: true,

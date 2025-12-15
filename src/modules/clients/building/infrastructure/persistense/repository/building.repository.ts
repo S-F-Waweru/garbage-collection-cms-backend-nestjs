@@ -39,6 +39,7 @@ export class BuildingRepository implements IBuildingRepository {
       firstName: schema.client.firstName,
       lastName: schema.client.lastName,
       email: schema.client.email,
+      billingDate: schema.client.billingDate,
       phone: schema.client.phone,
       paymentMethod: schema.client.paymentMethod,
       buildings: [],

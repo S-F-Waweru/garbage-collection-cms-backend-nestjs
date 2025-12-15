@@ -6,36 +6,55 @@ import {
   IsString,
   IsDateString,
   IsEnum,
+  IsBoolean,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { InvoiceStatus } from '../../domain/invoice.entity';
 
 export class GenerateInvoiceDto {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Client ID to generate invoice for',
+  })
   @IsUUID()
   clientId: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Start date of the billing period',
+  })
   @IsDate()
   @Type(() => Date)
   billingPeriodStart: Date;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'End date of the billing period',
+  })
   @IsDate()
   @Type(() => Date)
   billingPeriodEnd: Date;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({
+    description: 'Specific invoice date (defaults to current date)',
+  })
   @IsOptional()
   @IsDate()
   @Type(() => Date)
   invoiceDate?: Date;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({
+    description: 'Notes to include on the invoice',
+  })
   @IsOptional()
   @IsString()
   notes?: string;
+
+  @ApiPropertyOptional({
+    description: 'Whether to validate only without creating invoice',
+    default: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  validateOnly?: boolean;
 }
 
 export class UpdateInvoiceStatusDto {

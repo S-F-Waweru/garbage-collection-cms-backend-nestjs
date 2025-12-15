@@ -15,6 +15,7 @@ export class Client extends BaseEntity {
   private _companyName: string;
   private _KRAPin: string;
   private _paymentMethod: PaymentMethod;
+  private _billingDate: number; // Day of month (1-31)
 
   private _buildings: Building[];
 
@@ -27,6 +28,7 @@ export class Client extends BaseEntity {
     email: string;
     phone: string;
     paymentMethod: PaymentMethod;
+    billingDate?: number; // Optional, defaults to 1
     buildings: Building[];
   }) {
     super(props.id);
@@ -37,6 +39,7 @@ export class Client extends BaseEntity {
     this._email = props.email;
     this._phone = props.phone;
     this._paymentMethod = props.paymentMethod;
+    this._billingDate = props.billingDate || 1; // Default to 1st of month
 
     this._buildings = props.buildings ? props.buildings : [];
 
@@ -81,7 +84,15 @@ export class Client extends BaseEntity {
     if (this._paymentMethod === undefined || this._paymentMethod === null) {
       throw new BadRequestException('PaymentMethod is required');
     }
-    // TODO CHECK PAYMANT METHIDS TYPE
+
+    // Validate billingDate
+    if (this._billingDate < 1 || this._billingDate > 31) {
+      throw new BadRequestException('Billing date must be between 1 and 31');
+    }
+
+    // Validate for months with fewer days
+    // Note: We can't validate specific months here, just the range
+    // Actual month validation happens during invoice generation
   }
 
   static create(props: {
@@ -92,6 +103,7 @@ export class Client extends BaseEntity {
     email: string;
     phone: string;
     paymentMethod: PaymentMethod;
+    billingDate?: number;
     buildings: Building[];
   }) {
     return new Client({
@@ -102,6 +114,7 @@ export class Client extends BaseEntity {
       email: props.email,
       phone: props.phone,
       paymentMethod: props.paymentMethod,
+      billingDate: props.billingDate,
       buildings: props.buildings ? props.buildings : [],
     });
   }
@@ -115,6 +128,7 @@ export class Client extends BaseEntity {
     email: string;
     phone: string;
     paymentMethod: PaymentMethod;
+    billingDate: number;
     buildings: Building[];
   }) {
     return new Client(props);
@@ -128,6 +142,7 @@ export class Client extends BaseEntity {
     email?: string;
     phone?: string;
     paymentMethod?: PaymentMethod;
+    billingDate?: number;
     buildings?: Building[];
   }) {
     if (props.companyName !== undefined) this._companyName = props.companyName;
@@ -138,6 +153,7 @@ export class Client extends BaseEntity {
     if (props.phone !== undefined) this._phone = props.phone;
     if (props.paymentMethod !== undefined)
       this._paymentMethod = props.paymentMethod;
+    if (props.billingDate !== undefined) this._billingDate = props.billingDate;
     if (props.buildings !== undefined) this._buildings = props.buildings;
 
     this.validate();
@@ -167,6 +183,10 @@ export class Client extends BaseEntity {
 
   get KRAPin() {
     return this._KRAPin;
+  }
+
+  get billingDate() {
+    return this._billingDate;
   }
 
   get buildings() {

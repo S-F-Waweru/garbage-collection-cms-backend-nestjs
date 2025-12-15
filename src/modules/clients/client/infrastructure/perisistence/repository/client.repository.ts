@@ -99,6 +99,7 @@ export class ClientRepository implements IClientRepository {
       lastName: schema.lastName,
       email: schema.email,
       phone: schema.phone,
+      billingDate: schema.billingDate,
       paymentMethod: schema.paymentMethod,
       buildings,
     });
