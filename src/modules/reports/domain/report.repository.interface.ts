@@ -1,4 +1,5 @@
 // domain/report.repository.interface.ts
+
 import {
   OutstandingBalanceItem,
   RevenueByClientItem,
@@ -6,7 +7,7 @@ import {
   PettyCashItem,
   OtherIncomeItem,
   ReportSummary,
-} from './entities/report-result.entity';
+} from './report-result.entity';
 
 export interface ReportFilters {
   startDate?: Date;
@@ -28,3 +29,5 @@ export interface IReportRepository {
   getOtherIncome(filters?: ReportFilters): Promise<OtherIncomeItem[]>;
   getSummaryStatistics(filters?: ReportFilters): Promise<ReportSummary>;
 }
+
+export const IReportRepository = Symbol('IReportRepository');

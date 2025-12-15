@@ -1,8 +1,8 @@
 // application/use-cases/get-revenue-report.use-case.ts
 import { Injectable, Inject } from '@nestjs/common';
 import { IReportRepository } from '../../domain/report.repository.interface';
-import { ReportResult, ReportType } from '../../domain/entities/report-result.entity';
-import { RevenueGroupBy } from '../dto/revenue-report-filters.dto';
+import { ReportResult, ReportType } from '../../domain/report-result.entity';
+import { RevenueGroupBy } from '../reports.dto';
 
 @Injectable()
 export class GetRevenueReportUseCase {

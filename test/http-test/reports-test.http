@@ -1,0 +1,51 @@
+### Get Outstanding Balances Report
+GET http://localhost:3000/reports/outstanding-balances
+Authorization: Bearer {{token}}
+
+### Get Outstanding Balances with Filters
+GET http://localhost:3000/reports/outstanding-balances?startDate=2024-01-01&endDate=2024-12-31&clientId={{clientId}}
+Authorization: Bearer {{token}}
+
+### Get Revenue Report by Client
+GET http://localhost:3000/reports/revenue?groupBy=client
+Authorization: Bearer {{token}}
+
+### Get Revenue Report by Location
+GET http://localhost:3000/reports/revenue?groupBy=location&startDate=2024-01-01&endDate=2024-12-31
+Authorization: Bearer {{token}}
+
+### Get Petty Cash Report
+GET http://localhost:3000/reports/petty-cash
+Authorization: Bearer {{token}}
+
+### Get Petty Cash Report with Date Range
+GET http://localhost:3000/reports/petty-cash?startDate=2024-01-01&endDate=2024-12-31
+Authorization: Bearer {{token}}
+
+### Get Other Income Report
+GET http://localhost:3000/reports/other-income
+Authorization: Bearer {{token}}
+
+### Get Summary Statistics
+GET http://localhost:3000/reports/summary
+Authorization: Bearer {{token}}
+
+### Get Summary Statistics with Date Range
+GET http://localhost:3000/reports/summary?startDate=2024-01-01&endDate=2024-12-31
+Authorization: Bearer {{token}}
+
+### Export Outstanding Balances to Excel
+GET http://localhost:3000/reports/export/outstanding-balances?startDate=2024-01-01&endDate=2024-12-31
+Authorization: Bearer {{token}}
+
+### Export Revenue Report to Excel
+GET http://localhost:3000/reports/export/revenue?groupBy=client&startDate=2024-01-01&endDate=2024-12-31
+Authorization: Bearer {{token}}
+
+### Export Petty Cash Report to Excel
+GET http://localhost:3000/reports/export/petty-cash
+Authorization: Bearer {{token}}
+
+### Export Other Income Report to Excel
+GET http://localhost:3000/reports/export/other-income
+Authorization: Bearer {{token}}

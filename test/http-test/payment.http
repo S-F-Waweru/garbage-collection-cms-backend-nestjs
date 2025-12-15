@@ -1,0 +1,29 @@
+### Record Payment
+POST http://localhost:3000/payments
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "clientId": "123e4567-e89b-12d3-a456-426614174000",
+  "amount": 50000,
+  "paymentMethod": "MPESA",
+  "paymentDate": "2024-12-14",
+  "referenceNumber": "QH12345678",
+  "notes": "December payment"
+}
+
+### Get Payment by ID
+GET http://localhost:3000/payments/{{paymentId}}
+Authorization: Bearer {{token}}
+
+### List All Payments
+GET http://localhost:3000/payments
+Authorization: Bearer {{token}}
+
+### List Payments with Filters
+GET http://localhost:3000/payments?clientId={{clientId}}&paymentMethod=MPESA&startDate=2024-01-01&endDate=2024-12-31
+Authorization: Bearer {{token}}
+
+### Get Payments by Client
+GET http://localhost:3000/payments/client/{{clientId}}
+Authorization: Bearer {{token}}

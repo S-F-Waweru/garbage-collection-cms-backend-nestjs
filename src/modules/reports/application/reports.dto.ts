@@ -1,6 +1,7 @@
 // application/dto/report-filters.dto.ts
 import { IsOptional, IsDateString, IsUUID, IsString } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class ReportFiltersDto {
   @ApiPropertyOptional({
@@ -45,8 +46,7 @@ export class ReportFiltersDto {
 }
 // application/dto/revenue-report-filters.dto.ts
 import { IsEnum } from 'class-validator';
-import { ReportFiltersDto } from './report-filters.dto';
-import { ApiProperty } from '@nestjs/swagger';
+
 
 export enum RevenueGroupBy {
   CLIENT = 'client',
@@ -64,7 +64,6 @@ export class RevenueReportFiltersDto extends ReportFiltersDto {
 }
 
 // application/dto/outstanding-balance-response.dto.ts
-import { ApiProperty } from '@nestjs/swagger';
 
 export class OutstandingBalanceItemDto {
   @ApiProperty({ description: 'Client UUID' })
@@ -105,7 +104,10 @@ export class OutstandingBalanceReportDto {
   @ApiProperty({ description: 'Report type', example: 'OUTSTANDING_BALANCES' })
   type: string;
 
-  @ApiProperty({ type: [OutstandingBalanceItemDto], description: 'Outstanding balance items' })
+  @ApiProperty({
+    type: [OutstandingBalanceItemDto],
+    description: 'Outstanding balance items',
+  })
   data: OutstandingBalanceItemDto[];
 
   @ApiProperty({ description: 'Report generation timestamp' })
@@ -118,7 +120,6 @@ export class OutstandingBalanceReportDto {
   totalRecords: number;
 }
 // application/dto/revenue-report-response.dto.ts
-import { ApiProperty } from '@nestjs/swagger';
 
 export class RevenueByClientItemDto {
   @ApiProperty({ description: 'Client UUID' })
@@ -170,7 +171,10 @@ export class RevenueByClientReportDto {
   @ApiProperty({ description: 'Report type', example: 'REVENUE_BY_CLIENT' })
   type: string;
 
-  @ApiProperty({ type: [RevenueByClientItemDto], description: 'Revenue by client items' })
+  @ApiProperty({
+    type: [RevenueByClientItemDto],
+    description: 'Revenue by client items',
+  })
   data: RevenueByClientItemDto[];
 
   @ApiProperty({ description: 'Report generation timestamp' })
@@ -187,7 +191,10 @@ export class RevenueByLocationReportDto {
   @ApiProperty({ description: 'Report type', example: 'REVENUE_BY_LOCATION' })
   type: string;
 
-  @ApiProperty({ type: [RevenueByLocationItemDto], description: 'Revenue by location items' })
+  @ApiProperty({
+    type: [RevenueByLocationItemDto],
+    description: 'Revenue by location items',
+  })
   data: RevenueByLocationItemDto[];
 
   @ApiProperty({ description: 'Report generation timestamp' })
@@ -201,7 +208,6 @@ export class RevenueByLocationReportDto {
 }
 
 // application/dto/petty-cash-report-response.dto.ts
-import { ApiProperty } from '@nestjs/swagger';
 
 export class PettyCashItemDto {
   @ApiProperty({ description: 'Transaction UUID' })
@@ -210,7 +216,10 @@ export class PettyCashItemDto {
   @ApiProperty({ description: 'Transaction date' })
   date: Date;
 
-  @ApiProperty({ description: 'Transaction type (IN/OUT)', enum: ['IN', 'OUT'] })
+  @ApiProperty({
+    description: 'Transaction type (IN/OUT)',
+    enum: ['IN', 'OUT'],
+  })
   type: 'IN' | 'OUT';
 
   @ApiProperty({ description: 'Transaction amount' })
@@ -236,7 +245,10 @@ export class PettyCashReportDto {
   @ApiProperty({ description: 'Report type', example: 'PETTY_CASH' })
   type: string;
 
-  @ApiProperty({ type: [PettyCashItemDto], description: 'Petty cash transactions' })
+  @ApiProperty({
+    type: [PettyCashItemDto],
+    description: 'Petty cash transactions',
+  })
   data: PettyCashItemDto[];
 
   @ApiProperty({ description: 'Report generation timestamp' })
@@ -249,7 +261,6 @@ export class PettyCashReportDto {
   totalRecords: number;
 }
 // application/dto/other-income-report-response.dto.ts
-import { ApiProperty } from '@nestjs/swagger';
 
 export class OtherIncomeItemDto {
   @ApiProperty({ description: 'Income record UUID' })
@@ -281,7 +292,10 @@ export class OtherIncomeReportDto {
   @ApiProperty({ description: 'Report type', example: 'OTHER_INCOME' })
   type: string;
 
-  @ApiProperty({ type: [OtherIncomeItemDto], description: 'Other income items' })
+  @ApiProperty({
+    type: [OtherIncomeItemDto],
+    description: 'Other income items',
+  })
   data: OtherIncomeItemDto[];
 
   @ApiProperty({ description: 'Report generation timestamp' })
@@ -294,7 +308,6 @@ export class OtherIncomeReportDto {
   totalRecords: number;
 }
 // application/dto/summary-statistics-response.dto.ts
-import { ApiProperty } from '@nestjs/swagger';
 
 class ReportPeriodDto {
   @ApiProperty({ description: 'Period start date' })
@@ -349,7 +362,10 @@ export class SummaryStatisticsReportDto {
   @ApiProperty({ description: 'Report type', example: 'SUMMARY' })
   type: string;
 
-  @ApiProperty({ type: SummaryStatisticsDto, description: 'Summary statistics' })
+  @ApiProperty({
+    type: SummaryStatisticsDto,
+    description: 'Summary statistics',
+  })
   data: SummaryStatisticsDto;
 
   @ApiProperty({ description: 'Report generation timestamp' })

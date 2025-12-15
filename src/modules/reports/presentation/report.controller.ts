@@ -8,27 +8,24 @@ import {
   ApiQuery,
   ApiProduces,
 } from '@nestjs/swagger';
-import { Response } from 'express';
-import { GetOutstandingBalancesUseCase } from '../application/use-cases/get-outstanding-balances.use-case';
-import { GetRevenueReportUseCase } from '../application/use-cases/get-revenue-report.use-case';
-import { GetPettyCashReportUseCase } from '../application/use-cases/get-petty-cash-report.use-case';
-import { GetOtherIncomeReportUseCase } from '../application/use-cases/get-other-income-report.use-case';
-import { GetSummaryStatisticsUseCase } from '../application/use-cases/get-summary-statistics.use-case';
-import { ExportReportToExcelUseCase } from '../application/use-cases/export-report-to-excel.use-case';
-import { ReportFiltersDto } from '../application/dto/report-filters.dto';
-import {
-  RevenueReportFiltersDto,
-  RevenueGroupBy,
-} from '../application/dto/revenue-report-filters.dto';
+import type { Response } from 'express';
 import {
   OutstandingBalanceReportDto,
+  ReportFiltersDto,
   RevenueByClientReportDto,
-  RevenueByLocationReportDto,
+  RevenueGroupBy,
+  RevenueReportFiltersDto,
   PettyCashReportDto,
   OtherIncomeReportDto,
   SummaryStatisticsReportDto,
-} from '../application/dto';
-import { ReportType } from '../domain/entities/report-result.entity';
+} from '../application/reports.dto';
+import { ExportReportToExcelUseCase } from '../application/usecase/export-report-to-excel.use-case';
+import { GetOtherIncomeReportUseCase } from '../application/usecase/get-other-income-report.use-case';
+import { GetOutstandingBalancesUseCase } from '../application/usecase/get-outstanding-balances.use-case';
+import { GetPettyCashReportUseCase } from '../application/usecase/get-petty-cash-report.use-case';
+import { GetRevenueReportUseCase } from '../application/usecase/get-revenue-report.use-case';
+import { GetSummaryStatisticsUseCase } from '../application/usecase/get-summary-statistics.use-case';
+import { ReportType } from '../domain/report-result.entity';
 
 @ApiTags('Reports')
 @ApiBearerAuth()

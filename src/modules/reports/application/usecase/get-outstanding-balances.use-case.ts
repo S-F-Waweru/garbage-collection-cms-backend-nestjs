@@ -1,10 +1,8 @@
 // application/use-cases/get-outstanding-balances.use-case.ts
 import { Injectable, Inject } from '@nestjs/common';
 import { IReportRepository } from '../../domain/report.repository.interface';
-import {
-  ReportResult,
-  ReportType,
-} from '../../domain/entities/report-result.entity';
+import { ReportResult, ReportType } from '../../domain/report-result.entity';
+
 
 @Injectable()
 export class GetOutstandingBalancesUseCase {
