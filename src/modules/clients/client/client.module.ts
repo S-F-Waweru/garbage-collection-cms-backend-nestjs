@@ -8,6 +8,8 @@ import { ClientController } from './presentaion/client.controller';
 import { CreateClientUseCase } from './application/use-cases/create-client.use-case';
 import { UpdateClientUseCase } from './application/use-cases/update.use-case';
 import { FindClientByIdUseCase } from './application/use-cases/find-by-id.use-case';
+import { IClientRepository } from './domain/interface/client.repository.interface';
+import { ClientRepository } from './infrastructure/perisistence/repository/client.repository';
 
 @Module({
   imports: [RepositoriesModule, LocationModule],
@@ -19,5 +21,6 @@ import { FindClientByIdUseCase } from './application/use-cases/find-by-id.use-ca
     FindAllClientsUseCase,
     FindClientByIdUseCase,
   ],
+  exports: [RepositoriesModule],
 })
 export class ClientModule {}

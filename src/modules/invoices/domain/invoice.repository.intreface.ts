@@ -15,6 +15,7 @@ export interface IInvoiceRepository {
   findByClient(clientId: string): Promise<Invoice[]>;
   findOutstandingByClient(clientId: string): Promise<Invoice[]>;
   findAll(filters?: InvoiceFilters): Promise<Invoice[]>;
+  findAllPaginated(skip: number, limit: number): Promise<[Invoice[], number]>;
   update(id: string, invoice: Invoice): Promise<Invoice | null>;
   existsForPeriod(
     clientId: string,

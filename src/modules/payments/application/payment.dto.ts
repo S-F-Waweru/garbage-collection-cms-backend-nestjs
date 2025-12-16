@@ -13,7 +13,6 @@ import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { PaymentMethod } from '../domain/payment.entity';
 
-
 export class RecordPaymentDto {
   @ApiProperty({
     description: 'Client UUID',
@@ -63,7 +62,6 @@ export class RecordPaymentDto {
   @IsString()
   notes?: string;
 }
-
 
 export class ListPaymentsDto {
   @ApiPropertyOptional({

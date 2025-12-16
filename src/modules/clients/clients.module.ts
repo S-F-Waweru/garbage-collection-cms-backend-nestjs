@@ -3,6 +3,6 @@ import { BuildingModule } from './building/building.module';
 import { ClientModule } from './client/client.module';
 
 @Module({
-  imports: [BuildingModule, ClientModule]
+  imports: [BuildingModule, ClientModule],
 })
 export class ClientsModule {}

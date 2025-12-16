@@ -17,3 +17,5 @@ export interface IPaymentRepository {
   findAll(filters?: PaymentFilters): Promise<Payment[]>;
   update(id: string, payment: Payment): Promise<Payment | null>;
 }
+
+export const IPaymentRepository = Symbol('IPaymentRepository');

@@ -4,7 +4,9 @@ import { ClientSchema } from '../schema/client.schema';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Repository } from 'typeorm';
 import { PaymentMethod } from '../../../../building/domain/building.entity';
+import { Injectable } from '@nestjs/common';
 
+@Injectable()
 export class ClientRepository implements IClientRepository {
   constructor(
     @InjectRepository(ClientSchema)

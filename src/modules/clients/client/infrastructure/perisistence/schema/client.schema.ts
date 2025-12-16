@@ -39,7 +39,7 @@ export class ClientSchema {
   @Column()
   paymentMethod: PaymentMethod;
 
-  @Column()
+  @Column({ default: 1 })
   billingDate: number;
 
   // relations

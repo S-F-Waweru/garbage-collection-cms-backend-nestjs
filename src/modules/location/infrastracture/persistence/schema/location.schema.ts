@@ -9,6 +9,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { BuildingSchema } from '../../../../clients/building/infrastructure/persistense/schema/buildingSchema';
+import { Building } from '../../../../clients/building/domain/building.entity';
 
 @Entity('locations')
 @Index('IDX_city_region_active', ['city', 'region'], {

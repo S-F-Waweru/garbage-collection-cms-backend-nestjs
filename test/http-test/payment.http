@@ -1,3 +1,6 @@
+
+
+
 ### Record Payment
 POST http://localhost:3000/payments
 Content-Type: application/json

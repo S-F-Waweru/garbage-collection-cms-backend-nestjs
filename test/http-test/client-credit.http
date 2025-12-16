@@ -1,6 +1,6 @@
 ### Variables
 @baseUrl = http://localhost:3300
-@clientId = your-client-uuid-here
+@clientId = 9c42b4ce-3281-4470-bff7-af2e513b6ff0
 @anotherClientId = another-client-uuid-here
 
 ### ============================================

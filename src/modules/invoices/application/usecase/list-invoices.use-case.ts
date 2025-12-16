@@ -2,7 +2,7 @@
 import { Injectable, Inject } from '@nestjs/common';
 
 import { Invoice } from '../../domain/invoice.entity';
-import type {
+import {
   IInvoiceRepository,
   InvoiceFilters,
 } from '../../domain/invoice.repository.intreface';
@@ -10,7 +10,7 @@ import type {
 @Injectable()
 export class ListInvoicesUseCase {
   constructor(
-    @Inject('IInvoiceRepository')
+    @Inject(IInvoiceRepository)
     private readonly invoiceRepo: IInvoiceRepository,
   ) {}
 

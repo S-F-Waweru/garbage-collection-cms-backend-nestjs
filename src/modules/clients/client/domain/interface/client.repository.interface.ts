@@ -4,7 +4,7 @@ export interface IClientRepository {
   findById(id: string): Promise<Client | null>;
   findByKRAPin(id: string): Promise<Client | null>;
   findAll(): Promise<Client[]>;
-  save(clientCrediClient: Client): Promise<Client>;
+  save(clientCreditClient: Client): Promise<Client>;
   delete(id: string): Promise<{ message: string }>;
   findAllPaginated(skip: number, limit: number): Promise<[Client[], number]>;
 }

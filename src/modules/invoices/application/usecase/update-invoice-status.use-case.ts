@@ -7,12 +7,12 @@ import {
 } from '@nestjs/common';
 
 import { Invoice, InvoiceStatus } from '../../domain/invoice.entity';
-import type { IInvoiceRepository } from '../../domain/invoice.repository.intreface';
+import { IInvoiceRepository } from '../../domain/invoice.repository.intreface';
 
 @Injectable()
 export class UpdateInvoiceStatusUseCase {
   constructor(
-    @Inject('IInvoiceRepository')
+    @Inject(IInvoiceRepository)
     private readonly invoiceRepo: IInvoiceRepository,
   ) {}
 

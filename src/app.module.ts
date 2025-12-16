@@ -24,6 +24,10 @@ import { RepositoriesModule } from './shared/repositories/repositories.module';
 import { PaymentModule } from './modules/payments/payments.module';
 import { InvoiceModule } from './modules/invoices/invoices.module';
 import { ReportModule } from './modules/reports/reports.module';
+import { InvoiceSchema } from './modules/invoices/infrasctructure/invoice.rschema';
+import { PaymentSchema } from './modules/payments/infrastructure/payment.schema';
+import { ClientCreditModule } from './modules/client-credit/client-credit.module';
+import { ClientCreditSchema } from './modules/client-credit/infrastructure/persisitence/schema/client-credit.schema';
 
 @Module({
   imports: [
@@ -50,6 +54,9 @@ import { ReportModule } from './modules/reports/reports.module';
           ExpenseSchema,
           ClientSchema,
           BuildingSchema,
+          ClientCreditSchema,
+          InvoiceSchema,
+          PaymentSchema,
         ],
         synchronize: true,
         logging: true,

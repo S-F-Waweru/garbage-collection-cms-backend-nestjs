@@ -47,7 +47,6 @@ export class ReportFiltersDto {
 // application/dto/revenue-report-filters.dto.ts
 import { IsEnum } from 'class-validator';
 
-
 export enum RevenueGroupBy {
   CLIENT = 'client',
   LOCATION = 'location',

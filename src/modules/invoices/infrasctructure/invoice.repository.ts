@@ -1,7 +1,7 @@
 // infrastructure/invoice.repository.ts
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource, Between } from 'typeorm';
+import { Repository, DataSource, IsNull } from 'typeorm';
 import { Invoice, InvoiceStatus } from '../domain/invoice.entity';
 import {
   IInvoiceRepository,
@@ -109,21 +109,32 @@ export class InvoiceRepository implements IInvoiceRepository {
     return schemas.map((s) => this.toDomain(s));
   }
 
+  async findAllPaginated(
+    skip: number,
+    limit: number,
+  ): Promise<[Invoice[], number]> {
+    const [schema, total] = await this.repo.findAndCount({
+      where: { deletedAt: IsNull() },
+      skip,
+      take: limit,
+    });
+    return [schema.map((s) => this.toDomain(s)), total];
+  }
   async update(id: string, invoice: Invoice): Promise<Invoice | null> {
-      const data = invoice.toObject();
-      await this.repo.update(id, data);
-      const saved = await this.findById(id);
-      
-      if (!saved) {
-          return null;
-      }
-      
-      const result = this.toDomain(saved);
-  
-      if (Array.isArray(result)) {
-        return result[0];
-      }
-      return result;
+    const data = invoice.toObject();
+    await this.repo.update(id, data);
+    const saved = await this.findById(id);
+
+    if (!saved) {
+      return null;
+    }
+
+    const result = this.toDomain(saved);
+
+    if (Array.isArray(result)) {
+      return result[0];
+    }
+    return result;
   }
 
   async existsForPeriod(

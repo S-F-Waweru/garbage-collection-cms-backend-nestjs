@@ -6,20 +6,20 @@ import { DataSource } from 'typeorm';
 import { Payment } from '../../domain/payment.entity';
 
 import { RecordPaymentDto } from '../payment.dto';
-import type { IInvoiceRepository } from 'src/modules/invoices/domain/invoice.repository.intreface';
-import type { IPaymentRepository } from '../../domain/payment.repositiory.interface';
+import { IInvoiceRepository } from 'src/modules/invoices/domain/invoice.repository.intreface';
+import { IPaymentRepository } from '../../domain/payment.repositiory.interface';
 import { ICreditClientRepository } from 'src/modules/client-credit/domain/client_credit.repository.interfacace';
 
 @Injectable()
 export class RecordPaymentUseCase {
   constructor(
-    @Inject('IPaymentRepository')
+    @Inject(IPaymentRepository)
     private readonly paymentRepo: IPaymentRepository,
-    @Inject('IInvoiceRepository')
+    @Inject(IInvoiceRepository)
     private readonly invoiceRepo: IInvoiceRepository,
-    @Inject('IClientCreditRepository')
+    @Inject(ICreditClientRepository)
     private readonly creditRepo: ICreditClientRepository,
-    @Inject('IClientRepository')
+    @Inject(IClientRepository)
     private readonly clientRepo: IClientRepository,
     private readonly dataSource: DataSource,
   ) {}

@@ -1,14 +1,14 @@
----
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1YzQxZjg3ZS0wNDE3LTRmNTUtOWNjMy0zZjI1MmRjODc3NmYiLCJlbWFpbCI6ImFkbWluQGdhcmJhZ2VjbXMuY29tIiwiaWF0IjoxNzY1ODgyODEzLCJleHAiOjE3NjU4ODM3MTN9.jDd61ovnXHO8IQzY10WVp2NDbNhbIDVntqAOU_4WZfw
 
+#######
 ## 9. HTTP Requests (REST Client / Postman)
-```http
 ### Generate Invoice
-POST http://localhost:3000/invoices/generate
+POST http://localhost:3300/invoices/generate
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-  "clientId": "uuid-here",
+  "clientId": "9c42b4ce-3281-4470-bff7-af2e513b6ff0",
   "billingPeriodStart": "2024-12-01",
   "billingPeriodEnd": "2024-12-31",
   "invoiceDate": "2024-12-14",
@@ -16,23 +16,23 @@ Authorization: Bearer {{token}}
 }
 
 ### Get Invoice by ID
-GET http://localhost:3000/invoices/{{invoiceId}}
+GET http://localhost:3300/invoices/{{invoiceId}}
 Authorization: Bearer {{token}}
 
 ### List All Invoices
-GET http://localhost:3000/invoices
+GET http://localhost:3300/invoices
 Authorization: Bearer {{token}}
 
 ### List Invoices with Filters
-GET http://localhost:3000/invoices?clientId={{clientId}}&status=PENDING&fromDate=2024-01-01&toDate=2024-12-31
+GET http://localhost:3300/invoices?clientId={{clientId}}&status=PENDING&fromDate=2024-01-01&toDate=2024-12-31
 Authorization: Bearer {{token}}
 
 ### Get Invoices by Client
-GET http://localhost:3000/invoices/client/{{clientId}}
+GET http://localhost:3300/invoices/client/{{clientId}}
 Authorization: Bearer {{token}}
 
 ### Update Invoice Status
-PATCH http://localhost:3000/invoices/{{invoiceId}}/status
+PATCH http://localhost:3300/invoices/{{invoiceId}}/status
 Content-Type: application/json
 Authorization: Bearer {{token}}
 

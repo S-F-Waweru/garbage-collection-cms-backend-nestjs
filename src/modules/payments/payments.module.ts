@@ -9,13 +9,22 @@ import { ListPaymentsUseCase } from './application/usecases/list-payments.use-ca
 import { RecordPaymentUseCase } from './application/usecases/record-payment.use-case';
 import { PaymentRepository } from './infrastructure/payament.repository';
 import { PaymentSchema } from './infrastructure/payment.schema';
+import { IPaymentRepository } from './domain/payment.repositiory.interface';
+import { InvoiceModule } from '../invoices/invoices.module';
+import { ClientModule } from '../clients/client/client.module';
+import { ClientCreditModule } from '../client-credit/client-credit.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([PaymentSchema])],
+  imports: [
+    TypeOrmModule.forFeature([PaymentSchema]),
+    InvoiceModule,
+    ClientModule,
+    ClientCreditModule,
+  ],
   providers: [
     // Repository
     {
-      provide: 'IPaymentRepository',
+      provide: IPaymentRepository,
       useClass: PaymentRepository,
     },
 
@@ -25,6 +34,6 @@ import { PaymentSchema } from './infrastructure/payment.schema';
     ListPaymentsUseCase,
   ],
   controllers: [PaymentController],
-  exports: ['IPaymentRepository'],
+  exports: [IPaymentRepository],
 })
 export class PaymentModule {}

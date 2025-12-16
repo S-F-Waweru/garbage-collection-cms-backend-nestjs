@@ -2,14 +2,14 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
 
 import { InvoiceStatus } from '../../domain/invoice.entity';
-import type { IInvoiceRepository } from '../../domain/invoice.repository.intreface';
+import { IInvoiceRepository } from '../../domain/invoice.repository.intreface';
 
 @Injectable()
 export class MarkOverdueInvoicesUseCase {
   private readonly logger = new Logger(MarkOverdueInvoicesUseCase.name);
 
   constructor(
-    @Inject('IInvoiceRepository')
+    @Inject(IInvoiceRepository)
     private readonly invoiceRepo: IInvoiceRepository,
   ) {}
 

@@ -6,8 +6,10 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   Index,
+  ManyToOne,
 } from 'typeorm';
 import { PaymentMethod } from '../domain/payment.entity';
+import { InvoiceSchema } from '../../invoices/infrasctructure/invoice.rschema';
 
 @Entity('payments')
 @Index(['clientId', 'paymentDate'])
@@ -55,4 +57,7 @@ export class PaymentSchema {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @ManyToOne(() => InvoiceSchema, (invoice) => invoice.payments)
+  invoice: InvoiceSchema;
 }

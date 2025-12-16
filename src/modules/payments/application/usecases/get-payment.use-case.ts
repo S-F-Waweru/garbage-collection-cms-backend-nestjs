@@ -2,12 +2,12 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 
 import { Payment } from '../../domain/payment.entity';
-import type { IPaymentRepository } from '../../domain/payment.repositiory.interface';
+import { IPaymentRepository } from '../../domain/payment.repositiory.interface';
 
 @Injectable()
 export class GetPaymentUseCase {
   constructor(
-    @Inject('IPaymentRepository')
+    @Inject(IPaymentRepository)
     private readonly paymentRepo: IPaymentRepository,
   ) {}
 

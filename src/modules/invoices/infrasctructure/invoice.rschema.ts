@@ -9,8 +9,12 @@ import {
   OneToMany,
   JoinColumn,
   Index,
+  DeleteDateColumn,
 } from 'typeorm';
 import { InvoiceStatus } from '../domain/invoice.entity';
+import { ClientSchema } from '../../clients/client/infrastructure/perisistence/schema/client.schema';
+import { PaymentSchema } from '../../payments/infrastructure/payment.schema';
+import { UserSchema } from '../../auth/infrastructure/persistence/schema/user.schema';
 
 @Entity('invoices')
 @Index(['clientId', 'invoiceDate'])
@@ -79,15 +83,18 @@ export class InvoiceSchema {
   @UpdateDateColumn()
   updatedAt: Date;
 
+  @DeleteDateColumn()
+  deletedAt?: Date;
+
   // Relationships (optional - for joins)
-  // @ManyToOne(() => ClientSchema)
-  // @JoinColumn({ name: 'clientId' })
-  // client?: ClientSchema;
+  @ManyToOne(() => ClientSchema)
+  @JoinColumn({ name: 'clientId' })
+  client?: ClientSchema;
 
-  // @OneToMany(() => PaymentSchema, payment => payment.invoice)
-  // payments?: PaymentSchema[];
+  @OneToMany(() => PaymentSchema, (payment) => payment.invoice)
+  payments?: PaymentSchema[];
 
-  // @ManyToOne(() => UserSchema)
-  // @JoinColumn({ name: 'createdBy' })
-  // creator?: UserSchema;
+  @ManyToOne(() => UserSchema)
+  @JoinColumn({ name: 'createdBy' })
+  creator?: UserSchema;
 }
