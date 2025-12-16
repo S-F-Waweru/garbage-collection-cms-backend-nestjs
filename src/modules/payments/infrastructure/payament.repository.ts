@@ -99,6 +99,14 @@ export class PaymentRepository implements IPaymentRepository {
     return schemas.map((s) => this.toDomain(s));
   }
 
+  async findAllPaginated(
+    skip: number,
+    limit: number,
+  ): Promise<[Payment[], number]> {
+    const [schema, total] = await this.repo.findAndCount({ skip, take: limit });
+    return [schema.map((s) => this.toDomain(s)), total];
+  }
+
   async update(id: string, payment: Payment): Promise<Payment | null> {
     const data = payment.toObject();
     await this.repo.update(id, data);

@@ -1,30 +1,35 @@
 // presentation/payment.controller.ts
 import {
-  Controller,
-  Post,
-  Get,
-  Param,
   Body,
-  Query,
+  Controller,
+  Get,
   HttpCode,
   HttpStatus,
+  Param,
+  Post,
+  Query,
   Req,
 } from '@nestjs/common';
 import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
   ApiBearerAuth,
+  ApiOperation,
   ApiParam,
+  ApiResponse,
+  ApiTags,
 } from '@nestjs/swagger';
 import {
+  ListPaymentsDto,
   PaymentResponseDto,
   RecordPaymentDto,
-  ListPaymentsDto,
 } from '../application/payment.dto';
 import { GetPaymentUseCase } from '../application/usecases/get-payment.use-case';
 import { ListPaymentsUseCase } from '../application/usecases/list-payments.use-case';
 import { RecordPaymentUseCase } from '../application/usecases/record-payment.use-case';
+import { ListPaginatedPaymentsUseCase } from '../application/usecases/get-paginated-payments';
+
+export interface RequestwithUser extends Request {
+  user?: any;
+}
 
 @ApiTags('Payments')
 @ApiBearerAuth()
@@ -34,6 +39,7 @@ export class PaymentController {
     private readonly recordPaymentUseCase: RecordPaymentUseCase,
     private readonly getPaymentUseCase: GetPaymentUseCase,
     private readonly listPaymentsUseCase: ListPaymentsUseCase,
+    private readonly listPaginatedUsecase: ListPaginatedPaymentsUseCase,
   ) {}
 
   @Post()
@@ -52,7 +58,10 @@ export class PaymentController {
     status: 400,
     description: 'Bad request - Invalid payment data or client not found',
   })
-  async recordPayment(@Body() dto: RecordPaymentDto, @Req() req: any) {
+  async recordPayment(
+    @Body() dto: RecordPaymentDto,
+    @Req() req: RequestwithUser,
+  ) {
     const userId = req.user?.id || 'SYSTEM';
     const payment = await this.recordPaymentUseCase.execute(dto, userId);
     return PaymentResponseDto.fromDomain(payment);
@@ -115,7 +124,19 @@ export class PaymentController {
     type: [PaymentResponseDto],
   })
   async getByClient(@Param('clientId') clientId: string) {
-    const payments = await this.listPaymentsUseCase.execute({ clientId });
-    return payments.map(PaymentResponseDto.fromDomain);
+    return await this.listPaymentsUseCase.execute({ clientId });
+  }
+
+  @Get('all-paginated')
+  @ApiOperation({ summary: 'List all payments with pagination' })
+  @ApiResponse({ status: 200, type: [PaymentResponseDto] })
+  async listAllPaginated(
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '10',
+  ) {
+    return await this.listPaginatedUsecase.execute({
+      page: parseInt(page, 10),
+      limit: parseInt(limit, 10),
+    });
   }
 }

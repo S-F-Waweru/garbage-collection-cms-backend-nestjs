@@ -29,6 +29,17 @@ export class ExpenseRepository implements IExpenseRepository {
     return schema ? this.toDomain(schema) : null;
   }
 
+  async findAllPaginated(
+    skip: number,
+    limit: number,
+  ): Promise<[Expense[], number]> {
+    const [schemas, total] = await this.repository.findAndCount({
+      skip,
+      take: limit,
+    });
+    return [schemas.map((s) => this.toDomain(s)), total];
+  }
+
   async save(expense: Expense): Promise<Expense> {
     const schema = this.toSchema(expense);
     const saved = await this.repository.save(schema);

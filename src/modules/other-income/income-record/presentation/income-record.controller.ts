@@ -8,22 +8,35 @@ import {
   Body,
   NotFoundException,
   UseGuards,
+  Query,
 } from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
 import {
   CreateIncomeRecordDto,
   UpdateIncomeRecordDto,
 } from '../application/dto/income-record.dto';
+
 import { CreateIncomeRecordUseCase } from '../application/use-cases/create-income-record.use-case';
-import { DeleteIncomeRecordUseCase } from '../application/use-cases/get-income-record-by-id.use-case';
-import { GetIncomeCategoryByIdUseCase } from '../../income-category/application/use-case/get-income-category-by-id.use-case';
+import { DeleteIncomeRecordUseCase } from '../application/use-cases/delete-income-record.use-case';
+
 import { GetAllIncomeRecordsUseCase } from '../application/use-cases/get-all-income-records.use-case';
 import { UpdateIncomeRecordUseCase } from '../application/use-cases/update-income-record.use-case';
+
 import { CurrentUser } from '../../../../shared/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
+import { GetIncomeCategoryByIdUseCase } from '../../income-category/application/use-case/get-income-category-by-id.use-case';
 
-// todo authentication and authorization of all routes at the end
-
+@ApiTags('Income Records')
+@ApiBearerAuth()
 @Controller('income-records')
 export class IncomeRecordController {
   constructor(
@@ -33,19 +46,45 @@ export class IncomeRecordController {
     private readonly getByIdUseCase: GetIncomeCategoryByIdUseCase,
     private readonly getAllUseCase: GetAllIncomeRecordsUseCase,
   ) {}
-
   // -----------------------
-  // GET all
+  // GET all (paginated)
   // -----------------------
   @Get()
-  async findAll() {
-    return this.getAllUseCase.execute();
+  @ApiOperation({ summary: 'Get all income records (paginated)' })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    example: 1,
+    description: 'Page number',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    example: 10,
+    description: 'Number of items per page',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Income records fetched successfully',
+  })
+  async findAll(
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '10',
+  ) {
+    return this.getAllUseCase.execute({
+      page: Number(page),
+      limit: Number(limit),
+    });
   }
 
   // -----------------------
   // GET by ID
   // -----------------------
   @Get(':id')
+  @ApiOperation({ summary: 'Get income record by ID' })
+  @ApiParam({ name: 'id', example: 'uuid-of-income-record' })
+  @ApiResponse({ status: 200, description: 'Income record found' })
+  @ApiResponse({ status: 404, description: 'Income record not found' })
   async findById(@Param('id') id: string) {
     const record = await this.getByIdUseCase.execute(id);
     if (!record) throw new NotFoundException('Income record not found');
@@ -57,8 +96,16 @@ export class IncomeRecordController {
   // -----------------------
   @UseGuards(JwtAuthGuard)
   @Post()
-  create(@CurrentUser() user: any, @Body() dto: CreateIncomeRecordDto) {
-    // return console.log('Creating income record for user:', user);
+  @ApiOperation({ summary: 'Create a new income record' })
+  @ApiBody({ type: CreateIncomeRecordDto })
+  @ApiResponse({
+    status: 201,
+    description: 'Income record created successfully',
+  })
+  create(
+    @CurrentUser() user: { userId: string },
+    @Body() dto: CreateIncomeRecordDto,
+  ) {
     return this.createUseCase.execute(user.userId, dto);
   }
 
@@ -66,6 +113,14 @@ export class IncomeRecordController {
   // UPDATE
   // -----------------------
   @Put(':id')
+  @ApiOperation({ summary: 'Update income record by ID' })
+  @ApiParam({ name: 'id', example: 'uuid-of-income-record' })
+  @ApiBody({ type: UpdateIncomeRecordDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Income record updated successfully',
+  })
+  @ApiResponse({ status: 404, description: 'Income record not found' })
   async update(@Param('id') id: string, @Body() dto: UpdateIncomeRecordDto) {
     return this.updateUseCase.execute({ id, ...dto });
   }
@@ -74,6 +129,12 @@ export class IncomeRecordController {
   // DELETE
   // -----------------------
   @Delete(':id')
+  @ApiOperation({ summary: 'Delete income record by ID' })
+  @ApiParam({ name: 'id', example: 'uuid-of-income-record' })
+  @ApiResponse({
+    status: 200,
+    description: 'Income record deleted successfully',
+  })
   async delete(@Param('id') id: string) {
     await this.deleteUseCase.execute(id);
     return { deleted: true };

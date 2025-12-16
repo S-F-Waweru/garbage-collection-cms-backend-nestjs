@@ -3,6 +3,7 @@ import { Location } from '../entities/location.entity';
 export interface ILocationRepository {
   findById(id: string): Promise<Location | null>;
   getAll(): Promise<Location[]>;
+  getAllPaginated(page: number, limit: number): Promise<[Location[], number]>;
   save(location: Location): Promise<Location>;
   delete(id: string): Promise<void>;
   exists(city: string, region: string): Promise<boolean>;

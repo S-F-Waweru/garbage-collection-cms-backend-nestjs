@@ -13,6 +13,8 @@ import { IPaymentRepository } from './domain/payment.repositiory.interface';
 import { InvoiceModule } from '../invoices/invoices.module';
 import { ClientModule } from '../clients/client/client.module';
 import { ClientCreditModule } from '../client-credit/client-credit.module';
+import { GetAllInvoicesPaginatedUseCase } from '../invoices/application/usecase/get-all-invoices-paginate';
+import { ListPaginatedPaymentsUseCase } from './application/usecases/get-paginated-payments';
 
 @Module({
   imports: [
@@ -32,6 +34,7 @@ import { ClientCreditModule } from '../client-credit/client-credit.module';
     RecordPaymentUseCase,
     GetPaymentUseCase,
     ListPaymentsUseCase,
+    ListPaginatedPaymentsUseCase,
   ],
   controllers: [PaymentController],
   exports: [IPaymentRepository],

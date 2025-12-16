@@ -3,6 +3,7 @@ import { IncomeRecord } from '../income-record.entity';
 export interface IIncomeRecordRepository {
   findById(id: string): Promise<IncomeRecord | null>;
   findAll(): Promise<IncomeRecord[]>;
+  findAllPaginated(skip: number, limit: number): Promise<[IncomeRecord[], number]>;
 
   findByCategory(categoryId: string): Promise<IncomeRecord[]>;
 

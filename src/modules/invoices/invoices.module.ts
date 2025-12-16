@@ -15,6 +15,7 @@ import { InvoiceCronService } from './application/services/invoice-cron/invoice-
 import { ClientModule } from '../clients/client/client.module';
 import { IInvoiceRepository } from './domain/invoice.repository.intreface';
 import { ClientCreditModule } from '../client-credit/client-credit.module';
+import { GetAllInvoicesPaginatedUseCase } from './application/usecase/get-all-invoices-paginate';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { ClientCreditModule } from '../client-credit/client-credit.module';
     UpdateInvoiceStatusUseCase,
     MarkOverdueInvoicesUseCase,
     InvoiceCronService,
+    GetAllInvoicesPaginatedUseCase,
   ],
   controllers: [InvoiceController],
   exports: [IInvoiceRepository, GenerateInvoiceUseCase], // ✅ Fixed: token reference

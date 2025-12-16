@@ -57,6 +57,18 @@ export class PettyCashRepository implements IPettyCashRepository {
     return schemas.map((s) => this.toDomain(s));
   }
 
+  async findAllPaginated(
+    skip: number,
+    limit: number,
+  ): Promise<[PettyCash[], number]> {
+    const [schemas, total] = await this.repository.findAndCount({
+      where: { deletedAt: IsNull() },
+      skip,
+      take: limit,
+    });
+    return [schemas.map((s) => this.toDomain(s)), total];
+  }
+
   async findById(id: string): Promise<PettyCash | null> {
     const schema = await this.repository.findOne({ where: { id } });
     return schema ? this.toDomain(schema) : null;

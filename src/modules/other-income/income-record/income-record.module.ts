@@ -6,13 +6,14 @@ import { IIncomeRecordRepository } from './domain/interface/income-record.reposi
 import { IncomeRecordRepository } from './infrastructure/schema/repository/income-record.repository';
 import { GetAllIncomeRecordsUseCase } from './application/use-cases/get-all-income-records.use-case';
 import { GetIncomeCategoryByIdUseCase } from '../income-category/application/use-case/get-income-category-by-id.use-case';
-import { DeleteIncomeRecordUseCase } from './application/use-cases/get-income-record-by-id.use-case';
+
 import { UpdateIncomeRecordUseCase } from './application/use-cases/update-income-record.use-case';
 import { IncomeCategorySchema } from '../income-category/infrastructure/schema/IncomeCategory.schema';
 import { IncomeRecordSchema } from './infrastructure/schema/income-record.schema';
 import { IncomeCategoryModule } from '../income-category/income-category.module';
 import { IIncomeCategoryRepository } from '../income-category/domain/interfaces/income-category.repository.interface';
 import { IncomeCategoryRepository } from '../income-category/infrastructure/repository/income-category.repository';
+import { DeleteIncomeRecordUseCase } from './application/use-cases/delete-income-record.use-case';
 
 @Module({
   imports: [

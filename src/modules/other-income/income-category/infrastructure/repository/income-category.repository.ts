@@ -50,6 +50,17 @@ export class IncomeCategoryRepository implements IIncomeCategoryRepository {
     });
     return schemas.map((s) => this.toDomain(s));
   }
+  async findAllPaginated(
+    skip: number,
+    limit: number,
+  ): Promise<[IncomeCategory[], number]> {
+    const [schemas, total] = await this.repository.findAndCount({
+      where: { deletedAt: IsNull() },
+      skip,
+      take: limit,
+    });
+    return [schemas.map((s) => this.toDomain(s)), total];
+  }
 
   async save(category: IncomeCategory): Promise<IncomeCategory> {
     const schema = this.repository.create(this.toSchema(category));

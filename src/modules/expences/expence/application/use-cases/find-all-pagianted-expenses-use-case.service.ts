@@ -1,26 +1,24 @@
 import { Inject, Injectable } from '@nestjs/common';
-
-import { IIncomeRecordRepository } from '../../domain/interface/income-record.repository.interface';
+import { IExpenseRepository } from '../../domain/expense.repository.interface';
 import { PaginationParams } from '../../../../clients/client/application/use-cases/find-all-pagiantion.use-case';
 
 @Injectable()
-export class GetAllIncomeRecordsUseCase {
+export class FindAllPaginatedExpensesUseCase {
   constructor(
-    @Inject(IIncomeRecordRepository)
-    private readonly repository: IIncomeRecordRepository,
+    @Inject(IExpenseRepository) private expenseRepository: IExpenseRepository,
   ) {}
 
   async execute(params: PaginationParams) {
     const { page, limit } = params;
     const skip = (page - 1) * limit;
 
-    const [incomeRecords, total] = await this.repository.findAllPaginated(
+    const [expences, total] = await this.expenseRepository.findAllPaginated(
       skip,
       limit,
     );
 
     return {
-      data: incomeRecords,
+      data: expences,
       total,
       page,
       limit,

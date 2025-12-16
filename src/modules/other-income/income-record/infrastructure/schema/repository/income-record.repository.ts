@@ -130,4 +130,16 @@ export class IncomeRecordRepository implements IIncomeRecordRepository {
       description: schema.description,
     });
   }
+
+  async findAllPaginated(
+    skip: number,
+    limit: number,
+  ): Promise<[IncomeRecord[], number]> {
+    const [schema, total] = await this.repository.findAndCount({
+      where: { deletedAt: IsNull() },
+      skip,
+      take: limit,
+    });
+    return [schema.map((s) => this.toDomain(s)), total];
+  }
 }

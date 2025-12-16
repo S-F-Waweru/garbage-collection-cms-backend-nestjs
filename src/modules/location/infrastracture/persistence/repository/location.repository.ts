@@ -65,6 +65,18 @@ export class LocationRepository implements ILocationRepository {
     return this.toDomain(savedSchema);
   }
 
+  async getAllPaginated(
+    skip: number,
+    limit: number,
+  ): Promise<[Location[], number]> {
+    const [schemas, total] = await this.repository.findAndCount({
+      where: { deletedAt: IsNull() },
+      skip,
+      take: limit,
+    });
+    return [schemas.map((s) => this.toDomain(s)), total];
+  }
+
   // --- Private Mapping Methods ---
 
   private toDomain(schema: LocationSchema): Location {

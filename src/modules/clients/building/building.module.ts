@@ -8,6 +8,7 @@ import { BuildingController } from './presentation/building.controller';
 import { UpdateBuildingUseCase } from './application/use-cases/update-buiding.use-case';
 import { FindBulidingsByClientIdUseCase } from './application/use-cases/find-bulidings-by-client-id.use-case';
 import { FindBuildingByIdUseCase } from './application/use-cases/find-building-by-id.use-case';
+import { FindAllPaginatedBuildingsUseCase } from './application/use-cases/get-all-pagianted-buidings';
 
 export class ClientModule {}
 
@@ -22,6 +23,7 @@ export class ClientModule {}
     FindAllBuildingsUseCase,
     FindBulidingsByClientIdUseCase,
     FindBuildingByIdUseCase,
+    FindAllPaginatedBuildingsUseCase,
   ],
 })
 export class BuildingModule {}

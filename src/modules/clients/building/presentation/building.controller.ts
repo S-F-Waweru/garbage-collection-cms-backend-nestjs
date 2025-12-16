@@ -18,6 +18,7 @@ import { FindBuildingByIdUseCase } from '../application/use-cases/find-building-
 import { DeleteBuildingUseCase } from '../application/use-cases/delete-building-use.case';
 import { FindAllBuildingsUseCase } from '../application/use-cases/find-all-buildings.use-case';
 import { FindBulidingsByClientIdUseCase } from '../application/use-cases/find-bulidings-by-client-id.use-case';
+import { FindAllPaginatedBuildingsUseCase } from '../application/use-cases/get-all-pagianted-buidings';
 
 @Controller('buildings')
 export class BuildingController {
@@ -27,12 +28,24 @@ export class BuildingController {
     private readonly deleteBuildingUseCase: DeleteBuildingUseCase,
     private readonly findBuildingByIdUseCase: FindBuildingByIdUseCase,
     private readonly findAllBuildingsUseCase: FindAllBuildingsUseCase,
+    private readonly findAllPaginatedBuildingsUseCase: FindAllPaginatedBuildingsUseCase,
     private readonly findClientBuildingsUseCase: FindBulidingsByClientIdUseCase,
   ) {}
 
   @Post()
   async create(@Body() dto: CreateBuildingDto) {
     return await this.createBuildingUseCase.execute(dto);
+  }
+
+  @Get()
+  async findAllPaginated(
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '10',
+  ) {
+    return await this.findAllPaginatedBuildingsUseCase.execute({
+      page: parseInt(page, 10),
+      limit: parseInt(limit, 10),
+    });
   }
 
   @Get()

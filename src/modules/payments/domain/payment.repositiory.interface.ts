@@ -15,6 +15,7 @@ export interface IPaymentRepository {
   findByPaymentNumber(paymentNumber: string): Promise<Payment | null>;
   findByClient(clientId: string): Promise<Payment[]>;
   findAll(filters?: PaymentFilters): Promise<Payment[]>;
+  findAllPaginated(skip: number, limit: number): Promise<[Payment[], number]>;
   update(id: string, payment: Payment): Promise<Payment | null>;
 }
 

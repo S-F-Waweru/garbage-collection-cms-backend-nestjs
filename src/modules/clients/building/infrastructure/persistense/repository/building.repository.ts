@@ -96,6 +96,19 @@ export class BuildingRepository implements IBuildingRepository {
 
     return schemas.map((schema) => this.toDomain(schema));
   }
+  async findAllPaginated(
+    skip: number,
+    limit: number,
+  ): Promise<[Building[], number]> {
+    const [schemas, total] = await this.repository.findAndCount({
+      where: { deletedAt: IsNull() },
+      relations: ['client', 'location'],
+      skip,
+      take: limit,
+    });
+
+    return [schemas.map((s) => this.toDomain(s)), total];
+  }
 
   async delete(id: string) {
     await this.repository.softDelete(id);

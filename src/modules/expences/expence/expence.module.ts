@@ -9,7 +9,7 @@ import { FindExpenseByIdUsecase } from './application/use-cases/find-expense-by-
 import { FindAllPettyCashUseCase } from '../petty-cash/application/use-cases/find-all-petty-cash.use-case';
 import { IExpenseRepository } from './domain/expense.repository.interface';
 import { ExpenseRepository } from './infrastructure/expense.repository';
-import { FindAllExpensesUseCase } from './application/use-cases/find-all-expenses.use-case';
+import { FindAllPaginatedExpensesUseCase } from './application/use-cases/find-all-pagianted-expenses-use-case.service';
 import { PettyCashModule } from '../petty-cash/petty-cash.module';
 
 @Module({
@@ -20,7 +20,7 @@ import { PettyCashModule } from '../petty-cash/petty-cash.module';
     DeleteExpenseUseCase,
     UpdateExpenseUseCase,
     FindExpenseByIdUsecase,
-    FindAllExpensesUseCase,
+    FindAllPaginatedExpensesUseCase,
     {
       provide: IExpenseRepository,
       useClass: ExpenseRepository,
