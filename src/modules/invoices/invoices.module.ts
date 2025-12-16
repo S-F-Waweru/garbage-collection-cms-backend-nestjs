@@ -11,7 +11,9 @@ import { UpdateInvoiceStatusUseCase } from './application/usecase/update-invoice
 import { InvoiceCronService } from './infrasctructure/cron/invoice-cron.service';
 import { InvoiceRepository } from './infrasctructure/invoice.repository';
 import { InvoiceSchema } from './infrasctructure/invoice.rschema';
-import { InvoiceController } from './presentaion/inovice.presentaion';
+import { InvoiceController } from './presentaion/invoice.controller';
+import { InvoiceCromService } from './application/services/invoice-crom/invoice-crom.service';
+import { InvoiceCronService } from './application/services/invoice-cron/invoice-cron.service';
 
 @Module({
   imports: [
@@ -35,6 +37,8 @@ import { InvoiceController } from './presentaion/inovice.presentaion';
 
     // Cron Service
     InvoiceCronService,
+
+    InvoiceCromService,
   ],
   controllers: [InvoiceController],
   exports: ['IInvoiceRepository', GenerateInvoiceUseCase],

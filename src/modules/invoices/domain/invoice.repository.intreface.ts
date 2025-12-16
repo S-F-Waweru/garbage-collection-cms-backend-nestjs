@@ -23,3 +23,4 @@ export interface IInvoiceRepository {
   ): Promise<boolean>;
   findAllDueForGeneration(): Promise<string[]>; // Returns clientIds
 }
+export const IInvoiceRepository = Symbol('IInvoiceRepository');

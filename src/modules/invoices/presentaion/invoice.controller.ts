@@ -1,26 +1,25 @@
 // presentation/invoice.controller.ts
 import {
-  Controller,
-  Post,
-  Get,
-  Patch,
-  Param,
   Body,
-  Query,
+  Controller,
+  Get,
   HttpCode,
   HttpStatus,
-  UseGuards,
+  Param,
+  Patch,
+  Post,
+  Query,
   Req,
 } from '@nestjs/common';
 import {
-  ApiTags,
+  ApiBearerAuth,
   ApiOperation,
   ApiResponse,
-  ApiBearerAuth,
+  ApiTags,
 } from '@nestjs/swagger';
 import {
-  InvoiceResponseDto,
   GenerateInvoiceDto,
+  InvoiceResponseDto,
   ListInvoicesDto,
   UpdateInvoiceStatusDto,
 } from '../application/dto/invoice.dto';
@@ -28,6 +27,11 @@ import { GenerateInvoiceUseCase } from '../application/usecase/generate-invoice.
 import { GetInvoiceUseCase } from '../application/usecase/get-invoice.use-case';
 import { ListInvoicesUseCase } from '../application/usecase/list-invoices.use-case';
 import { UpdateInvoiceStatusUseCase } from '../application/usecase/update-invoice-status.use-case';
+import { User } from '../../auth/domain/entities/user.entity';
+
+interface RequestWithUser extends Request {
+  user?: User; // Replace User with your actual user type
+}
 
 @ApiTags('Invoices')
 @ApiBearerAuth()
@@ -45,10 +49,9 @@ export class InvoiceController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Generate invoice for a client' })
   @ApiResponse({ status: 201, type: InvoiceResponseDto })
-  async generate(@Body() dto: GenerateInvoiceDto, @Req() req: any) {
-    // const userId = req.user?.id || 'SYSTEM';
-    // const invoice = await this.generateInvoiceUseCase.execute(dto, userId);
-    // return InvoiceResponseDto.fromDomain(invoice);
+  async generate(@Body() dto: GenerateInvoiceDto, @Req() req: RequestWithUser) {
+    const userId = req.user?.id || 'SYSTEM';
+    return await this.generateInvoiceUseCase.execute(dto, userId);
   }
 
   @Get()
@@ -61,25 +64,21 @@ export class InvoiceController {
       fromDate: query.fromDate ? new Date(query.fromDate) : undefined,
       toDate: query.toDate ? new Date(query.toDate) : undefined,
     };
-
-    const invoices = await this.listInvoicesUseCase.execute(filters);
-    return invoices.map(InvoiceResponseDto.fromDomain);
+    return await this.listInvoicesUseCase.execute(filters);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get invoice by ID' })
   @ApiResponse({ status: 200, type: InvoiceResponseDto })
   async getById(@Param('id') id: string) {
-    const invoice = await this.getInvoiceUseCase.execute(id);
-    return InvoiceResponseDto.fromDomain(invoice);
+    return await this.getInvoiceUseCase.execute(id);
   }
 
   @Get('client/:clientId')
   @ApiOperation({ summary: 'Get all invoices for a client' })
   @ApiResponse({ status: 200, type: [InvoiceResponseDto] })
   async getByClient(@Param('clientId') clientId: string) {
-    const invoices = await this.listInvoicesUseCase.execute({ clientId });
-    return invoices.map(InvoiceResponseDto.fromDomain);
+    return await this.listInvoicesUseCase.execute({ clientId });
   }
 
   @Patch(':id/status')
@@ -89,10 +88,6 @@ export class InvoiceController {
     @Param('id') id: string,
     @Body() dto: UpdateInvoiceStatusDto,
   ) {
-    const invoice = await this.updateInvoiceStatusUseCase.execute(
-      id,
-      dto.status,
-    );
-    return InvoiceResponseDto.fromDomain(invoice);
+    return await this.updateInvoiceStatusUseCase.execute(id, dto.status);
   }
 }
