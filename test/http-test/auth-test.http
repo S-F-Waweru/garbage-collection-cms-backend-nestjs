@@ -8,6 +8,10 @@
 @user2Email = admin@garbagecms.com
 @password2 = Admin@123
 
+######
+@accessToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1YzQxZjg3ZS0wNDE3LTRmNTUtOWNjMy0zZjI1MmRjODc3NmYiLCJlbWFpbCI6ImFkbWluQGdhcmJhZ2VjbXMuY29tIiwiaWF0IjoxNzY1OTU3NjEzLCJleHAiOjE3NjU5NTg1MTN9.bZmpJDgiFZwB61R2QTiFJmKyBTwlOr11ScJyrkyK424
+@refreshToken =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1YzQxZjg3ZS0wNDE3LTRmNTUtOWNjMy0zZjI1MmRjODc3NmYiLCJpYXQiOjE3NjU5NTc2MTMsImV4cCI6MTc2NjU2MjQxM30.Kr4GK_WAc-ys8GV5aCKJSuhue_flGb_PfI0SFZJZpDc
+
 
 ### 1.1 ✅ Successful Registration - User 1
 # @name registerUser1
@@ -38,15 +42,17 @@ Content-Type: {{contentType}}
 POST {{baseUrl}}/auth/login
 Content-Type: {{contentType}}
 
-
 {
   "email": "{{user2Email}}",
    "password": "{{password2}}"
 }
 
+### 2.2 🔁 Refresh Token
+POST {{baseUrl}}/auth/refresh
+Content-Type: {{contentType}}
+Authorization: Bearer {{refreshToken}}
 
-######
-@accessToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1YzQxZjg3ZS0wNDE3LTRmNTUtOWNjMy0zZjI1MmRjODc3NmYiLCJlbWFpbCI6ImFkbWluQGdhcmJhZ2VjbXMuY29tIiwiaWF0IjoxNzY0OTE5MDM3LCJleHAiOjE3NjQ5MTk5Mzd9.gfca_ZbX6ZGY9yitVYIfZrXSDv5_uUDRl8R1P2Bg7ro
+
 
 ### 2.2 ✅ Successful Login \- User 2
 # @name loginUser2

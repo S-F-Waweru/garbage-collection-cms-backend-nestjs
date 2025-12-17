@@ -5,6 +5,8 @@ import {
   HttpCode,
   HttpStatus,
   Post,
+  Req,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { RegisterUseCase } from '../../application/use-cases/register.use-case.ts/register-use-case.service';
@@ -17,6 +19,8 @@ import {
 import { ChangePasswordUseCase } from '../../application/use-cases/change-password.use-case/change-password-use-case.service';
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { CurrentUser } from '../../../../shared/decorators/current-user.decorator';
+import { Public } from '../decorators/public.decorator';
+import { RefreshTokenUseCase } from '../../application/use-cases/refresh-token.use-case';
 
 @Controller('auth')
 export class AuthController {
@@ -24,7 +28,7 @@ export class AuthController {
     private readonly registerUseCase: RegisterUseCase,
     private readonly loginUseCase: LoginUseCase,
     private readonly changePasswordUseCase: ChangePasswordUseCase,
-    // private readonly rereshTokenUseCase: Refresh,
+    private readonly refreshTokenUseCase: RefreshTokenUseCase,
   ) {}
 
   // todo restrict to only the admins can create users
@@ -46,11 +50,30 @@ export class AuthController {
     return this.changePasswordUseCase.execute(dto);
   }
 
-  // @UseGuards(JwtAuthGuard)
-  // @Post('/refresh')
-  // refreshToken() {
-  //   return this.refreshTokenUsecase.execute();
-  // }
+  @Public()
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  async refresh(@Req() req: Request) {
+    const authHeader = req.headers['authorization'];
+
+    if (!authHeader) {
+      throw new UnauthorizedException('Missing authorization header');
+    }
+
+    // Expected: "Bearer <refresh-token>"
+    const [scheme, refreshToken] = authHeader.split(' ');
+
+    if (scheme !== 'Bearer' || !refreshToken) {
+      throw new UnauthorizedException('Invalid authorization header format');
+    }
+
+    const result = await this.refreshTokenUseCase.execute(refreshToken);
+
+    return {
+      accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
+    };
+  }
 
   @UseGuards(JwtAuthGuard)
   @Get('/me')

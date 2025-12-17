@@ -19,6 +19,7 @@ import { JwtService } from './application/services/jwt-service/jwt-service.servi
 import { AdminSeederService } from './application/services/admin-seeder/admin-seeder.service';
 import { ResetPasswordUseCase } from './application/use-cases/reset-password.use-case/reset-password.use-case';
 import { JwtStrategy } from './presentation/strategies/jwt.strategy';
+import { RefreshTokenUseCase } from './application/use-cases/refresh-token.use-case';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { JwtStrategy } from './presentation/strategies/jwt.strategy';
     LoginUseCase,
     JwtService,
     AdminSeederService,
+    RefreshTokenUseCase,
 
     //Services
     PasswordHasherService,
