@@ -20,6 +20,7 @@ import { AdminSeederService } from './application/services/admin-seeder/admin-se
 import { ResetPasswordUseCase } from './application/use-cases/reset-password.use-case/reset-password.use-case';
 import { JwtStrategy } from './presentation/strategies/jwt.strategy';
 import { RefreshTokenUseCase } from './application/use-cases/refresh-token.use-case';
+import { DemoSeederService } from './application/services/demo-seeder/demo-seeder.service';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { RefreshTokenUseCase } from './application/use-cases/refresh-token.use-c
     LoginUseCase,
     JwtService,
     AdminSeederService,
+    DemoSeederService,
     RefreshTokenUseCase,
 
     //Services
@@ -72,8 +74,12 @@ import { RefreshTokenUseCase } from './application/use-cases/refresh-token.use-c
   ],
 })
 export class AuthModule implements OnModuleInit {
-  constructor(private readonly adminSeederService: AdminSeederService) {}
+  constructor(
+    private readonly adminSeederService: AdminSeederService,
+    private readonly demoSeeder: DemoSeederService,
+  ) {}
   async onModuleInit() {
     await this.adminSeederService.seedDefaultAdmin();
+    await this.demoSeeder.seedDemoData();
   }
 }

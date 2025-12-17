@@ -70,8 +70,10 @@ export class LoginUseCase {
       refreshToken,
       user: {
         id: user.id,
-        email: user.email,
+        email: user.email.value,
+        role: user.role,
       },
+      message: 'Login successful',
     };
   }
 }
