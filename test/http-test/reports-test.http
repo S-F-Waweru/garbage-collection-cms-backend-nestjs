@@ -1,11 +1,13 @@
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1YzQxZjg3ZS0wNDE3LTRmNTUtOWNjMy0zZjI1MmRjODc3NmYiLCJlbWFpbCI6ImFkbWluQGdhcmJhZ2VjbXMuY29tIiwiaWF0IjoxNzY1ODgyODEzLCJleHAiOjE3NjU4ODM3MTN9.jDd61ovnXHO8IQzY10WVp2NDbNhbIDVntqAOU_4WZfw
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1YzQxZjg3ZS0wNDE3LTRmNTUtOWNjMy0zZjI1MmRjODc3NmYiLCJlbWFpbCI6ImFkbWluQGdhcmJhZ2VjbXMuY29tIiwiaWF0IjoxNzY1OTU4NDA5LCJleHAiOjE3NjU5NTkzMDl9.-P9OlCiEBqSXhHL_CvdhVP5flOzxAQHQghfe8cXYwO0
+
+@clientId =318aa9c1-92fa-4057-b09a-451fcbe8b3c4
 
 ### Get Outstanding Balances Report
 GET http://localhost:3300/reports/outstanding-balances
 Authorization: Bearer {{token}}
 
 ### Get Outstanding Balances with Filters
-GET http://localhost:3300/reports/outstanding-balances?startDate=2024-01-01&endDate=2024-12-31&clientId={{clientId}}
+GET http://localhost:3300/reports/outstanding-balances?startDate=2025-01-01&endDate=2025-12-31&clientId={{clientId}}
 Authorization: Bearer {{token}}
 
 ### Get Revenue Report by Client

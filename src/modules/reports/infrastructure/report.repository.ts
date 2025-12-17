@@ -33,7 +33,8 @@ export class ReportRepository implements IReportRepository {
       .createQueryBuilder()
       .select([
         'i.clientId as "clientId"',
-        'c.name as "clientName"',
+        'c.firstName as "clientFirstName"', // Add closing quote here
+        'c.lastName as "clientLastName"',
         'i.id as "invoiceId"',
         'i.invoiceNumber as "invoiceNumber"',
         'i.invoiceDate as "invoiceDate"',
@@ -90,8 +91,8 @@ export class ReportRepository implements IReportRepository {
       .leftJoin('clients', 'c', 'i.clientId = c.id')
       .leftJoin('locations', 'l', 'c.locationId = l.id')
       .where('c.isActive = true')
-      .andWhere('i.status != :cancelled', { cancelled: 'CANCELLED' });
-
+      .andWhere('i.status != :cancelled', { cancelled: 'CANCELLED' })
+      .andWhere('"i"."deletedAt" IS NULL');
     if (filters?.startDate) {
       query = query.andWhere('i.invoiceDate >= :startDate', {
         startDate: filters.startDate,
