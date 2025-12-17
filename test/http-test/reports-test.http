@@ -15,7 +15,7 @@ GET http://localhost:3300/reports/revenue?groupBy=client
 Authorization: Bearer {{token}}
 
 ### Get Revenue Report by Location
-GET http://localhost:3300/reports/revenue?groupBy=location&startDate=2024-01-01&endDate=2024-12-31
+GET http://localhost:3300/reports/revenue?groupBy=location&startDate=2025-01-01&endDate=2025-12-31
 Authorization: Bearer {{token}}
 
 ### Get Petty Cash Report
@@ -35,7 +35,7 @@ GET http://localhost:3300/reports/summary
 Authorization: Bearer {{token}}
 
 ### Get Summary Statistics with Date Range
-GET http://localhost:3300/reports/summary?startDate=2024-01-01&endDate=2024-12-31
+GET http://localhost:3300/reports/summary?startDate=2025-01-01&endDate=2025-12-31
 Authorization: Bearer {{token}}
 
 ### Export Outstanding Balances to Excel

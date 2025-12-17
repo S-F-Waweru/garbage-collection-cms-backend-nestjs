@@ -18,10 +18,11 @@ export interface ReportFilters {
 }
 
 export interface IReportRepository {
-  getOutstandingBalances(
+  getOutstandingBalances( // done ✅
     filters?: ReportFilters,
   ): Promise<OutstandingBalanceItem[]>;
-  getRevenueByClient(filters?: ReportFilters): Promise<RevenueByClientItem[]>;
+
+  getRevenueByClient(filters?: ReportFilters): Promise<RevenueByClientItem[]>; // done ✅
   getRevenueByLocation(
     filters?: ReportFilters,
   ): Promise<RevenueByLocationItem[]>;

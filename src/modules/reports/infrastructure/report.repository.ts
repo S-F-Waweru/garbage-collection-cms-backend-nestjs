@@ -79,40 +79,43 @@ export class ReportRepository implements IReportRepository {
     let query = this.dataSource
       .createQueryBuilder()
       .select([
-        'i.clientId as "clientId"',
-        'c.name as "clientName"',
-        'CONCAT(l.city, \', \', l.region) as "location"',
-        'SUM(i.totalAmount) as "totalInvoiced"',
-        'SUM(i.amountPaid) as "totalPaid"',
-        'SUM(i.balance) as "totalOutstanding"',
-        'COUNT(i.id) as "invoiceCount"',
+        '"i"."clientId" as "clientId"',
+        '"c"."firstName" as "clientFirstName"',
+        '"c"."lastName" as "clientLastName"',
+        'SUM("i"."totalAmount") as "totalInvoiced"',
+        'SUM("i"."amountPaid") as "totalPaid"',
+        'SUM("i"."balance") as "totalOutstanding"',
+        'COUNT("i"."id") as "invoiceCount"',
       ])
       .from('invoices', 'i')
-      .leftJoin('clients', 'c', 'i.clientId = c.id')
-      .leftJoin('locations', 'l', 'c.locationId = l.id')
-      .where('c.isActive = true')
-      .andWhere('i.status != :cancelled', { cancelled: 'CANCELLED' })
+      .leftJoin(
+        'clients',
+        'c',
+        '"i"."clientId" = "c"."id" AND "c"."deletedAt" IS NULL',
+      )
+      .andWhere('"i"."status" != :cancelled', { cancelled: 'CANCELLED' })
       .andWhere('"i"."deletedAt" IS NULL');
+
     if (filters?.startDate) {
-      query = query.andWhere('i.invoiceDate >= :startDate', {
+      query = query.andWhere('"i"."invoiceDate" >= :startDate', {
         startDate: filters.startDate,
       });
     }
 
     if (filters?.endDate) {
-      query = query.andWhere('i.invoiceDate <= :endDate', {
+      query = query.andWhere('"i"."invoiceDate" <= :endDate', {
         endDate: filters.endDate,
       });
     }
 
     if (filters?.clientId) {
-      query = query.andWhere('i.clientId = :clientId', {
+      query = query.andWhere('"i"."clientId" = :clientId', {
         clientId: filters.clientId,
       });
     }
 
     query = query
-      .groupBy('i.clientId, c.name, l.city, l.region')
+      .groupBy('"i"."clientId", "c"."firstName", "c"."lastName"')
       .orderBy('"totalInvoiced"', 'DESC');
 
     const results = await query.getRawMany();
@@ -132,42 +135,57 @@ export class ReportRepository implements IReportRepository {
     let query = this.dataSource
       .createQueryBuilder()
       .select([
-        'l.city as "city"',
-        'l.region as "region"',
-        'SUM(i.totalAmount) as "totalInvoiced"',
-        'SUM(i.amountPaid) as "totalPaid"',
-        'SUM(i.balance) as "totalOutstanding"',
-        'COUNT(DISTINCT c.id) as "clientCount"',
-        'COUNT(i.id) as "invoiceCount"',
+        '"l"."city" as "city"',
+        '"l"."region" as "region"',
+        'SUM("i"."totalAmount") as "totalInvoiced"',
+        'SUM("i"."amountPaid") as "totalPaid"',
+        'SUM("i"."balance") as "totalOutstanding"',
+        'COUNT(DISTINCT "c"."id") as "clientCount"',
+        'COUNT("i"."id") as "invoiceCount"',
       ])
       .from('invoices', 'i')
-      .leftJoin('clients', 'c', 'i.clientId = c.id')
-      .leftJoin('locations', 'l', 'c.locationId = l.id')
-      .where('c.isActive = true')
-      .andWhere('i.status != :cancelled', { cancelled: 'CANCELLED' });
+      .leftJoin(
+        'clients',
+        'c',
+        '"i"."clientId" = "c"."id" AND "c"."deletedAt" IS NULL',
+      )
+      .leftJoin(
+        'buildings',
+        'b',
+        '"b"."clientId" = "c"."id" AND "b"."deletedAt" IS NULL',
+      )
+      .leftJoin(
+        'locations',
+        'l',
+        '"b"."locationId" = "l"."id" AND "l"."deletedAt" IS NULL',
+      )
+      .where('"i"."status" != :cancelled', { cancelled: 'CANCELLED' })
+      .andWhere('"i"."deletedAt" IS NULL');
 
     if (filters?.startDate) {
-      query = query.andWhere('i.invoiceDate >= :startDate', {
+      query = query.andWhere('"i"."invoiceDate" >= :startDate', {
         startDate: filters.startDate,
       });
     }
 
     if (filters?.endDate) {
-      query = query.andWhere('i.invoiceDate <= :endDate', {
+      query = query.andWhere('"i"."invoiceDate" <= :endDate', {
         endDate: filters.endDate,
       });
     }
 
     if (filters?.city) {
-      query = query.andWhere('l.city = :city', { city: filters.city });
+      query = query.andWhere('"l"."city" = :city', { city: filters.city });
     }
 
     if (filters?.region) {
-      query = query.andWhere('l.region = :region', { region: filters.region });
+      query = query.andWhere('"l"."region" = :region', {
+        region: filters.region,
+      });
     }
 
     query = query
-      .groupBy('l.city, l.region')
+      .groupBy('"l"."city", "l"."region"')
       .orderBy('"totalInvoiced"', 'DESC');
 
     const results = await query.getRawMany();
@@ -181,44 +199,44 @@ export class ReportRepository implements IReportRepository {
       invoiceCount: parseInt(r.invoiceCount || 0),
     }));
   }
-
   async getPettyCashSummary(filters?: ReportFilters): Promise<PettyCashItem[]> {
     let query = this.dataSource
       .createQueryBuilder()
       .select([
         'pc.id as "id"',
-        'pc.date as "date"',
-        'pc.type as "type"',
-        'pc.amount as "amount"',
-        'pc.purpose as "purpose"',
-        'pc.category as "category"',
-        'pc.source as "source"',
-        'pc.balance as "balance"',
-        'u.name as "enteredBy"',
+        'pc.createdAt as "createdAt"',
+        'pc.totalAmount as "totalAmount"',
+        'pc.name as "name"',
+        'u.id as "enteredBy"',
       ])
-      .from('petty_cash', 'pc')
-      .leftJoin('users', 'u', 'pc.createdBy = u.id');
+      .from('petty_cashes', 'pc')
+      .leftJoin(
+        'users',
+        'u',
+        '"pc"."oi.createdAt"::uuid = "u"."id" AND "u"."deletedAt" IS NULL',
+      )
+      .where('pc.deletedAt IS NULL');
 
     if (filters?.startDate) {
-      query = query.andWhere('pc.date >= :startDate', {
+      query = query.andWhere('pc.createdAt >= :startDate', {
         startDate: filters.startDate,
       });
     }
 
     if (filters?.endDate) {
-      query = query.andWhere('pc.date <= :endDate', {
+      query = query.andWhere('pc.createdAt <= :endDate', {
         endDate: filters.endDate,
       });
     }
 
-    query = query.orderBy('pc.date', 'DESC');
+    query = query.orderBy('pc.createdAt', 'DESC');
 
     const results = await query.getRawMany();
 
     return results.map((r) => ({
       ...r,
-      amount: parseFloat(r.amount || 0),
-      balance: parseFloat(r.balance || 0),
+      totalAmount: parseFloat(r.totalAmount || '0'),
+      // balance: parseFloat(r.balance || '0'), // uncomment if balance exists
     }));
   }
 
@@ -227,38 +245,40 @@ export class ReportRepository implements IReportRepository {
       .createQueryBuilder()
       .select([
         'oi.id as "id"',
-        'oi.date as "date"',
-        'oi.source as "source"',
-        'oi.itemType as "itemType"',
+        'oi.recordedAt as "recordedAt"',
+        'oi.clientName as "clientName"',
+        'oi.unitType as "unitType"',
         'oi.unitPrice as "unitPrice"',
-        'oi.quantity as "quantity"',
-        'oi.total as "total"',
-        'u.name as "enteredBy"',
+        'oi.unitCount as "unitCount"',
+        'oi.recordedAt as "recordedAt"',
+        'oi.unitPrice * oi.unitCount as "total"',
+        'oi.recordedBy as "enteredBy"',
       ])
-      .from('other_income', 'oi')
-      .leftJoin('users', 'u', 'oi.createdBy = u.id');
+      .from('income_records', 'oi')
+      .leftJoin('users', 'u', '"oi"."recordedBy"::uuid = "u"."id"')
+      .where('oi.deletedAt IS NULL');
 
     if (filters?.startDate) {
-      query = query.andWhere('oi.date >= :startDate', {
+      query = query.andWhere('oi.recordedAt >= :startDate', {
         startDate: filters.startDate,
       });
     }
 
     if (filters?.endDate) {
-      query = query.andWhere('oi.date <= :endDate', {
+      query = query.andWhere('oi.recordedAt <= :endDate', {
         endDate: filters.endDate,
       });
     }
 
-    query = query.orderBy('oi.date', 'DESC');
+    query = query.orderBy('oi.recordedAt', 'DESC');
 
     const results = await query.getRawMany();
 
     return results.map((r) => ({
       ...r,
-      unitPrice: parseFloat(r.unitPrice || 0),
-      quantity: parseFloat(r.quantity || 0),
-      total: parseFloat(r.total || 0),
+      unitPrice: parseFloat(r.unitPrice || '0'),
+      quantity: parseFloat(r.unitCount || '0'),
+      total: parseFloat(r.total || '0'),
     }));
   }
 
@@ -266,10 +286,7 @@ export class ReportRepository implements IReportRepository {
     // Total clients
     const clientQuery = this.dataSource
       .createQueryBuilder()
-      .select([
-        'COUNT(*) as "totalClients"',
-        'COUNT(CASE WHEN isActive = true THEN 1 END) as "activeClients"',
-      ])
+      .select(['COUNT(*) as "totalClients"'])
       .from('clients', 'c');
 
     const clientStats = await clientQuery.getRawOne();
@@ -278,14 +295,15 @@ export class ReportRepository implements IReportRepository {
     let invoiceQuery = this.dataSource
       .createQueryBuilder()
       .select([
-        'SUM(totalAmount) as "totalRevenue"',
-        'SUM(balance) as "totalOutstanding"',
-        'SUM(amountPaid) as "totalPaid"',
+        'SUM(i."totalAmount") as "totalRevenue"',
+        'SUM(i."balance") as "totalOutstanding"',
+        'SUM(i."amountPaid") as "totalPaid"',
         'COUNT(*) as "totalInvoices"',
-        'COUNT(CASE WHEN status = \'PAID\' THEN 1 END) as "paidInvoices"',
-        'COUNT(CASE WHEN status = \'PENDING\' THEN 1 END) as "pendingInvoices"',
-        'COUNT(CASE WHEN status = \'OVERDUE\' THEN 1 END) as "overdueInvoices"',
-        'AVG(totalAmount) as "averageInvoiceAmount"',
+        `COUNT(CASE WHEN i.status = 'PAID' THEN 1 END) as "paidInvoices"`,
+        `COUNT(CASE WHEN i.status = 'PENDING' THEN 1 END) as "pendingInvoices"`,
+        `COUNT(CASE WHEN i.status = 'OVERDUE' THEN 1 END) as "overdueInvoices"`,
+        `COUNT(CASE WHEN i.status = 'PARTIALLY_PAID' THEN 1 END) as "partialInvoices"`, // Add this
+        'AVG(i."totalAmount") as "averageInvoiceAmount"',
       ])
       .from('invoices', 'i')
       .where('i.status != :cancelled', { cancelled: 'CANCELLED' });
@@ -307,9 +325,9 @@ export class ReportRepository implements IReportRepository {
     // Petty cash balance
     const pettyCashQuery = this.dataSource
       .createQueryBuilder()
-      .select('balance')
-      .from('petty_cash', 'pc')
-      .orderBy('date', 'DESC')
+      .select('pc.totalAmount', 'totalAmount')
+      .from('petty_cashes', 'pc')
+      .orderBy('pc.createdAt', 'DESC')
       .limit(1);
 
     const pettyCash = await pettyCashQuery.getRawOne();
@@ -317,17 +335,20 @@ export class ReportRepository implements IReportRepository {
     // Other income total
     let otherIncomeQuery = this.dataSource
       .createQueryBuilder()
-      .select('SUM(total) as "otherIncomeTotal"')
-      .from('other_income', 'oi');
+      .select('SUM(oi."unitPrice" * oi."unitCount") as "otherIncomeTotal"')
+      .from('income_records', 'oi');
 
     if (filters?.startDate) {
-      otherIncomeQuery = otherIncomeQuery.andWhere('oi.date >= :startDate', {
-        startDate: filters.startDate,
-      });
+      otherIncomeQuery = otherIncomeQuery.andWhere(
+        'oi.createdAt >= :startDate',
+        {
+          startDate: filters.startDate,
+        },
+      );
     }
 
     if (filters?.endDate) {
-      otherIncomeQuery = otherIncomeQuery.andWhere('oi.date <= :endDate', {
+      otherIncomeQuery = otherIncomeQuery.andWhere('oi.createdAt <= :endDate', {
         endDate: filters.endDate,
       });
     }
