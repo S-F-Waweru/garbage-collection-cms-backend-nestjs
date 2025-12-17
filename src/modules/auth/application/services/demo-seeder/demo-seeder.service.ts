@@ -3,8 +3,6 @@ import { DataSource } from 'typeorm';
 import { PasswordHasherService } from '../password-hasher-service/password-hasher-service.service';
 
 // --- SCHEMA IMPORTS ---
-
-// --- ENUMS & CONSTANTS ---
 import { Role } from '../../../policies/rbac.policy';
 import { InvoiceStatus } from '../../../../invoices/domain/invoice.entity';
 import { UserSchema } from '../../../infrastructure/persistence/schema/user.schema';
@@ -32,7 +30,7 @@ export class DemoSeederService implements OnModuleInit {
     }
   }
 
-  private getRandomDate(monthsBack = 6): Date {
+  private getRandomDate(monthsBack = 12): Date {
     const date = new Date();
     date.setMonth(date.getMonth() - Math.floor(Math.random() * monthsBack));
     date.setDate(Math.floor(Math.random() * 28) + 1);
@@ -40,7 +38,7 @@ export class DemoSeederService implements OnModuleInit {
   }
 
   async seedDemoData() {
-    this.logger.log('🚀 Starting BULK demo data seeding...');
+    this.logger.log('🚀 Starting MASSIVE BULK data seeding...');
 
     try {
       const users = await this.seedUsers();
@@ -59,7 +57,7 @@ export class DemoSeederService implements OnModuleInit {
       const invoices = await this.seedInvoices(buildings, adminId);
       await this.seedPayments(invoices, adminId);
 
-      this.logger.log('🎉 Bulk seeding completed successfully!');
+      this.logger.log('🎉 MASSIVE seeding completed! System is report-ready.');
     } catch (error) {
       this.logger.error('❌ Bulk seeding failed:', error);
     }
@@ -69,7 +67,7 @@ export class DemoSeederService implements OnModuleInit {
     const hp = await this.passwordHasher.hash('Demo@123');
     const users = [
       { f: 'Super', l: 'Admin', e: 'admin@demo.com', r: Role.ADMIN },
-      { f: 'Jane', l: 'Accountant', e: 'finance@demo.com', r: Role.ACCOUNTANT },
+      { f: 'Jane', l: 'Finance', e: 'finance@demo.com', r: Role.ACCOUNTANT },
     ];
     const results: UserSchema[] = [];
     for (const u of users) {
@@ -77,11 +75,10 @@ export class DemoSeederService implements OnModuleInit {
         'SELECT id FROM users WHERE email = $1',
         [u.e],
       );
-      if (exist.length > 0) {
-        results.push(exist[0]);
-      } else {
+      if (exist.length > 0) results.push(exist[0]);
+      else {
         const res = await this.dataSource.query<UserSchema[]>(
-          `INSERT INTO users (id, "firstName", "lastName", email, "passwordHash", role, "createdAt", "updatedAt") 
+          `INSERT INTO users (id, "firstName", "lastName", email, "passwordHash", role, "createdAt", "updatedAt")
            VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, NOW(), NOW()) RETURNING id`,
           [u.f, u.l, u.e, hp, u.r],
         );
@@ -94,23 +91,25 @@ export class DemoSeederService implements OnModuleInit {
   private async seedLocations(): Promise<LocationSchema[]> {
     const locs = [
       { c: 'Nairobi', r: 'Westlands' },
+      { c: 'Nairobi', r: 'Kilimani' },
       { c: 'Mombasa', r: 'Nyali' },
+      { c: 'Mombasa', r: 'Bamburi' },
       { c: 'Kisumu', r: 'Milimani' },
+      { c: 'Nakuru', r: 'Lanet' },
     ];
     const results: LocationSchema[] = [];
     for (const l of locs) {
       const res = await this.dataSource.query<LocationSchema[]>(
-        `INSERT INTO locations (id, city, region, "createdAt", "updatedAt") 
-         VALUES (gen_random_uuid(), $1, $2, NOW(), NOW()) 
-         ON CONFLICT DO NOTHING RETURNING id`,
+        `INSERT INTO locations (id, city, region, "createdAt", "updatedAt")
+         VALUES (gen_random_uuid(), $1, $2, NOW(), NOW()) ON CONFLICT DO NOTHING RETURNING id`,
         [l.c, l.r],
       );
       if (res.length > 0) {
         results.push(res[0]);
       } else {
         const exist = await this.dataSource.query<LocationSchema[]>(
-          'SELECT id FROM locations WHERE city = $1',
-          [l.c],
+          'SELECT id FROM locations WHERE city=$1 AND region=$2',
+          [l.c, l.r],
         );
         results.push(exist[0]);
       }
@@ -119,18 +118,20 @@ export class DemoSeederService implements OnModuleInit {
   }
 
   private async seedClients(): Promise<ClientSchema[]> {
-    const clients = [
-      { n: 'Acme Holdings', p: 'A111B', e: 'info@acme.com' },
-      { n: 'Global Tech', p: 'B222C', e: 'admin@gtech.com' },
-      { n: 'Urban Living', p: 'C333D', e: 'hello@urban.com' },
-    ];
+    const clientsData = Array.from({ length: 15 }).map((_, i) => ({
+      n: `Client Group ${String.fromCharCode(65 + i)} Ltd`,
+      p: `KRA${1000 + i}PIN`,
+      e: `contact${i}@clientgroup.com`,
+      index: i, // Added index here to use in the loop below
+    }));
+
     const results: ClientSchema[] = [];
-    for (const c of clients) {
+    for (const c of clientsData) {
       const res = await this.dataSource.query<ClientSchema[]>(
         `INSERT INTO clients (id, "companyName", "KRAPin", "firstName", "lastName", email, phone, "paymentMethod", "billingDate", "createdAt", "updatedAt")
-         VALUES (gen_random_uuid(), $1, $2, 'Manager', 'Contact', $3, '07000000', 'MPESA', 1, NOW(), NOW())
-         ON CONFLICT DO NOTHING RETURNING id`,
-        [c.n, c.p, c.e],
+         VALUES (gen_random_uuid(), $1, $2, 'Manager', $3, $4, '0712345678', 'MPESA', 1, NOW(), NOW())
+           ON CONFLICT DO NOTHING RETURNING id`,
+        [c.n, c.p, `Name-${c.index}`, c.e],
       );
       if (res.length > 0) {
         results.push(res[0]);
@@ -156,13 +157,13 @@ export class DemoSeederService implements OnModuleInit {
         const res = await this.dataSource.query<BuildingSchema[]>(
           `INSERT INTO buildings (id, name, "clientId", "locationId", "unitPrice", "unitCount", "createdAt", "updatedAt")
            VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, NOW(), NOW())
-           RETURNING id, "unitPrice", "unitCount", "clientId"`,
+             RETURNING id, "unitPrice", "unitCount", "clientId"`,
           [
-            `${client.companyName} - Wing ${i}`,
+            `${client.companyName} - Plaza ${i}`,
             client.id,
             loc.id,
-            2000 + i * 500,
-            10 + i * 5,
+            1500 + Math.random() * 2000,
+            20 + Math.floor(Math.random() * 50),
           ],
         );
         results.push(res[0]);
@@ -176,7 +177,7 @@ export class DemoSeederService implements OnModuleInit {
       await this.dataSource.query(
         `INSERT INTO client_credits (id, client_id, balance, created_at, updated_at)
          VALUES (gen_random_uuid(), $1, $2, NOW(), NOW()) ON CONFLICT (client_id) DO NOTHING`,
-        [c.id, Math.floor(Math.random() * 5000)],
+        [c.id, Math.floor(Math.random() * 10000)],
       );
     }
   }
@@ -184,7 +185,7 @@ export class DemoSeederService implements OnModuleInit {
   private async seedPettyCash(userId: string): Promise<PettyCashSchema[]> {
     return await this.dataSource.query<PettyCashSchema[]>(
       `INSERT INTO petty_cashes (id, name, "totalAmount", notes, "createdBy", "createdAt", "updatedAt")
-       VALUES (gen_random_uuid(), 'Main Vault', 100000, 'Main', $1, NOW(), NOW()) RETURNING id`,
+       VALUES (gen_random_uuid(), 'Operational Vault', 500000, 'Main Seeder', $1, NOW(), NOW()) RETURNING id`,
       [userId],
     );
   }
@@ -195,31 +196,25 @@ export class DemoSeederService implements OnModuleInit {
       'Fuel',
       'Salaries',
       'Permits',
-      'Cleaning Supplies',
+      'Marketing',
+      'Supplies',
+      'Repairs',
     ];
-
-    for (let i = 0; i < 20; i++) {
-      const date = this.getRandomDate(4);
-      // Round the amount to 2 decimal places for clean reports
-      const amount = Math.round((1000 + Math.random() * 2000) * 100) / 100;
-
+    for (let i = 0; i < 120; i++) {
+      const date = this.getRandomDate(11);
+      const amount = Math.round((2000 + Math.random() * 8000) * 100) / 100;
       await this.dataSource.query(
-        `INSERT INTO expenses (
-          id, "pettyCashId", category, amount, description, notes,
-          "recordedBy", "expenseDate", "createdAt", "updatedAt"
-        ) VALUES (
-                   gen_random_uuid(), $1, $2, $3, $4, 'Automated Seed', $5,
-                   $6::date, $7::timestamp, $8::timestamp
-                 )`,
+        `INSERT INTO expenses (id, "pettyCashId", category, amount, description, notes, "recordedBy", "expenseDate", "createdAt", "updatedAt")
+         VALUES (gen_random_uuid(), $1, $2, $3, $4, 'Seed Data', $5, $6::date, $7::timestamp, $8::timestamp)`,
         [
           pettyCash[0].id,
-          categories[i % 5],
+          categories[i % categories.length],
           amount,
-          `Monthly ${categories[i % 5]} - Batch ${i}`,
+          `Voucher #${1000 + i}`,
           userId,
-          date, // $6 cast to date
-          date, // $7 cast to timestamp
-          date, // $8 cast to timestamp
+          date,
+          date,
+          date,
         ],
       );
     }
@@ -231,24 +226,16 @@ export class DemoSeederService implements OnModuleInit {
   ): Promise<InvoiceSchema[]> {
     const results: InvoiceSchema[] = [];
     for (const b of buildings) {
-      const buildingId = b.id;
       const clientId = (b as any).clientId;
-
-      for (let i = 0; i < 4; i++) {
-        const date = this.getRandomDate(4);
-        const subtotal = b.unitPrice * b.unitCount;
-
+      for (let i = 0; i < 12; i++) {
+        const date = this.getRandomDate(11);
+        const subtotal = Math.round(b.unitPrice * b.unitCount * 100) / 100;
         const res = await this.dataSource.query<InvoiceSchema[]>(
-          `INSERT INTO invoices (
-            id, "invoiceNumber", "clientId", "billingPeriodStart", "billingPeriodEnd",
-            "invoiceDate", "dueDate", "unitCount", "unitPrice", subtotal,
-            "totalAmount", balance, status, "createdBy", "createdAt", "updatedAt"
-          ) VALUES (
-                     gen_random_uuid(), $1, $2, $3::date, $3::date, $3::date, $3::date,
-                     $4, $5, $6, $6, $6, $7, $8, $9::timestamp, $10::timestamp
-                   ) RETURNING id, "totalAmount", "clientId"`,
+          `INSERT INTO invoices (id, "invoiceNumber", "clientId", "billingPeriodStart", "billingPeriodEnd", "invoiceDate", "dueDate", "unitCount", "unitPrice", subtotal, "totalAmount", balance, status, "createdBy", "createdAt", "updatedAt")
+           VALUES (gen_random_uuid(), $1, $2, $3::date, $3::date, $3::date, $3::date, $4, $5, $6, $6, $6, $7, $8, $9::timestamp, $10::timestamp)
+             RETURNING id, "totalAmount", "clientId"`,
           [
-            `INV-${buildingId.slice(0, 4)}-${i}`,
+            `INV-${b.id.slice(0, 4)}-${100 + i}`,
             clientId,
             date,
             b.unitCount,
@@ -256,8 +243,8 @@ export class DemoSeederService implements OnModuleInit {
             subtotal,
             InvoiceStatus.PENDING,
             userId,
-            date, // createdAt
-            date, // updatedAt
+            date,
+            date,
           ],
         );
         results.push(res[0]);
@@ -268,26 +255,28 @@ export class DemoSeederService implements OnModuleInit {
 
   private async seedPayments(invoices: InvoiceSchema[], userId: string) {
     for (const inv of invoices) {
-      const chance = Math.random();
+      const roll = Math.random();
       let payAmount = 0;
-
-      if (chance > 0.4) payAmount = Number(inv.totalAmount);
-      else if (chance > 0.2) payAmount = Number(inv.totalAmount) / 2;
+      if (roll > 0.3) payAmount = Number(inv.totalAmount);
+      else if (roll > 0.1) payAmount = Number(inv.totalAmount) * 0.5;
 
       if (payAmount > 0) {
+        const date = new Date();
         await this.dataSource.query(
           `INSERT INTO payments (id, "paymentNumber", "clientId", "invoiceId", amount, "paymentMethod", "paymentDate", "referenceNumber", "createdBy", "createdAt", "updatedAt")
-           VALUES (gen_random_uuid(), $1, $2, $3, $4, 'MPESA', NOW(), $5, $6, NOW(), NOW())`,
+           VALUES (gen_random_uuid(), $1, $2, $3, $4, 'MPESA', $5::timestamp, $6, $7, $8::timestamp, $9::timestamp)`,
           [
             `PAY-${inv.id.slice(0, 4)}`,
             inv.clientId,
             inv.id,
             payAmount,
-            `REF-${Math.random().toString(36).toUpperCase().slice(2, 8)}`,
+            date,
+            `REF-${Math.random().toString(36).toUpperCase().slice(2, 9)}`,
             userId,
+            date,
+            date,
           ],
         );
-
         const newStatus =
           payAmount >= Number(inv.totalAmount)
             ? InvoiceStatus.PAID
