@@ -1,4 +1,5 @@
 import { BaseEntity } from 'src/shared/domain/entities/base.entity';
+import { BadRequestException } from '@nestjs/common';
 
 export enum InvoiceStatus {
   PENDING = 'PENDING',
@@ -205,86 +206,88 @@ export class Invoice extends BaseEntity {
   // Business Rules & Validation
   private validate(): void {
     if (!this._invoiceNumber || this._invoiceNumber.trim() === '') {
-      throw new Error('Invoice number is required');
+      throw new BadRequestException('Invoice number is required');
     }
 
     if (!this._clientId) {
-      throw new Error('Client ID is required');
+      throw new BadRequestException('Client ID is required');
     }
 
     if (this._unitCount <= 0) {
-      throw new Error('Unit count must be greater than 0');
+      throw new BadRequestException('Unit count must be greater than 0');
     }
 
     if (this._unitPrice < 0) {
-      throw new Error('Unit price cannot be negative');
+      throw new BadRequestException('Unit price cannot be negative');
     }
 
     if (this._subtotal < 0) {
-      throw new Error('Subtotal cannot be negative');
+      throw new BadRequestException('Subtotal cannot be negative');
     }
 
     if (this._creditApplied < 0) {
-      throw new Error('Credit applied cannot be negative');
+      throw new BadRequestException('Credit applied cannot be negative');
     }
 
     if (this._creditApplied > this._subtotal) {
-      throw new Error('Credit applied cannot exceed subtotal');
+      throw new BadRequestException('Credit applied cannot exceed subtotal');
     }
 
     if (this._totalAmount < 0) {
-      throw new Error('Total amount cannot be negative');
+      throw new BadRequestException('Total amount cannot be negative');
     }
 
     if (this._amountPaid < 0) {
-      throw new Error('Amount paid cannot be negative');
+      throw new BadRequestException('Amount paid cannot be negative');
     }
 
     if (this._amountPaid > this._totalAmount) {
-      throw new Error('Amount paid cannot exceed total amount');
+      throw new BadRequestException('Amount paid cannot exceed total amount');
     }
 
     if (this._balance < 0) {
-      throw new Error('Balance cannot be negative');
+      throw new BadRequestException('Balance cannot be negative');
     }
 
     if (this._billingPeriodStart >= this._billingPeriodEnd) {
-      throw new Error('Billing period start must be before end');
+      throw new BadRequestException('Billing period start must be before end');
     }
 
     if (!this._createdBy) {
-      throw new Error('Created by user is required');
+      throw new BadRequestException('Created by user is required');
     }
 
     // Validate calculated fields
     const calculatedSubtotal = this._unitCount * this._unitPrice;
     if (Math.abs(this._subtotal - calculatedSubtotal) > 0.01) {
-      throw new Error('Subtotal calculation mismatch');
+      throw new BadRequestException('Subtotal calculation mismatch');
     }
 
     const calculatedTotal = this._subtotal - this._creditApplied;
     if (Math.abs(this._totalAmount - calculatedTotal) > 0.01) {
-      throw new Error('Total amount calculation mismatch');
+      throw new BadRequestException('Total amount calculation mismatch');
     }
 
     const calculatedBalance = this._totalAmount - this._amountPaid;
     if (Math.abs(this._balance - calculatedBalance) > 0.01) {
-      throw new Error('Balance calculation mismatch');
+      throw new BadRequestException('Balance calculation mismatch');
     }
   }
 
   // Business Logic - Apply payment to invoice
   applyPayment(amount: number): void {
     if (amount <= 0) {
-      throw new Error('Payment amount must be greater than 0');
+      throw new BadRequestException('Payment amount must be greater than 0');
     }
 
     if (this._status === InvoiceStatus.CANCELLED) {
-      throw new Error('Cannot apply payment to cancelled invoice');
+      throw new BadRequestException(
+        'Cannot apply payment to cancelled invoice',
+      );
     }
 
     if (amount > this._balance) {
-      throw new Error('Payment amount exceeds invoice balance');
+      throw new BadRequestException('Payment amount exceeds invoice balance');
     }
 
     this._amountPaid += amount;
@@ -321,7 +324,9 @@ export class Invoice extends BaseEntity {
 
   updateStatus(newStatus: InvoiceStatus): void {
     if (!this.canTransitionTo(newStatus)) {
-      throw new Error(`Cannot transition from ${this._status} to ${newStatus}`);
+      throw new BadRequestException(
+        `Cannot transition from ${this._status} to ${newStatus}`,
+      );
     }
 
     this._status = newStatus;
@@ -366,7 +371,9 @@ export class Invoice extends BaseEntity {
   // Business Logic - Cancel invoice
   cancel(): void {
     if (this._amountPaid > 0) {
-      throw new Error('Cannot cancel invoice with payments applied');
+      throw new BadRequestException(
+        'Cannot cancel invoice with payments applied',
+      );
     }
 
     this.updateStatus(InvoiceStatus.CANCELLED);

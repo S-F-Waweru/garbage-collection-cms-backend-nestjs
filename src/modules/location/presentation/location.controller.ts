@@ -9,6 +9,7 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiBody,
@@ -29,8 +30,10 @@ import { GetLocationListUseCase } from '../application/use-cases/get-location-li
 import { UpdateLocationUseCase } from '../application/use-cases/update-location.use-case';
 import { DeleteLocationUseCase } from '../application/use-cases/delete-location.use-case';
 import { GetLocationByIdUseCase } from '../application/use-cases/get-location.by-id.use-case';
+import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
 
 @ApiTags('Locations')
+@UseGuards(JwtAuthGuard)
 @Controller('locations')
 export class LocationController {
   constructor(

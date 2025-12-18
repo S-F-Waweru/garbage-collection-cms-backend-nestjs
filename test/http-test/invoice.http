@@ -24,7 +24,7 @@ GET http://localhost:3300/invoices
 Authorization: Bearer {{token}}
 
 ### List Invoices with Filters
-GET http://localhost:3300/invoices?clientId={{clientId}}&status=PENDING&fromDate=2024-01-01&toDate=2024-12-31
+GET http://localhost:3300/invoices?clientId={{clientId}}&status=PENDING&fromDate=2025-01-01&toDate=2025-12-31
 Authorization: Bearer {{token}}
 
 ### Get Invoices by Client

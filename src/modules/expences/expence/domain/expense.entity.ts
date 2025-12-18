@@ -1,5 +1,6 @@
 import { BaseEntity } from '../../../../shared/domain/entities/base.entity';
 import { PettyCash } from '../../petty-cash/domain/petty-cash.entity';
+import { BadRequestException } from '@nestjs/common';
 
 export class Expense extends BaseEntity {
   private _pettyCash: PettyCash;
@@ -76,13 +77,13 @@ export class Expense extends BaseEntity {
 
   validate(): void {
     if (!this._description || this._description.trim().length === 0) {
-      throw new Error('Expense description is required');
+      throw new BadRequestException('Expense description is required');
     }
     if (this._amount < 0) {
-      throw new Error('Expense amount cannot be negative');
+      throw new BadRequestException('Expense amount cannot be negative');
     }
     if (!this._recordedBy || this._recordedBy.trim().length === 0) {
-      throw new Error('Recorded By is required');
+      throw new BadRequestException('Recorded By is required');
     }
   }
 

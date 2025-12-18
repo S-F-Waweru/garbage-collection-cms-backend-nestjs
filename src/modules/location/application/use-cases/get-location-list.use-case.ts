@@ -19,6 +19,8 @@ export class GetLocationListUseCase {
       skip,
       limit,
     );
+    
+ 
 
     return {
       data: locations,

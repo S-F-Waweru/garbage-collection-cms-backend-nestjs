@@ -2,6 +2,8 @@
 @baseUrl = http://localhost:3300
 @createLocation = variable value
 @locationId =f09b3e28-91dc-4389-8790-9e65011032fc
+@page = 1
+@limit = 25
 
 ### Create Location
 # @name createLocation
@@ -23,7 +25,7 @@ Content-Type: application/json
 }
 
 ### Get All Locations
-GET {{baseUrl}}/locations
+GET {{baseUrl}}/locations?page={{page}}&limit={{limit}}
 
 ### Get Location By ID
 GET {{baseUrl}}/locations/{{locationId}}

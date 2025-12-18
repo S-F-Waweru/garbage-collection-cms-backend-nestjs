@@ -1,5 +1,6 @@
 // domain/payment.entity.ts
 import { BaseEntity } from 'src/shared/domain/entities/base.entity';
+import { BadRequestException } from '@nestjs/common';
 
 export enum PaymentMethod {
   BANK = 'BANK',
@@ -150,37 +151,39 @@ export class Payment extends BaseEntity {
   // Validation
   private validate(): void {
     if (!this._paymentNumber || this._paymentNumber.trim() === '') {
-      throw new Error('Payment number is required');
+      throw new BadRequestException('Payment number is required');
     }
 
     if (!this._clientId) {
-      throw new Error('Client ID is required');
+      throw new BadRequestException('Client ID is required');
     }
 
     if (this._amount <= 0) {
-      throw new Error('Payment amount must be greater than 0');
+      throw new BadRequestException('Payment amount must be greater than 0');
     }
 
     if (!this._paymentMethod) {
-      throw new Error('Payment method is required');
+      throw new BadRequestException('Payment method is required');
     }
 
     if (!this._paymentDate) {
-      throw new Error('Payment date is required');
+      throw new BadRequestException('Payment date is required');
     }
 
     if (!this._createdBy) {
-      throw new Error('Created by user is required');
+      throw new BadRequestException('Created by user is required');
     }
 
     if (this._excessAmount < 0) {
-      throw new Error('Excess amount cannot be negative');
+      throw new BadRequestException('Excess amount cannot be negative');
     }
 
     // Validate total applied doesn't exceed payment amount
     const totalApplied = this.totalApplied;
     if (totalApplied + this._excessAmount !== this._amount) {
-      throw new Error('Total applied + excess must equal payment amount');
+      throw new BadRequestException(
+        'Total applied + excess must equal payment amount',
+      );
     }
   }
 
@@ -191,12 +194,12 @@ export class Payment extends BaseEntity {
     amountApplied: number,
   ): void {
     if (amountApplied <= 0) {
-      throw new Error('Applied amount must be greater than 0');
+      throw new BadRequestException('Applied amount must be greater than 0');
     }
 
     const currentTotal = this.totalApplied + this._excessAmount;
     if (currentTotal + amountApplied > this._amount) {
-      throw new Error('Cannot apply more than payment amount');
+      throw new BadRequestException('Cannot apply more than payment amount');
     }
 
     this._appliedToInvoices.push({
@@ -210,12 +213,14 @@ export class Payment extends BaseEntity {
 
   setExcessAmount(amount: number): void {
     if (amount < 0) {
-      throw new Error('Excess amount cannot be negative');
+      throw new BadRequestException('Excess amount cannot be negative');
     }
 
     const totalApplied = this.totalApplied;
     if (totalApplied + amount !== this._amount) {
-      throw new Error('Total applied + excess must equal payment amount');
+      throw new BadRequestException(
+        'Total applied + excess must equal payment amount',
+      );
     }
 
     this._excessAmount = amount;

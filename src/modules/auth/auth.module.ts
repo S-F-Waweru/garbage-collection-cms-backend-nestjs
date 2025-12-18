@@ -79,7 +79,7 @@ export class AuthModule implements OnModuleInit {
     private readonly demoSeeder: DemoSeederService,
   ) {}
   async onModuleInit() {
-    await this.adminSeederService.seedDefaultAdmin();
-    await this.demoSeeder.seedDemoData();
+    // await this.adminSeederService.seedDefaultAdmin();
+    // await this.demoSeeder.seedDemoData();
   }
 }

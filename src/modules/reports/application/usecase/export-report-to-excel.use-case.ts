@@ -1,5 +1,5 @@
 // application/use-cases/export-report-to-excel.use-case.ts
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import * as ExcelJS from 'exceljs';
 import { ReportType } from '../../domain/report-result.entity';
 
@@ -32,7 +32,7 @@ export class ExportReportToExcelUseCase {
         this.addOtherIncomeSheet(worksheet, data);
         break;
       default:
-        throw new Error(`Unsupported report type: ${reportType}`);
+        throw new BadRequestException(`Unsupported report type: ${reportType}`);
     }
 
     // Generate and return buffer

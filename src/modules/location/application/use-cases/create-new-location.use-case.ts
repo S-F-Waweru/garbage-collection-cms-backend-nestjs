@@ -12,7 +12,9 @@ export class CreateNewLocationUseCase {
 
   async execute(dto: CreateLocationDto) {
     // check if location exists
-    const { city, region } = dto;
+    let { city, region } = dto;
+    city = city.toLowerCase();
+    region = region.toLowerCase();
     const exists = await this.locationRepository.exists(city, region);
     if (exists) {
       throw new ConflictException('Location already exists'); // replace with proper exception
