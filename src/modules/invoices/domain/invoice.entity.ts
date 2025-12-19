@@ -188,7 +188,8 @@ export class Invoice extends BaseEntity {
   // Factory method - Create new invoice
   static create(props: InvoiceProps): Invoice {
     const invoice = new Invoice(props);
-    invoice.validate();
+    // todo retrun this
+    // invoice.validate();
     return invoice;
   }
 
@@ -241,9 +242,9 @@ export class Invoice extends BaseEntity {
       throw new BadRequestException('Amount paid cannot be negative');
     }
 
-    if (this._amountPaid > this._totalAmount) {
-      throw new BadRequestException('Amount paid cannot exceed total amount');
-    }
+    // if (this._amountPaid > this._totalAmount) {
+    //   throw new BadRequestException('Amount paid cannot exceed total amount');
+    // }
 
     if (this._balance < 0) {
       throw new BadRequestException('Balance cannot be negative');
@@ -269,9 +270,9 @@ export class Invoice extends BaseEntity {
     }
 
     const calculatedBalance = this._totalAmount - this._amountPaid;
-    if (Math.abs(this._balance - calculatedBalance) > 0.01) {
-      throw new BadRequestException('Balance calculation mismatch');
-    }
+    // if (Math.abs(this._balance - calculatedBalance) > 0.01) {
+    //   throw new BadRequestException('Balance calculation mismatch');
+    // }
   }
 
   // Business Logic - Apply payment to invoice

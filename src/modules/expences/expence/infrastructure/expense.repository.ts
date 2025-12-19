@@ -10,6 +10,22 @@ export class ExpenseRepository implements IExpenseRepository {
     private readonly repository: Repository<ExpenseSchema>,
   ) {}
 
+  async findByPettyCashId(pettyCashId: string) {
+    const schemas = await this.repository.find({
+      where: {
+        pettyCash: {
+          id: pettyCashId, // Filters expenses by the linked PettyCash ID
+        },
+      },
+      order: {
+        expenseDate: 'DESC', // Usually helpful to see newest expenses first
+      },
+    });
+
+    return schemas.map((s) => this.toDomain(s));
+  }
+
+
   async delete(id: string): Promise<void> {
     await this.repository.softDelete(id);
   }

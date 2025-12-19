@@ -9,9 +9,12 @@ import { IPettyCashRepository } from './domain/interfaces/petty-cash.repository.
 import { PettyCashController } from './presentation/petty-cash.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PettyCashSchema } from './infrastructure/petty-cash-schema';
+import { IExpenseRepository } from '../expence/domain/expense.repository.interface';
+import { ExpenseRepository } from '../expence/infrastructure/expense.repository';
+import { ExpenseSchema } from '../expence/infrastructure/expense.schema';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([PettyCashSchema])],
+  imports: [TypeOrmModule.forFeature([PettyCashSchema, ExpenseSchema])],
   controllers: [PettyCashController],
   providers: [
     CreatePettyCashUseCase,
@@ -22,6 +25,10 @@ import { PettyCashSchema } from './infrastructure/petty-cash-schema';
     {
       provide: IPettyCashRepository,
       useClass: PettyCashRepository,
+    },
+    {
+      provide: IExpenseRepository,
+      useClass: ExpenseRepository,
     },
   ],
   exports: [IPettyCashRepository],

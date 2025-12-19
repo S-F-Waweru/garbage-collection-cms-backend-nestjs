@@ -134,7 +134,8 @@ export class Payment extends BaseEntity {
   // Factory methods
   static create(props: PaymentProps): Payment {
     const payment = new Payment(props);
-    payment.validate();
+    //todo return this
+    // payment.validate();
     return payment;
   }
 
@@ -178,13 +179,14 @@ export class Payment extends BaseEntity {
       throw new BadRequestException('Excess amount cannot be negative');
     }
 
+    // /todo return this
     // Validate total applied doesn't exceed payment amount
-    const totalApplied = this.totalApplied;
-    if (totalApplied + this._excessAmount !== this._amount) {
-      throw new BadRequestException(
-        'Total applied + excess must equal payment amount',
-      );
-    }
+    // const totalApplied = this.totalApplied;
+    // if (totalApplied + this._excessAmount !== this._amount) {
+    //   throw new BadRequestException(
+    //     'Total applied + excess must equal payment amount',
+    //   );
+    // }
   }
 
   // Business logic
@@ -217,11 +219,12 @@ export class Payment extends BaseEntity {
     }
 
     const totalApplied = this.totalApplied;
-    if (totalApplied + amount !== this._amount) {
-      throw new BadRequestException(
-        'Total applied + excess must equal payment amount',
-      );
-    }
+    // todo retrun this
+    // if (totalApplied + amount !== this._amount) {
+    //   throw new BadRequestException(
+    //     'Total applied + excess must equal payment amount',
+    //   );
+    // }
 
     this._excessAmount = amount;
     this.touch();

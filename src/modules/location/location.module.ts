@@ -10,6 +10,7 @@ import { GetLocationByIdUseCase } from './application/use-cases/get-location.by-
 import { UpdateLocationUseCase } from './application/use-cases/update-location.use-case';
 import { DeleteLocationUseCase } from './application/use-cases/delete-location.use-case';
 import { ILocationRepository } from './domain/interface/location.repository.inteface';
+import { GetRawLocationsUSecase } from './application/use-cases/getRawLocation.usecase';
 
 @Module({
   imports: [TypeOrmModule.forFeature([LocationSchema])],
@@ -21,6 +22,7 @@ import { ILocationRepository } from './domain/interface/location.repository.inte
     GetLocationByIdUseCase,
     UpdateLocationUseCase,
     DeleteLocationUseCase,
+    GetRawLocationsUSecase,
     // Repository
     {
       provide: ILocationRepository, // ← Use the Symbol, not string

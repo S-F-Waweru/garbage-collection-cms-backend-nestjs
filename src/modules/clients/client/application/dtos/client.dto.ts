@@ -14,7 +14,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { PaymentMethod } from '../../../building/domain/building.entity';
-import { CreateBuildingDto } from '../../../building/application/dto/building.dto';
+import { CreateBuildingDto, CreateClientBuildingDto } from '../../../building/application/dto/building.dto';
 
 export class CreateClientDto {
   @IsNotEmpty()
@@ -51,8 +51,8 @@ export class CreateClientDto {
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => CreateBuildingDto)
-  buildings?: CreateBuildingDto[];
+  @Type(() => CreateClientBuildingDto)
+  buildings?: CreateClientBuildingDto[];
 }
 
 export class UpdateClientDto {

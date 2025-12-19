@@ -31,6 +31,7 @@ import { UpdateLocationUseCase } from '../application/use-cases/update-location.
 import { DeleteLocationUseCase } from '../application/use-cases/delete-location.use-case';
 import { GetLocationByIdUseCase } from '../application/use-cases/get-location.by-id.use-case';
 import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
+import { GetRawLocationsUSecase } from '../application/use-cases/getRawLocation.usecase';
 
 @ApiTags('Locations')
 @UseGuards(JwtAuthGuard)
@@ -42,6 +43,7 @@ export class LocationController {
     private readonly updateLocationUseCase: UpdateLocationUseCase,
     private readonly deleteLocationUseCase: DeleteLocationUseCase,
     private readonly getLocationByIdUseCase: GetLocationByIdUseCase,
+    private readonly getRawLocationUseCase: GetRawLocationsUSecase,
   ) {}
 
   @Post()
@@ -67,6 +69,13 @@ export class LocationController {
       page: Number(page),
       limit: Number(limit),
     });
+  }
+  @Get('raw')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Get locations No Pagination)' })
+  @ApiResponse({ status: 200, description: 'Locations fetched successfully' })
+  async getLocationsNoPagiantion() {
+    return this.getRawLocationUseCase.execute();
   }
 
   @Get(':id')

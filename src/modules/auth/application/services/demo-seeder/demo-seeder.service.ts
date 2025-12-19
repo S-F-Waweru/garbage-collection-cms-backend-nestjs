@@ -1,16 +1,14 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { DataSource } from 'typeorm';
+import { DataSource, QueryRunner } from 'typeorm';
 import { PasswordHasherService } from '../password-hasher-service/password-hasher-service.service';
 
-// --- SCHEMA IMPORTS ---
+// --- SCHEMA & ENUM IMPORTS ---
 import { Role } from '../../../policies/rbac.policy';
-import { InvoiceStatus } from '../../../../invoices/domain/invoice.entity';
 import { UserSchema } from '../../../infrastructure/persistence/schema/user.schema';
 import { LocationSchema } from '../../../../location/infrastracture/persistence/schema/location.schema';
 import { ClientSchema } from '../../../../clients/client/infrastructure/perisistence/schema/client.schema';
 import { BuildingSchema } from '../../../../clients/building/infrastructure/persistense/schema/buildingSchema';
 import { PettyCashSchema } from '../../../../expences/petty-cash/infrastructure/petty-cash-schema';
-import { InvoiceSchema } from '../../../../invoices/infrasctructure/invoice.rschema';
 
 @Injectable()
 export class DemoSeederService implements OnModuleInit {
@@ -30,54 +28,69 @@ export class DemoSeederService implements OnModuleInit {
     }
   }
 
-  private getRandomDate(monthsBack = 12): Date {
+  // --- HELPER UTILITIES ---
+  private getRandomDate(monthsBack = 1): Date {
     const date = new Date();
-    date.setMonth(date.getMonth() - Math.floor(Math.random() * monthsBack));
-    date.setDate(Math.floor(Math.random() * 28) + 1);
+    date.setMonth(date.getMonth() - monthsBack);
+    date.setDate(Math.floor(Math.random() * 25) + 1);
     return date;
   }
 
+  private addDays(date: Date, days: number): Date {
+    const result = new Date(date);
+    result.setDate(result.getDate() + days);
+    return result;
+  }
+
+  // --- MAIN SEEDER FLOW ---
   async seedDemoData() {
     this.logger.log('🚀 Starting MASSIVE BULK data seeding...');
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
     try {
-      const users = await this.seedUsers();
-      if (!users.length) throw new Error('No users seeded');
-      const adminId = users[0].id;
+      const users = await this.seedUsers(queryRunner);
+      const adminId = users[0]?.id;
+      if (!adminId) throw new Error('Could not find or create Admin user');
 
-      const locations = await this.seedLocations();
-      const clients = await this.seedClients();
-      const buildings = await this.seedBuildings(clients, locations);
+      const locations = await this.seedLocations(queryRunner);
+      const clients = await this.seedClients(queryRunner);
+      
+      // Pass both clients and locations
+      const buildings = await this.seedBuildings(queryRunner, clients, locations);
+      
+      await this.seedClientCredits(queryRunner, clients);
+      const pettyCash = await this.seedPettyCash(queryRunner, adminId);
+      await this.seedExpenses(queryRunner, pettyCash, adminId);
 
-      await this.seedClientCredits(clients);
+      // This is where the null clientId was causing issues
+      const invoices = await this.seedInvoices(queryRunner, buildings, adminId);
+      await this.seedPayments(queryRunner, invoices, adminId);
 
-      const pettyCash = await this.seedPettyCash(adminId);
-      await this.seedExpenses(pettyCash, adminId);
-
-      const invoices = await this.seedInvoices(buildings, adminId);
-      await this.seedPayments(invoices, adminId);
-
-      this.logger.log('🎉 MASSIVE seeding completed! System is report-ready.');
+      await queryRunner.commitTransaction();
+      this.logger.log('🎉 MASSIVE seeding completed successfully!');
     } catch (error) {
+      await queryRunner.rollbackTransaction();
       this.logger.error('❌ Bulk seeding failed:', error);
+      throw error;
+    } finally {
+      await queryRunner.release();
     }
   }
 
-  private async seedUsers(): Promise<UserSchema[]> {
+  // --- INDIVIDUAL SEEDER METHODS ---
+
+  private async seedUsers(queryRunner: QueryRunner): Promise<UserSchema[]> {
     const hp = await this.passwordHasher.hash('Demo@123');
-    const users = [
-      { f: 'Super', l: 'Admin', e: 'admin@demo.com', r: Role.ADMIN },
-      { f: 'Jane', l: 'Finance', e: 'finance@demo.com', r: Role.ACCOUNTANT },
-    ];
-    const results: UserSchema[] = [];
+    const users = [{ f: 'Super', l: 'Admin', e: 'admin@demo.com', r: Role.ADMIN }];
+    const results: any[] = [];
     for (const u of users) {
-      const exist = await this.dataSource.query<UserSchema[]>(
-        'SELECT id FROM users WHERE email = $1',
-        [u.e],
-      );
-      if (exist.length > 0) results.push(exist[0]);
-      else {
-        const res = await this.dataSource.query<UserSchema[]>(
+      const exist = await queryRunner.query('SELECT id FROM users WHERE email = $1', [u.e]);
+      if (exist.length > 0) {
+        results.push(exist[0]);
+      } else {
+        const res = await queryRunner.query(
           `INSERT INTO users (id, "firstName", "lastName", email, "passwordHash", role, "createdAt", "updatedAt")
            VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, NOW(), NOW()) RETURNING id`,
           [u.f, u.l, u.e, hp, u.r],
@@ -88,83 +101,37 @@ export class DemoSeederService implements OnModuleInit {
     return results;
   }
 
-  private async seedLocations(): Promise<LocationSchema[]> {
-    const locs = [
-      { c: 'Nairobi', r: 'Westlands' },
-      { c: 'Nairobi', r: 'Kilimani' },
-      { c: 'Mombasa', r: 'Nyali' },
-      { c: 'Mombasa', r: 'Bamburi' },
-      { c: 'Kisumu', r: 'Milimani' },
-      { c: 'Nakuru', r: 'Lanet' },
-    ];
-    const results: LocationSchema[] = [];
+  private async seedLocations(queryRunner: QueryRunner): Promise<LocationSchema[]> {
+    const locs = [{ c: 'Nairobi', r: 'Westlands' }];
+    const results: any[] = [];
     for (const l of locs) {
-      const res = await this.dataSource.query<LocationSchema[]>(
-        `INSERT INTO locations (id, city, region, "createdAt", "updatedAt")
-         VALUES (gen_random_uuid(), $1, $2, NOW(), NOW()) ON CONFLICT DO NOTHING RETURNING id`,
-        [l.c, l.r],
-      );
-      if (res.length > 0) {
-        results.push(res[0]);
+      const exist = await queryRunner.query('SELECT id FROM locations WHERE city = $1 AND region = $2', [l.c, l.r]);
+      if (exist.length > 0) {
+        results.push(exist[0]);
       } else {
-        const exist = await this.dataSource.query<LocationSchema[]>(
-          'SELECT id FROM locations WHERE city=$1 AND region=$2',
+        const res = await queryRunner.query(
+          `INSERT INTO locations (id, city, region, "createdAt", "updatedAt")
+           VALUES (gen_random_uuid(), $1, $2, NOW(), NOW()) RETURNING id`,
           [l.c, l.r],
         );
-        results.push(exist[0]);
+        results.push(res[0]);
       }
     }
     return results;
   }
 
-  private async seedClients(): Promise<ClientSchema[]> {
-    const clientsData = Array.from({ length: 15 }).map((_, i) => ({
-      n: `Client Group ${String.fromCharCode(65 + i)} Ltd`,
-      p: `KRA${1000 + i}PIN`,
-      e: `contact${i}@clientgroup.com`,
-      index: i, // Added index here to use in the loop below
-    }));
-
-    const results: ClientSchema[] = [];
-    for (const c of clientsData) {
-      const res = await this.dataSource.query<ClientSchema[]>(
-        `INSERT INTO clients (id, "companyName", "KRAPin", "firstName", "lastName", email, phone, "paymentMethod", "billingDate", "createdAt", "updatedAt")
-         VALUES (gen_random_uuid(), $1, $2, 'Manager', $3, $4, '0712345678', 'MPESA', 1, NOW(), NOW())
-           ON CONFLICT DO NOTHING RETURNING id`,
-        [c.n, c.p, `Name-${c.index}`, c.e],
-      );
-      if (res.length > 0) {
-        results.push(res[0]);
+  private async seedClients(queryRunner: QueryRunner): Promise<ClientSchema[]> {
+    const results: any[] = [];
+    for (let i = 0; i < 3; i++) {
+      const pin = `PIN-DEMO-${i}`;
+      const exist = await queryRunner.query('SELECT id FROM clients WHERE "KRAPin" = $1', [pin]);
+      if (exist.length > 0) {
+        results.push(exist[0]);
       } else {
-        const exist = await this.dataSource.query<ClientSchema[]>(
-          'SELECT id FROM clients WHERE "KRAPin" = $1',
-          [c.p],
-        );
-        results.push(exist[0]);
-      }
-    }
-    return results;
-  }
-
-  private async seedBuildings(
-    clients: ClientSchema[],
-    locations: LocationSchema[],
-  ): Promise<BuildingSchema[]> {
-    const results: BuildingSchema[] = [];
-    for (const client of clients) {
-      for (let i = 1; i <= 2; i++) {
-        const loc = locations[Math.floor(Math.random() * locations.length)];
-        const res = await this.dataSource.query<BuildingSchema[]>(
-          `INSERT INTO buildings (id, name, "clientId", "locationId", "unitPrice", "unitCount", "createdAt", "updatedAt")
-           VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, NOW(), NOW())
-             RETURNING id, "unitPrice", "unitCount", "clientId"`,
-          [
-            `${client.companyName} - Plaza ${i}`,
-            client.id,
-            loc.id,
-            1500 + Math.random() * 2000,
-            20 + Math.floor(Math.random() * 50),
-          ],
+        const res = await queryRunner.query(
+          `INSERT INTO clients (id, "companyName", "KRAPin", "firstName", "lastName", email, phone, "paymentMethod", "billingDate", "createdAt", "updatedAt")
+           VALUES (gen_random_uuid(), $1, $2, 'Seed', 'User', $3, '0700000000', 'MPESA', 1, NOW(), NOW()) RETURNING id`,
+          [`Client ${i} Ltd`, pin, `client${i}@demo.com`],
         );
         results.push(res[0]);
       }
@@ -172,120 +139,82 @@ export class DemoSeederService implements OnModuleInit {
     return results;
   }
 
-  private async seedClientCredits(clients: ClientSchema[]) {
-    for (const c of clients) {
-      await this.dataSource.query(
-        `INSERT INTO client_credits (id, client_id, balance, created_at, updated_at)
-         VALUES (gen_random_uuid(), $1, $2, NOW(), NOW()) ON CONFLICT (client_id) DO NOTHING`,
-        [c.id, Math.floor(Math.random() * 10000)],
+  private async seedBuildings(queryRunner: QueryRunner, clients: any[], locations: any[]): Promise<any[]> {
+    const results: any[] = [];
+    for (const client of clients) {
+      // FIXED: Added "clientId" to the RETURNING clause
+      const res = await queryRunner.query(
+        `INSERT INTO buildings (id, name, "clientId", "locationId", "unitPrice", "unitCount", "createdAt", "updatedAt")
+         VALUES (gen_random_uuid(), $1, $2, $3, 1500, 20, NOW(), NOW()) 
+         RETURNING id, "clientId"`,
+        [`Building for ${client.id.slice(0, 5)}`, client.id, locations[0].id],
       );
+      results.push(res[0]);
+    }
+    return results;
+  }
+
+  private async seedClientCredits(queryRunner: QueryRunner, clients: any[]) {
+    for (const c of clients) {
+      const exist = await queryRunner.query('SELECT id FROM client_credits WHERE client_id = $1', [c.id]);
+      if (exist.length === 0) {
+        await queryRunner.query(
+          `INSERT INTO client_credits (id, client_id, balance, created_at, updated_at)
+           VALUES (gen_random_uuid(), $1, 0, NOW(), NOW())`,
+          [c.id],
+        );
+      }
     }
   }
 
-  private async seedPettyCash(userId: string): Promise<PettyCashSchema[]> {
-    return await this.dataSource.query<PettyCashSchema[]>(
-      `INSERT INTO petty_cashes (id, name, "totalAmount", notes, "createdBy", "createdAt", "updatedAt")
-       VALUES (gen_random_uuid(), 'Operational Vault', 500000, 'Main Seeder', $1, NOW(), NOW()) RETURNING id`,
+  private async seedPettyCash(queryRunner: QueryRunner, userId: string): Promise<any[]> {
+    const exist = await queryRunner.query('SELECT id FROM petty_cashes WHERE name = $1', ['Main Vault']);
+    if (exist.length > 0) return exist;
+    return await queryRunner.query(
+      `INSERT INTO petty_cashes (id, name, "totalAmount", "createdBy", "createdAt", "updatedAt")
+       VALUES (gen_random_uuid(), 'Main Vault', 500000, $1, NOW(), NOW()) RETURNING id`,
       [userId],
     );
   }
 
-  private async seedExpenses(pettyCash: PettyCashSchema[], userId: string) {
-    const categories = [
-      'Maintenance',
-      'Fuel',
-      'Salaries',
-      'Permits',
-      'Marketing',
-      'Supplies',
-      'Repairs',
-    ];
-    for (let i = 0; i < 120; i++) {
-      const date = this.getRandomDate(11);
-      const amount = Math.round((2000 + Math.random() * 8000) * 100) / 100;
-      await this.dataSource.query(
-        `INSERT INTO expenses (id, "pettyCashId", category, amount, description, notes, "recordedBy", "expenseDate", "createdAt", "updatedAt")
-         VALUES (gen_random_uuid(), $1, $2, $3, $4, 'Seed Data', $5, $6::date, $7::timestamp, $8::timestamp)`,
-        [
-          pettyCash[0].id,
-          categories[i % categories.length],
-          amount,
-          `Voucher #${1000 + i}`,
-          userId,
-          date,
-          date,
-          date,
-        ],
-      );
-    }
+  private async seedExpenses(queryRunner: QueryRunner, pettyCash: any[], userId: string) {
+    await queryRunner.query(
+      `INSERT INTO expenses (id, "pettyCashId", category, amount, description, notes, "recordedBy", "expenseDate", "createdAt", "updatedAt")
+       VALUES (gen_random_uuid(), $1, 'Maintenance', 500, 'Seed Expense', 'System Generated', $2, NOW(), NOW(), NOW())`,
+      [pettyCash[0].id, userId],
+    );
   }
 
-  private async seedInvoices(
-    buildings: BuildingSchema[],
-    userId: string,
-  ): Promise<InvoiceSchema[]> {
-    const results: InvoiceSchema[] = [];
+  private async seedInvoices(queryRunner: QueryRunner, buildings: any[], userId: string): Promise<any[]> {
+    const results: any[] = [];
     for (const b of buildings) {
-      const clientId = (b as any).clientId;
-      for (let i = 0; i < 12; i++) {
-        const date = this.getRandomDate(11);
-        const subtotal = Math.round(b.unitPrice * b.unitCount * 100) / 100;
-        const res = await this.dataSource.query<InvoiceSchema[]>(
-          `INSERT INTO invoices (id, "invoiceNumber", "clientId", "billingPeriodStart", "billingPeriodEnd", "invoiceDate", "dueDate", "unitCount", "unitPrice", subtotal, "totalAmount", balance, status, "createdBy", "createdAt", "updatedAt")
-           VALUES (gen_random_uuid(), $1, $2, $3::date, $3::date, $3::date, $3::date, $4, $5, $6, $6, $6, $7, $8, $9::timestamp, $10::timestamp)
-             RETURNING id, "totalAmount", "clientId"`,
-          [
-            `INV-${b.id.slice(0, 4)}-${100 + i}`,
-            clientId,
-            date,
-            b.unitCount,
-            b.unitPrice,
-            subtotal,
-            InvoiceStatus.PENDING,
-            userId,
-            date,
-            date,
-          ],
-        );
-        results.push(res[0]);
-      }
+      if (!b.clientId) throw new Error(`Building ${b.id} is missing a clientId reference.`);
+      
+      const invDate = this.getRandomDate();
+      const res = await queryRunner.query(
+        `INSERT INTO invoices (
+          id, "invoiceNumber", "clientId", "billingPeriodStart", "billingPeriodEnd",
+          "invoiceDate", "dueDate", "unitCount", "unitPrice", subtotal,
+          "creditApplied", "totalAmount", "amountPaid", balance, status, "createdBy", "createdAt", "updatedAt"
+        ) VALUES (gen_random_uuid(), $1, $2, $3, $3, $3, $4, 20, 1500, 30000, 0, 30000, 0, 30000, 'PENDING', $5, NOW(), NOW())
+        RETURNING id, "totalAmount", "clientId", "invoiceNumber"`,
+        [`INV-${Math.random().toString(36).slice(2, 7).toUpperCase()}`, b.clientId, invDate, this.addDays(invDate, 14), userId],
+      );
+      results.push(res[0]);
     }
     return results;
   }
 
-  private async seedPayments(invoices: InvoiceSchema[], userId: string) {
+  private async seedPayments(queryRunner: QueryRunner, invoices: any[], userId: string) {
     for (const inv of invoices) {
-      const roll = Math.random();
-      let payAmount = 0;
-      if (roll > 0.3) payAmount = Number(inv.totalAmount);
-      else if (roll > 0.1) payAmount = Number(inv.totalAmount) * 0.5;
-
-      if (payAmount > 0) {
-        const date = new Date();
-        await this.dataSource.query(
-          `INSERT INTO payments (id, "paymentNumber", "clientId", "invoiceId", amount, "paymentMethod", "paymentDate", "referenceNumber", "createdBy", "createdAt", "updatedAt")
-           VALUES (gen_random_uuid(), $1, $2, $3, $4, 'MPESA', $5::timestamp, $6, $7, $8::timestamp, $9::timestamp)`,
-          [
-            `PAY-${inv.id.slice(0, 4)}`,
-            inv.clientId,
-            inv.id,
-            payAmount,
-            date,
-            `REF-${Math.random().toString(36).toUpperCase().slice(2, 9)}`,
-            userId,
-            date,
-            date,
-          ],
-        );
-        const newStatus =
-          payAmount >= Number(inv.totalAmount)
-            ? InvoiceStatus.PAID
-            : InvoiceStatus.PARTIALLY_PAID;
-        await this.dataSource.query(
-          `UPDATE invoices SET balance = balance - $1, status = $2 WHERE id = $3`,
-          [payAmount, newStatus, inv.id],
-        );
-      }
+      const amount = Number(inv.totalAmount);
+      const app = JSON.stringify([{ invoiceId: inv.id, invoiceNumber: inv.invoiceNumber, amountApplied: amount }]);
+      await queryRunner.query(
+        `INSERT INTO payments (id, "paymentNumber", "clientId", amount, "paymentMethod", "paymentDate", "referenceNumber", "createdBy", "appliedToInvoices", "excessAmount", "createdAt", "updatedAt")
+         VALUES (gen_random_uuid(), $1, $2, $3, 'MPESA', NOW(), $4, $5, $6::jsonb, 0, NOW(), NOW())`,
+        [`PAY-${inv.id.slice(0, 4).toUpperCase()}`, inv.clientId, amount, `REF-${inv.id.slice(0,4)}`, userId, app],
+      );
+      await queryRunner.query(`UPDATE invoices SET "amountPaid" = $1, balance = 0, status = 'PAID' WHERE id = $2`, [amount, inv.id]);
     }
   }
 }

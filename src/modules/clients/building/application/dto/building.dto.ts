@@ -22,6 +22,24 @@ export class CreateBuildingDto {
   unitCount: number;
 }
 
+export class CreateClientBuildingDto {
+  @IsNotEmpty()
+  @IsString()
+  name: string;
+
+  @IsNotEmpty()
+  @IsString()
+  locationId: string;
+
+  @IsNotEmpty()
+  @IsNumber()
+  unitPrice: number;
+
+  @IsNotEmpty()
+  @IsNumber()
+  unitCount: number;
+}
+
 export class UpdateBuildingDto {
   @IsNotEmpty()
   @IsString()

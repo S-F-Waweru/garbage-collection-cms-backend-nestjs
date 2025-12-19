@@ -3,9 +3,11 @@ import {
   Controller,
   Delete,
   Get,
+  Logger,
   Param,
   Patch,
   Post,
+  Put,
   Query,
 } from '@nestjs/common';
 import {
@@ -31,6 +33,7 @@ import { FindAllClientsUseCase } from '../application/use-cases/find-all-pagiant
 @ApiTags('Clients')
 @Controller('clients')
 export class ClientController {
+  private readonly logger = new Logger(ClientController.name);
   constructor(
     private readonly createClientUseCase: CreateClientUseCase,
     private readonly updateClientUseCase: UpdateClientUseCase,
@@ -45,6 +48,7 @@ export class ClientController {
   @ApiResponse({ status: 201, description: 'Client created successfully' })
   @ApiResponse({ status: 400, description: 'Invalid request body' })
   async create(@Body() dto: CreateClientDto) {
+    this.logger.debug(dto);
     return this.createClientUseCase.execute(dto);
   }
 
@@ -57,6 +61,9 @@ export class ClientController {
     @Query('page') page: string = '1',
     @Query('limit') limit: string = '10',
   ) {
+    console.log(
+      `DEBUG reaching the find all controlller ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^`,
+    );
     return this.findAllClientsUseCase.execute({
       page: parseInt(page, 10),
       limit: parseInt(limit, 10),
@@ -72,7 +79,7 @@ export class ClientController {
     return this.findClientByIdUseCase.execute(id);
   }
 
-  @Patch(':id')
+  @Put(':id')
   @ApiOperation({ summary: 'Update client by ID' })
   @ApiParam({ name: 'id', example: 'a3f1c2d4-1234-4567-890a-bcdef1234567' })
   @ApiBody({ type: UpdateClientDto })

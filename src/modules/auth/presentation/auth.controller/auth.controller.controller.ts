@@ -106,22 +106,9 @@ export class AuthController {
   @ApiUnauthorizedResponse({
     description: 'Invalid or missing refresh token',
   })
-  async refresh(@Req() req: Request) {
-    const authHeader = req.headers['authorization'];
-
-    if (!authHeader) {
-      throw new UnauthorizedException('Missing authorization header');
-    }
-
-    // Expected format: "Bearer <refresh-token>"
-    const [scheme, refreshToken] = authHeader.split(' ');
-
-    if (scheme !== 'Bearer' || !refreshToken) {
-      throw new UnauthorizedException('Invalid authorization header format');
-    }
-
+  async refresh(@Body() refresh: { refresh: string }) {
+    const refreshToken = refresh.refresh;
     const result = await this.refreshTokenUseCase.execute(refreshToken);
-
     return {
       accessToken: result.accessToken,
       refreshToken: result.refreshToken,

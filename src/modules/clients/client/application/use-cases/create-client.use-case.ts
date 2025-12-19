@@ -2,6 +2,7 @@ import {
   ConflictException,
   Inject,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { Client } from '../../domain/entities/client.entity';
@@ -10,9 +11,11 @@ import { Building } from '../../../building/domain/building.entity';
 import { IBuildingRepository } from '../../../building/domain/interface/buidling.repsository.interface';
 import { ILocationRepository } from '../../../../location/domain/interface/location.repository.inteface';
 import { CreateClientDto } from '../dtos/client.dto';
+import { log } from 'node:console';
 
 @Injectable()
 export class CreateClientUseCase {
+  private readonly logger = new Logger(CreateClientUseCase.name);
   constructor(
     @Inject(IClientRepository)
     private readonly clientRepository: IClientRepository,
@@ -28,6 +31,7 @@ export class CreateClientUseCase {
       throw new ConflictException('Use with this KRAPin exist');
     }
     // First, create the client WITHOUT buildings
+    this.logger.debug(dto);
     const client = Client.create({
       companyName: dto.companyName,
       KRAPin: dto.KRAPin,
@@ -41,6 +45,9 @@ export class CreateClientUseCase {
 
     // Save the client first to get an ID
     const savedClient = await this.clientRepository.save(client);
+    console.log(savedClient);
+
+    this.logger.debug(savedClient);
 
     // If buildings are provided, create and save them
     if (dto.buildings && dto.buildings.length > 0) {
@@ -69,7 +76,9 @@ export class CreateClientUseCase {
       });
 
       // Wait for all buildings to be saved
-      await Promise.all(buildingPromises);
+      const savedB = await Promise.all(buildingPromises);
+
+      this.logger.debug(savedB);
     }
 
     // Return the client (reload with buildings)
@@ -77,10 +86,13 @@ export class CreateClientUseCase {
       savedClient.id,
     );
 
+    this.logger.debug(clientWithBuildings);
+
     if (!clientWithBuildings) {
       throw new NotFoundException('Client not found after creation');
     }
 
+    this.logger.debug(clientWithBuildings);
     return clientWithBuildings;
   }
 }

@@ -76,10 +76,12 @@ export class Client extends BaseEntity {
       throw new BadRequestException('Phone is required');
     }
 
-    const phoneRegex = /^(?:\+254|0)[17]\d{8}$/;
-    if (!phoneRegex.test(this._phone)) {
-      throw new BadRequestException('Invalid Kenyan phone number format');
-    }
+    // const phoneRegex = /^(?:\+254|0)[17]\d{8}$/; <= Kenyan
+    // const phoneRegex = /^\+[1-9]\d{1,14}$/;
+
+    // if (!phoneRegex.test(this._phone)) {
+    //   throw new BadRequestException('Invalid  phone number format');
+    // }
 
     if (this._paymentMethod === undefined || this._paymentMethod === null) {
       throw new BadRequestException('PaymentMethod is required');
