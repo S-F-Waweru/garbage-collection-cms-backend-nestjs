@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer';
 import {
   IsDate,
   IsNotEmpty,
@@ -29,11 +30,8 @@ export class CreateExpenseDto {
 
   @IsNotEmpty()
   @IsDate()
+  @Type(() => Date) // <--- Add this line!
   expenseDate: Date;
-
-  @IsNotEmpty()
-  @IsString()
-  recordedBy: string;
 }
 
 export class UpdateExpenseDto {
@@ -60,8 +58,4 @@ export class UpdateExpenseDto {
   @IsNotEmpty()
   @IsDate()
   expenseDate: Date;
-
-  @IsNotEmpty()
-  @IsString()
-  recordedBy: string;
 }

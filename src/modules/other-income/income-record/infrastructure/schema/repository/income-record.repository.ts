@@ -39,6 +39,7 @@ export class IncomeRecordRepository implements IIncomeRecordRepository {
       notes: record.notes,
       unitType: record.unitType,
       unitCount: record.unitCount,
+      unitPrice: record.unitPrice,
       clientName: record.clientName,
       category, // now definitely not undefined
       recordedBy: record.recordedBy,

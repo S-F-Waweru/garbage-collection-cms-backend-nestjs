@@ -26,7 +26,6 @@ export class UpdateExpenseUseCase {
       description: dto.description,
       amount: dto.amount,
       expenseDate: dto.expenseDate,
-      recordedBy: dto.recordedBy,
       category: dto.category,
       notes: dto.notes,
     });

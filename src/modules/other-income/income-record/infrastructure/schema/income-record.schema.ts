@@ -1,42 +1,38 @@
-import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  ManyToOne,
-  CreateDateColumn,
-  UpdateDateColumn,
-  DeleteDateColumn,
-} from 'typeorm';
-import { IncomeCategorySchema } from '../../../income-category/infrastructure/schema/IncomeCategory.schema';
-import { Unit } from '../../application/dto/income-record.dto';
+import { IncomeCategorySchema } from "src/modules/other-income/income-category/infrastructure/schema/IncomeCategory.schema";
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn, DeleteDateColumn } from "typeorm";
+import { Unit } from "../../application/dto/income-record.dto";
 
 @Entity('income_records')
 export class IncomeRecordSchema {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Column()
+  categoryId: string;
+
   @ManyToOne(() => IncomeCategorySchema, { eager: true })
+  @JoinColumn({ name: 'categoryId' })
   category: IncomeCategorySchema;
 
   @Column()
   clientName: string;
 
-  @Column('decimal')
+  @Column('decimal', { nullable: false })
   unitPrice: number;
 
-  @Column('decimal')
+  @Column('decimal', { nullable: false })
   unitCount: number;
 
-  @Column({ type: 'enum', enum: Unit })
+  @Column({ type: 'enum', enum: Unit, nullable: false })
   unitType: Unit;
 
   @Column({ nullable: true })
   notes?: string;
 
   @Column()
-  recordedBy: string; // userId
+  recordedBy: string;
 
-  @Column({ type: 'timestamp' })
+  @Column({ type: 'timestamp', nullable: false })
   recordedAt: Date;
 
   @CreateDateColumn()

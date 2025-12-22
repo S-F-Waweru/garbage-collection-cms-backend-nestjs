@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Logger,
   Param,
   Post,
   Put,
@@ -38,6 +39,7 @@ import {
 @UseGuards(JwtAuthGuard)
 @Controller('expenses')
 export class ExpensesController {
+  private logger = new Logger(ExpensesController.name);
   constructor(
     private readonly createExpenseUseCase: CreateExpenseUseCase,
     private readonly deleteExpenseUseCase: DeleteExpenseUseCase,
@@ -51,6 +53,7 @@ export class ExpensesController {
   @ApiBody({ type: CreateExpenseDto })
   @ApiResponse({ status: 201, description: 'Expense created successfully' })
   create(@CurrentUser() user: any, @Body() dto: CreateExpenseDto) {
+    console.log(user, dto);
     return this.createExpenseUseCase.execute(user.userId, dto);
   }
 

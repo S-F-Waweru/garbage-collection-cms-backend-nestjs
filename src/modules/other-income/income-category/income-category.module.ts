@@ -9,13 +9,18 @@ import { UpdateIncomeCategoryUseCase } from './application/use-case/update-incom
 import { DeleteIncomeCategoryUseCase } from './application/use-case/delete-category-income.use-case';
 import { GetIncomeCategoryByIdUseCase } from './application/use-case/get-income-category-by-id.use-case';
 import { ListIncomeCategoriesUseCase } from './application/use-case/list-income-categories.usecase';
+import { IncomeRecordSchema } from '../income-record/infrastructure/schema/income-record.schema';
+import { IncomeRecordRepository } from '../income-record/infrastructure/schema/repository/income-record.repository';
+import { IIncomeRecordRepository } from '../income-record/domain/interface/income-record.repository.interface';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([IncomeCategorySchema])],
+  imports: [TypeOrmModule.forFeature([IncomeCategorySchema, IncomeRecordSchema])],
   controllers: [IncomeCategoryController],
   providers: [
     // Repository binding to interface
     { provide: IIncomeCategoryRepository, useClass: IncomeCategoryRepository },
+    { provide: IIncomeRecordRepository, useClass: IncomeRecordRepository },
+
 
     // Use cases
     CreateIncomeCategoryUseCase,

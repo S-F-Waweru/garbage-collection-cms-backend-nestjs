@@ -9,6 +9,7 @@ import {
   NotFoundException,
   UseGuards,
   Query,
+  Logger,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -39,6 +40,7 @@ import { GetIncomeCategoryByIdUseCase } from '../../income-category/application/
 @ApiBearerAuth()
 @Controller('income-records')
 export class IncomeRecordController {
+  logger = new Logger(IncomeRecordController.name);
   constructor(
     private readonly createUseCase: CreateIncomeRecordUseCase,
     private readonly updateUseCase: UpdateIncomeRecordUseCase,
@@ -106,6 +108,8 @@ export class IncomeRecordController {
     @CurrentUser() user: { userId: string },
     @Body() dto: CreateIncomeRecordDto,
   ) {
+    this.logger.debug('CreateIncomeRecordDto');
+    this.logger.debug(dto);
     return this.createUseCase.execute(user.userId, dto);
   }
 

@@ -1,4 +1,9 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 
 import { CreateIncomeRecordDto } from '../dto/income-record.dto';
 import { IncomeRecord } from '../../domain/income-record.entity';
@@ -7,6 +12,7 @@ import { IIncomeCategoryRepository } from '../../../income-category/domain/inter
 
 @Injectable()
 export class CreateIncomeRecordUseCase {
+  logger = new Logger(CreateIncomeRecordDto.name);
   constructor(
     @Inject(IIncomeRecordRepository)
     private readonly repository: IIncomeRecordRepository,
@@ -20,14 +26,16 @@ export class CreateIncomeRecordUseCase {
       throw new BadRequestException(`Category ${dto.categoryId} not found`);
     }
     const incomeRecord = IncomeRecord.create({
-      category: category,
+      category: category, // still keep relation for ORM
       clientName: dto.clientName,
-      unitPrice: dto.unitPrice,
-      unitCount: dto.unitCount,
+      unitPrice: Number(dto.unitPrice), // ensure it’s a number
+      unitCount: Number(dto.unitCount), // ensure it’s a number
       unitType: dto.unitType,
       recordedBy: userId,
       notes: dto.notes,
     });
+
+    this.logger.debug(incomeRecord);
 
     await this.repository.save(incomeRecord);
 
