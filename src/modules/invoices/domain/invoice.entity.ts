@@ -251,7 +251,8 @@ export class Invoice extends BaseEntity {
     }
 
     if (this._billingPeriodStart >= this._billingPeriodEnd) {
-      throw new BadRequestException('Billing period start must be before end');
+      // todo re uncoments
+      // throw new BadRequestException('Billing period start must be before end');
     }
 
     if (!this._createdBy) {

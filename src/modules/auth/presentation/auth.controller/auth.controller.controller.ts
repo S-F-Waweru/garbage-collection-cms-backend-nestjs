@@ -30,6 +30,7 @@ import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { CurrentUser } from '../../../../shared/decorators/current-user.decorator';
 import { Public } from '../decorators/public.decorator';
 import { RefreshTokenUseCase } from '../../application/use-cases/refresh-token.use-case';
+import type { CurrentUserDto } from '../../../expences/petty-cash/presentation/petty-cash.controller';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -71,7 +72,7 @@ export class AuthController {
   // Change Password (Protected)
   // ---------------------------
   @UseGuards(JwtAuthGuard)
-  @Post('changePassword')
+  @Post('change-password')
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
   @ApiOperation({
@@ -83,8 +84,11 @@ export class AuthController {
     description: 'Password changed successfully',
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  changePassword(@Body() dto: ChangePasswordDto) {
-    return this.changePasswordUseCase.execute(dto);
+  changePassword(
+    @CurrentUser() user: CurrentUserDto,
+    @Body() dto: ChangePasswordDto,
+  ) {
+    return this.changePasswordUseCase.execute(user.userId, dto);
   }
 
   // ---------------------------

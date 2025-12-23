@@ -16,10 +16,9 @@ export class ChangePasswordUseCase {
     private readonly passwordHasher: PasswordHasherService,
   ) {}
 
-  async execute(dto: ChangePasswordDto) {
+  async execute(userId: string, dto: ChangePasswordDto) {
     const newPassword = dto.newPassword;
     const currentPassword = dto.currentPassword;
-    const userId = dto.userId;
 
     const user = await this.authRepository.findById(userId);
 

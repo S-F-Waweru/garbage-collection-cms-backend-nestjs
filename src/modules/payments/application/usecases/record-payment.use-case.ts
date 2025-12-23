@@ -1,5 +1,10 @@
 // application/use-cases/record-payment.use-case.ts
-import { Injectable, Inject, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  BadRequestException,
+  Logger,
+} from '@nestjs/common';
 import { IClientRepository } from 'src/modules/clients/client/domain/interface/client.repository.interface';
 
 import { DataSource } from 'typeorm';
@@ -23,8 +28,10 @@ export class RecordPaymentUseCase {
     private readonly clientRepo: IClientRepository,
     private readonly dataSource: DataSource,
   ) {}
+  logger = new Logger(RecordPaymentUseCase.name);
 
   async execute(dto: RecordPaymentDto, userId: string): Promise<Payment> {
+    this.logger.debug(userId);
     // 1. Validate client exists
     const client = await this.clientRepo.findById(dto.clientId);
     if (!client) {
@@ -45,6 +52,7 @@ export class RecordPaymentUseCase {
       notes: dto.notes,
       createdBy: userId,
     });
+    this.logger.log(payment);
 
     // 4. Apply payment to invoices in a transaction
     const queryRunner = this.dataSource.createQueryRunner();
@@ -84,8 +92,11 @@ export class RecordPaymentUseCase {
         await this.creditRepo.incrementBalance(dto.clientId, remainingAmount);
       }
 
+      this.logger.log(payment);
       // Save payment
       const savedPayment = await this.paymentRepo.save(payment);
+
+      console.log(savedPayment);
 
       await queryRunner.commitTransaction();
       return savedPayment;

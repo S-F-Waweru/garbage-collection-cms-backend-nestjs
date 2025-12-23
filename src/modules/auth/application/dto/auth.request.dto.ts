@@ -45,8 +45,8 @@ export class ChangePasswordDto {
   @IsString()
   currentPassword: string;
 
-  @IsString()
-  userId: string;
+  // @IsString()
+  // userId: string;
 }
 export class ForgotPasswordDto {
   @IsEmail()

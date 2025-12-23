@@ -9,6 +9,7 @@ import {
   Post,
   Query,
   Req,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -26,6 +27,9 @@ import { GetPaymentUseCase } from '../application/usecases/get-payment.use-case'
 import { ListPaymentsUseCase } from '../application/usecases/list-payments.use-case';
 import { RecordPaymentUseCase } from '../application/usecases/record-payment.use-case';
 import { ListPaginatedPaymentsUseCase } from '../application/usecases/get-paginated-payments';
+import { CurrentUser } from '../../../shared/decorators/current-user.decorator';
+import type { CurrentUserDto } from '../../expences/petty-cash/presentation/petty-cash.controller';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 
 export interface RequestwithUser extends Request {
   user?: any;
@@ -33,6 +37,7 @@ export interface RequestwithUser extends Request {
 
 @ApiTags('Payments')
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller('payments')
 export class PaymentController {
   constructor(
@@ -60,9 +65,9 @@ export class PaymentController {
   })
   async recordPayment(
     @Body() dto: RecordPaymentDto,
-    @Req() req: RequestwithUser,
+    @CurrentUser() user: CurrentUserDto,
   ) {
-    const userId = req.user?.id || 'SYSTEM';
+    const userId = user.userId;
     const payment = await this.recordPaymentUseCase.execute(dto, userId);
     return PaymentResponseDto.fromDomain(payment);
   }

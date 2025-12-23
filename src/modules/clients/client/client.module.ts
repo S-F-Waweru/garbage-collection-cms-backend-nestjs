@@ -10,6 +10,7 @@ import { UpdateClientUseCase } from './application/use-cases/update.use-case';
 import { FindClientByIdUseCase } from './application/use-cases/find-by-id.use-case';
 import { IClientRepository } from './domain/interface/client.repository.interface';
 import { ClientRepository } from './infrastructure/perisistence/repository/client.repository';
+import { FindAllClientsRawUseCase } from './application/use-cases/find-raw-clients.usecase';
 
 @Module({
   imports: [RepositoriesModule, LocationModule],
@@ -20,6 +21,7 @@ import { ClientRepository } from './infrastructure/perisistence/repository/clien
     DeleteClientUseCase,
     FindAllClientsUseCase,
     FindClientByIdUseCase,
+    FindAllClientsRawUseCase
   ],
   exports: [RepositoriesModule],
 })
