@@ -43,16 +43,3 @@ Authorization: Bearer {{token}}
 
 ---
 
-## Summary
-
-✅ **Entity** - Domain model with business rules
-✅ **Repository Interface** - Contract for data access
-✅ **Schema** - TypeORM database mapping
-✅ **Repository Implementation** - PostgreSQL + sequential numbering
-✅ **Use Cases** - Generate, Get, List, Update Status, Auto-generate, Mark Overdue
-✅ **DTOs** - Request/Response validation
-✅ **Controller** - REST API endpoints
-✅ **Cron Jobs** - Daily invoice generation & overdue marking
-✅ **HTTP Examples** - Test requests
-
-**Next:** Create the database migration for the `invoice_number_seq` sequence!

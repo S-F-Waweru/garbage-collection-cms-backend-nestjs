@@ -213,7 +213,7 @@ export class ReportRepository implements IReportRepository {
       .leftJoin(
         'users',
         'u',
-        '"pc"."oi.createdAt"::uuid = "u"."id" AND "u"."deletedAt" IS NULL',
+        '"pc"."createdBy"::uuid = "u"."id" AND "u"."deletedAt" IS NULL',
       )
       .where('pc.deletedAt IS NULL');
 

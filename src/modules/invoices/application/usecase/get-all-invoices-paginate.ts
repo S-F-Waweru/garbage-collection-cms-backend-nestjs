@@ -1,5 +1,5 @@
 // application/use-cases/list-invoices.use-case.ts
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, Logger } from '@nestjs/common';
 
 import { Invoice } from '../../domain/invoice.entity';
 import { IInvoiceRepository } from '../../domain/invoice.repository.intreface';
@@ -11,12 +11,14 @@ import { Client } from '../../../clients/client/domain/entities/client.entity';
 
 @Injectable()
 export class GetAllInvoicesPaginatedUseCase {
+  logger = new Logger(GetAllInvoicesPaginatedUseCase.name);
   constructor(
     @Inject(IInvoiceRepository)
     private readonly invoiceRepo: IInvoiceRepository,
   ) {}
 
   async execute(params: PaginationParams): Promise<PaginatedResult<Invoice>> {
+    this.logger.debug(params);
     const { page, limit } = params;
     const skip = (page - 1) * limit;
 
