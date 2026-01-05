@@ -1,4 +1,9 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { IAuthRepository } from '../../../domain/interfaces/auth.repository.interface';
 import { PasswordHasherService } from '../../services/password-hasher-service/password-hasher-service.service';
 import { RegisterDto } from '../../dto/auth.request.dto';
@@ -14,6 +19,7 @@ export class RegisterUseCase {
     private readonly authRepository: IAuthRepository,
     private readonly passwordHasher: PasswordHasherService,
   ) {}
+  logger = new Logger(RegisterUseCase.name);
 
   async execute(dto: RegisterDto) {
     const { email, password, firstName, lastName } = dto;
@@ -27,6 +33,9 @@ export class RegisterUseCase {
       process.env.DEFAULT_USER_PASSWORD ||
       'ChangeMe@123';
     const user = User.create(email, userPassword, firstName, lastName);
+
+    this.logger.debug(user);
+    this.logger.debug(userPassword);
 
     //    hash the Password
     const hashedPassword = await this.passwordHasher.hash(userPassword);

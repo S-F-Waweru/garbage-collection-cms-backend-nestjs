@@ -20,7 +20,7 @@ Content-Type: {{contentType}}
 
 {
   "email": "{{user1Email}}",
-  "password": "{{password}}",
+#  "password": "{{password}}",
   "firstName": "Sam",
   "lastName": "Waweru"
 }

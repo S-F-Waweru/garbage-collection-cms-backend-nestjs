@@ -143,4 +143,29 @@ export class IncomeRecordRepository implements IIncomeRecordRepository {
     });
     return [schema.map((s) => this.toDomain(s)), total];
   }
+
+  // In IncomeRecordRepository class
+
+  async getMonthlyTotals(year: number): Promise<number[]> {
+    const result = await this.repository
+      .createQueryBuilder('income')
+      .select('EXTRACT(MONTH FROM income.recordedAt)', 'month')
+      .addSelect('SUM(income.unitPrice * income.unitCount)', 'total')
+      .where('EXTRACT(YEAR FROM income.recordedAt) = :year', { year })
+      .andWhere('income.deletedAt IS NULL')
+      .groupBy('EXTRACT(MONTH FROM income.recordedAt)')
+      .orderBy('month', 'ASC')
+      .getRawMany();
+
+    // Initialize array with 0 for all 12 months
+    const monthlyData = Array(12).fill(0);
+
+    // Fill in actual data
+    result.forEach((row) => {
+      const monthIndex = parseInt(row.month) - 1; // Month is 1-12, array is 0-11
+      monthlyData[monthIndex] = parseFloat(row.total);
+    });
+
+    return monthlyData;
+  }
 }

@@ -1,18 +1,21 @@
 // typescript
 import { BaseEntity } from '../../../../shared/domain/entities/base.entity';
 import { BadRequestException } from '@nestjs/common';
+import { IncomeSource } from '../application/dto/petty-cash.dto';
 
 export class PettyCash extends BaseEntity {
   private _name: string;
   private _totalAmount: number;
   private _createdBy: string;
   private _notes: string;
+  private _incomeSource: IncomeSource;
 
   constructor(props: {
     id?: string;
     name: string;
     totalAmount: number;
     createdBy: string;
+    incomeSource: IncomeSource;
     notes?: string;
   }) {
     super(props.id);
@@ -27,12 +30,14 @@ export class PettyCash extends BaseEntity {
     name: string,
     totalAmount: number,
     createdBy: string,
+    incomeSource: IncomeSource,
     notes?: string,
   ): PettyCash {
     return new PettyCash({
       name,
       totalAmount,
       createdBy,
+      incomeSource,
       notes: notes ?? '',
     });
   }
@@ -42,6 +47,7 @@ export class PettyCash extends BaseEntity {
     name: string;
     totalAmount: number;
     createdBy: string;
+    incomeSource: IncomeSource;
     notes?: string;
   }): PettyCash {
     return new PettyCash({
@@ -49,6 +55,7 @@ export class PettyCash extends BaseEntity {
       name: props.name,
       totalAmount: props.totalAmount,
       createdBy: props.createdBy,
+      incomeSource: props.incomeSource,
       notes: props.notes,
     });
   }

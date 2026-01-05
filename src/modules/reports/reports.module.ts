@@ -13,12 +13,21 @@ import { GetRevenueReportUseCase } from './application/usecase/get-revenue-repor
 import { GetSummaryStatisticsUseCase } from './application/usecase/get-summary-statistics.use-case';
 import { PaymentSchema } from '../payments/infrastructure/payment.schema';
 import { ReportRepository } from './infrastructure/report.repository';
+import { GetExpenseIncomeChartUseCase } from './application/usecase/get-expense-income-chart.usecase';
+import { IncomeRecordSchema } from '../other-income/income-record/infrastructure/schema/income-record.schema';
+import { ExpenseSchema } from '../expences/expence/infrastructure/expense.schema';
+import { IncomeCategorySchema } from '../other-income/income-category/infrastructure/schema/IncomeCategory.schema';
+import { IncomeRecordRepository } from '../other-income/income-record/infrastructure/schema/repository/income-record.repository';
+import { ExpenseRepository } from '../expences/expence/infrastructure/expense.repository';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
       InvoiceSchema,
       PaymentSchema,
+      IncomeRecordSchema,
+      IncomeCategorySchema, // Add this - IncomeRecordRepository needs it
+      ExpenseSchema,
       // Add other schemas
     ]),
   ],
@@ -28,6 +37,8 @@ import { ReportRepository } from './infrastructure/report.repository';
       provide: 'IReportRepository',
       useClass: ReportRepository,
     },
+    IncomeRecordRepository, // Add this
+    ExpenseRepository, // Add this
 
     // Use Cases
     GetOutstandingBalancesUseCase,
@@ -35,6 +46,7 @@ import { ReportRepository } from './infrastructure/report.repository';
     GetPettyCashReportUseCase,
     GetOtherIncomeReportUseCase,
     GetSummaryStatisticsUseCase,
+    GetExpenseIncomeChartUseCase,
     ExportReportToExcelUseCase,
   ],
   controllers: [ReportController],

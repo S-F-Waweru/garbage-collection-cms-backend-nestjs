@@ -15,6 +15,7 @@ export class CreatePettyCashUseCase {
       dto.name,
       dto.totalAmount,
       userId,
+      dto.incomeSource,
       dto.notes ?? '',
     );
 

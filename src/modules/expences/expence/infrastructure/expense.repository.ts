@@ -25,7 +25,6 @@ export class ExpenseRepository implements IExpenseRepository {
     return schemas.map((s) => this.toDomain(s));
   }
 
-
   async delete(id: string): Promise<void> {
     await this.repository.softDelete(id);
   }
@@ -86,5 +85,27 @@ export class ExpenseRepository implements IExpenseRepository {
       category: schema.category,
       recordedBy: schema.recordedBy,
     });
+  }
+  async getMonthlyTotals(year: number): Promise<number[]> {
+    const result = await this.repository
+      .createQueryBuilder('expense')
+      .select('EXTRACT(MONTH FROM expense.expenseDate)', 'month')
+      .addSelect('SUM(expense.amount)', 'total')
+      .where('EXTRACT(YEAR FROM expense.expenseDate) = :year', { year })
+      .andWhere('expense.deletedAt IS NULL')
+      .groupBy('EXTRACT(MONTH FROM expense.expenseDate)')
+      .orderBy('month', 'ASC')
+      .getRawMany();
+
+    // Initialize array with 0 for all 12 months
+    const monthlyData = Array(12).fill(0);
+
+    // Fill in actual data
+    result.forEach((row) => {
+      const monthIndex = parseInt(row.month) - 1;
+      monthlyData[monthIndex] = parseFloat(row.total);
+    });
+
+    return monthlyData;
   }
 }

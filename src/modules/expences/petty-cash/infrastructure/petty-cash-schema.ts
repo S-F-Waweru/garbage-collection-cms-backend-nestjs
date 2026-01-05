@@ -7,6 +7,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { User } from '../../../auth/domain/entities/user.entity';
+import { IncomeSource } from '../application/dto/petty-cash.dto';
 
 @Entity('petty_cashes')
 export class PettyCashSchema {
@@ -24,6 +25,13 @@ export class PettyCashSchema {
 
   @Column()
   createdBy: string;
+
+  @Column({
+    type: 'enum',
+    enum: IncomeSource,
+    default: IncomeSource.BANK, // Or any other default from your enum
+  })
+  incomeSource: IncomeSource;
 
   @CreateDateColumn()
   createdAt: Date;

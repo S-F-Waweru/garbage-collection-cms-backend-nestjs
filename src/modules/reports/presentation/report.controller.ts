@@ -26,6 +26,7 @@ import { GetPettyCashReportUseCase } from '../application/usecase/get-petty-cash
 import { GetRevenueReportUseCase } from '../application/usecase/get-revenue-report.use-case';
 import { GetSummaryStatisticsUseCase } from '../application/usecase/get-summary-statistics.use-case';
 import { ReportType } from '../domain/report-result.entity';
+import { GetExpenseIncomeChartUseCase } from '../application/usecase/get-expense-income-chart.usecase';
 
 @ApiTags('Reports')
 @ApiBearerAuth()
@@ -38,6 +39,7 @@ export class ReportController {
     private readonly getOtherIncomeReportUseCase: GetOtherIncomeReportUseCase,
     private readonly getSummaryStatisticsUseCase: GetSummaryStatisticsUseCase,
     private readonly exportReportToExcelUseCase: ExportReportToExcelUseCase,
+    private readonly getExpenseIncomeChartUseCase: GetExpenseIncomeChartUseCase,
   ) {}
 
   @Get('outstanding-balances')
@@ -335,5 +337,46 @@ export class ReportController {
     );
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     res.send(buffer);
+  }
+
+  @Get('expense-income-chart')
+  @ApiOperation({
+    summary: 'Get expense vs income chart data',
+    description:
+      'Returns monthly totals for expenses and income for chart visualization',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Chart data generated successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        incomeData: {
+          type: 'array',
+          items: { type: 'number' },
+          example: [
+            65000, 59000, 80000, 81000, 56000, 55000, 40000, 43000, 48000,
+            52000, 75000, 68000,
+          ],
+        },
+        expenseData: {
+          type: 'array',
+          items: { type: 'number' },
+          example: [
+            28000, 48000, 40000, 19000, 86000, 27000, 90000, 31000, 45000,
+            38000, 29000, 42000,
+          ],
+        },
+      },
+    },
+  })
+  @ApiQuery({
+    name: 'year',
+    required: true,
+    description: 'Year for the report (e.g., 2024)',
+    type: Number,
+  })
+  async getExpenseIncomeChart(@Query('year') year: number) {
+    return await this.getExpenseIncomeChartUseCase.execute(year);
   }
 }

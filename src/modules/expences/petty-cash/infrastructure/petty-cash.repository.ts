@@ -29,6 +29,7 @@ export class PettyCashRepository implements IPettyCashRepository {
       name: schema.name,
       totalAmount: schema.totalAmount,
       createdBy: schema.createdBy,
+      incomeSource: schema.incomeSource,
       notes: schema.notes,
     });
   }

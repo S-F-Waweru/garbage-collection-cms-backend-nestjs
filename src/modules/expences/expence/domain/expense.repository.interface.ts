@@ -8,6 +8,7 @@ export interface IExpenseRepository {
   findAllPaginated(skip: number, limit: number): Promise<[Expense[], number]>;
   delete(id: string): Promise<void>;
   exists(id: string): Promise<boolean>;
+  getMonthlyTotals(year: number): Promise<number[]>;
 }
 
 export const IExpenseRepository = Symbol('IExpenseRepository');
