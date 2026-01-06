@@ -56,6 +56,7 @@ export class UpdateExpenseDto {
   notes?: string;
 
   @IsNotEmpty()
+  @Type(() => Date)
   @IsDate()
   expenseDate: Date;
 }

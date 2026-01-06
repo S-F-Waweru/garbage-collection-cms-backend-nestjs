@@ -15,7 +15,11 @@ export class ExpenseSchema {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => PettyCashSchema, { eager: true })
+  @ManyToOne(() => PettyCashSchema, {
+    eager: true,
+    onDelete: 'CASCADE',
+    nullable: true, // Add this
+  })
   pettyCash: PettyCash;
 
   @Column()

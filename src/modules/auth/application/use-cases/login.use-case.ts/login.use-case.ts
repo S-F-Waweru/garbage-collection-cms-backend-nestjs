@@ -46,6 +46,7 @@ export class LoginUseCase {
     const accessToken = this.jwtService.generateAccessToken({
       userId: user.id,
       email: user.email.value,
+      role: user.role,
     });
 
     // 6. Generate new refresh token (JWT) for session extension

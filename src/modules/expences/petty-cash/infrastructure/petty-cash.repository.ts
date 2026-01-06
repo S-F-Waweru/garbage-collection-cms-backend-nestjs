@@ -5,14 +5,16 @@ import { IsNull, Repository } from 'typeorm';
 import { PettyCashSchema } from './petty-cash-schema';
 import { PettyCash } from '../domain/petty-cash.entity';
 import { Injectable } from '@nestjs/common';
+import { ExpenseSchema } from '../../expence/infrastructure/expense.schema';
 
 @Injectable()
 export class PettyCashRepository implements IPettyCashRepository {
   constructor(
     @InjectRepository(PettyCashSchema)
     private readonly repository: Repository<PettyCashSchema>,
+    @InjectRepository(ExpenseSchema)
+    private readonly expenseRepository: Repository<ExpenseSchema>,
   ) {}
-
   private toSchema(pettyCash: PettyCash): Partial<PettyCashSchema> {
     return {
       id: pettyCash.id,
@@ -40,6 +42,10 @@ export class PettyCashRepository implements IPettyCashRepository {
     return this.toDomain(saved);
   }
   async delete(id: string): Promise<void> {
+    // Delete associated expenses first
+    await this.expenseRepository.softDelete({ pettyCash: { id } });
+
+    // Then delete the petty cash
     await this.repository.softDelete(id);
   }
 

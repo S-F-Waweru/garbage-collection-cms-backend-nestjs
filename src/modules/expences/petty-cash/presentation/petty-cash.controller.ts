@@ -40,7 +40,7 @@ export interface CurrentUserDto {
 
 @ApiTags('Petty Cash')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+// @UseGuards(JwtAuthGuard)
 @Controller('petty-cash')
 export class PettyCashController {
   constructor(

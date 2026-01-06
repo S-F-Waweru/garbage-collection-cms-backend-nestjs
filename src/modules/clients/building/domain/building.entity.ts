@@ -15,6 +15,9 @@ export class Building extends BaseEntity {
   private _client: Client;
   private _unitPrice: number;
   private _unitCount: number;
+  private _activeUnits: number;
+  private _binsAssigned: number;
+  private _totalPrice: number;
 
   constructor(props: {
     id?: string;
@@ -23,6 +26,8 @@ export class Building extends BaseEntity {
     client: Client;
     unitPrice: number;
     unitCount: number;
+    activeUnits?: number;
+    binsAssigned?: number;
   }) {
     super(props.id);
     this._name = props.name;
@@ -30,7 +35,15 @@ export class Building extends BaseEntity {
     this._client = props.client;
     this._unitCount = props.unitCount;
     this._unitPrice = props.unitPrice;
+    this._activeUnits = props.activeUnits || 0;
+    this._binsAssigned =
+      props.binsAssigned !== undefined ? props.binsAssigned : 3; // Default to 3
+    this._totalPrice = this.calculateTotalPrice();
     this.validate();
+  }
+
+  private calculateTotalPrice(): number {
+    return this._activeUnits * this._unitPrice;
   }
 
   validate() {
@@ -61,6 +74,20 @@ export class Building extends BaseEntity {
     if (this._unitCount < 0 || !Number.isInteger(this._unitCount)) {
       throw new BadRequestException('Unit count must be a positive integer');
     }
+
+    if (this._activeUnits < 0 || !Number.isInteger(this._activeUnits)) {
+      throw new BadRequestException('Active units must be a positive integer');
+    }
+
+    if (this._activeUnits > this._unitCount) {
+      throw new BadRequestException(
+        'Active units cannot exceed total unit count',
+      );
+    }
+
+    if (this._binsAssigned < 0 || !Number.isInteger(this._binsAssigned)) {
+      throw new BadRequestException('Assigned bins must be a positive integer');
+    }
   }
 
   static create(props: {
@@ -69,6 +96,8 @@ export class Building extends BaseEntity {
     client: Client;
     unitPrice: number;
     unitCount: number;
+    activeUnits?: number;
+    binsAssigned?: number;
   }) {
     return new Building({
       name: props.name,
@@ -76,6 +105,8 @@ export class Building extends BaseEntity {
       client: props.client,
       unitCount: props.unitCount,
       unitPrice: props.unitPrice,
+      activeUnits: props.activeUnits,
+      binsAssigned: props.binsAssigned,
     });
   }
 
@@ -86,6 +117,8 @@ export class Building extends BaseEntity {
     client: Client;
     unitPrice: number;
     unitCount: number;
+    activeUnits?: number;
+    binsAssigned?: number;
   }) {
     return new Building(props);
   }
@@ -96,12 +129,22 @@ export class Building extends BaseEntity {
     client?: Client;
     unitCount?: number;
     unitPrice?: number;
+    activeUnits?: number;
+    binsAssigned?: number;
   }) {
     if (props.name !== undefined) this._name = props.name;
     if (props.location !== undefined) this._location = props.location;
     if (props.client !== undefined) this._client = props.client;
     if (props.unitCount !== undefined) this._unitCount = props.unitCount;
     if (props.unitPrice !== undefined) this._unitPrice = props.unitPrice;
+    if (props.activeUnits !== undefined) this._activeUnits = props.activeUnits;
+    if (props.binsAssigned !== undefined)
+      this._binsAssigned = props.binsAssigned;
+
+    // Recalculate total price when unit price or active units change
+    if (props.unitPrice !== undefined || props.activeUnits !== undefined) {
+      this._totalPrice = this.calculateTotalPrice();
+    }
 
     this.validate();
   }
@@ -125,5 +168,35 @@ export class Building extends BaseEntity {
 
   get unitCount() {
     return this._unitCount;
+  }
+
+  get activeUnits() {
+    return this._activeUnits;
+  }
+
+  get binsAssigned() {
+    return this._binsAssigned;
+  }
+
+  get totalPrice() {
+    return this._totalPrice;
+  }
+
+  // Setters for controlled modifications
+  setActiveUnits(activeUnits: number) {
+    this._activeUnits = activeUnits;
+    this._totalPrice = this.calculateTotalPrice();
+    this.validate();
+  }
+
+  setbinsAssigned(binsAssigned: number) {
+    this._binsAssigned = binsAssigned;
+    this.validate();
+  }
+
+  setUnitPrice(unitPrice: number) {
+    this._unitPrice = unitPrice;
+    this._totalPrice = this.calculateTotalPrice();
+    this.validate();
   }
 }

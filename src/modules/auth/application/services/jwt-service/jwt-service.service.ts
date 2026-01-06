@@ -1,11 +1,12 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { JwtService as NestJwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { Role } from '../../../policies/rbac.policy';
 
 export interface AccessTokenPayload {
   userId: string;
   email: string;
-  // roles?: string[];     // Add later when you have roles
+  role: Role;
   // permissions?: string[]; // Add later when you have permissions
 }
 

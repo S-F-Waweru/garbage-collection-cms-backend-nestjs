@@ -1,11 +1,11 @@
 import {
+  BeforeInsert,
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -32,6 +32,12 @@ export class BuildingSchema {
 
   @Column('int')
   unitCount: number;
+
+  @Column('int')
+  activeUnits: number;
+
+  @Column('int', { default: 3, nullable: true })
+  binsAssigned: number;
 
   @CreateDateColumn()
   createdAt: Date;

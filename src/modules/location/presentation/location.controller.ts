@@ -34,7 +34,7 @@ import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
 import { GetRawLocationsUSecase } from '../application/use-cases/getRawLocation.usecase';
 
 @ApiTags('Locations')
-@UseGuards(JwtAuthGuard)
+// @UseGuards(JwtAuthGuard)
 @Controller('locations')
 export class LocationController {
   constructor(

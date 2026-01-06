@@ -1,5 +1,10 @@
 import { IBuildingRepository } from '../../domain/interface/buidling.repsository.interface';
-import { Injectable, Inject, BadRequestException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  BadRequestException,
+  Logger,
+} from '@nestjs/common';
 import { CreateBuildingDto } from '../dto/building.dto';
 import { ILocationRepository } from '../../../../location/domain/interface/location.repository.inteface';
 import { IClientRepository } from '../../../client/domain/interface/client.repository.interface';
@@ -8,7 +13,7 @@ import { Building } from '../../domain/building.entity';
 
 !Injectable();
 export class CreateBuildingUseCase {
-  private readonly logger =new Logger(CreateBuildingUseCase.name)
+  private readonly logger = new Logger(CreateBuildingUseCase.name);
   constructor(
     @Inject(IBuildingRepository)
     private readonly buildingRepository: IBuildingRepository,
@@ -20,9 +25,17 @@ export class CreateBuildingUseCase {
   ) {}
 
   async execute(dto: CreateBuildingDto) {
-    this.logger.debug(dto)
-    
-    const { name, locationId, clientId, unitPrice, unitCount } = dto;
+    this.logger.debug(dto);
+
+    const {
+      name,
+      locationId,
+      clientId,
+      unitPrice,
+      unitCount,
+      binsAssigned,
+      activeUnits,
+    } = dto;
 
     const location = await this.locationRepository.findById(locationId);
 
@@ -42,6 +55,8 @@ export class CreateBuildingUseCase {
       client,
       unitCount,
       unitPrice,
+      binsAssigned,
+      activeUnits,
     });
 
     const savedBuilding = await this.buildingRepository.save(building);

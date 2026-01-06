@@ -1,6 +1,7 @@
 // domain/payment.entity.ts
 import { BaseEntity } from 'src/shared/domain/entities/base.entity';
 import { BadRequestException } from '@nestjs/common';
+import { Client } from '../../clients/client/domain/entities/client.entity';
 
 export enum PaymentMethod {
   BANK = 'BANK',
@@ -24,7 +25,7 @@ interface PaymentProps {
   excessAmount?: number;
 
   // Relationships (optional - loaded separately)
-  client?: any;
+  client?: Client;
   creator?: any;
 }
 
@@ -45,9 +46,10 @@ export class Payment extends BaseEntity {
   private _createdBy: string;
   private _appliedToInvoices: PaymentApplication[];
   private _excessAmount: number;
+  private _clientName?: string;
 
   // Relationships
-  private _client?: any;
+  private _client?: Client;
   private _creator?: any;
 
   private constructor(props: PaymentProps, id?: string) {
@@ -123,10 +125,9 @@ export class Payment extends BaseEntity {
   }
 
   // Relationship setters
-  setClient(client: any): void {
+  setClient(client: Client): void {
     this._client = client;
   }
-
   setCreator(creator: any): void {
     this._creator = creator;
   }

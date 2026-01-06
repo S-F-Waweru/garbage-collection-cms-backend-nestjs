@@ -62,6 +62,7 @@ export class CreateClientUseCase {
           );
         }
 
+        this.logger.debug(`BUILDING DTO`, buildingDto);
         // Create building
         const building = Building.create({
           name: buildingDto.name,
@@ -69,7 +70,11 @@ export class CreateClientUseCase {
           client: savedClient,
           unitPrice: buildingDto.unitPrice,
           unitCount: buildingDto.unitCount,
+          binsAssigned: buildingDto.binsAssigned,
+          activeUnits: buildingDto.activeUnits,
         });
+
+        this.logger.debug(`SAVED BUILDING`, building);
 
         // Save and return the building
         return this.buildingRepository.save(building);

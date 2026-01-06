@@ -57,6 +57,7 @@ export class AuthController {
   // ---------------------------
   // Login
   // ---------------------------
+  @Public()
   @Post('login')
   @ApiOperation({
     summary: 'Login user and return access & refresh tokens',
@@ -71,7 +72,7 @@ export class AuthController {
   // ---------------------------
   // Change Password (Protected)
   // ---------------------------
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Post('change-password')
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
@@ -94,8 +95,9 @@ export class AuthController {
   // ---------------------------
   // Refresh Token (Public)
   // ---------------------------
-  @Public()
+
   @Post('refresh')
+  @Public()
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
   @ApiOperation({
@@ -122,7 +124,7 @@ export class AuthController {
   // ---------------------------
   // Me (Protected)
   // ---------------------------
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Get('me')
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()

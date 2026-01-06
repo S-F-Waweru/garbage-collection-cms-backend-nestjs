@@ -22,7 +22,15 @@ export class UpdateBuildingUseCase {
   ) {}
 
   async execute(id: string, dto: UpdateBuildingDto) {
-    const { name, locationId, clientId, unitPrice, unitCount } = dto;
+    const {
+      name,
+      locationId,
+      clientId,
+      unitPrice,
+      unitCount,
+      binsAssigned,
+      activeUnits,
+    } = dto;
 
     const building = await this.buildingRepository.findById(id);
 
@@ -48,6 +56,8 @@ export class UpdateBuildingUseCase {
       client,
       unitCount,
       unitPrice,
+      binsAssigned,
+      activeUnits,
     });
 
     return {

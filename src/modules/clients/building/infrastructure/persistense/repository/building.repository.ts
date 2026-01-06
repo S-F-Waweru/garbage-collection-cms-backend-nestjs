@@ -5,12 +5,15 @@ import { IsNull, Repository } from 'typeorm';
 import { Building } from '../../../domain/building.entity';
 import { Client } from '../../../../client/domain/entities/client.entity';
 import { Location } from 'src/modules/location/domain/entities/location.entity';
+import { Logger } from '@nestjs/common';
 
 export class BuildingRepository implements IBuildingRepository {
   constructor(
     @InjectRepository(BuildingSchema)
     private readonly repository: Repository<BuildingSchema>,
   ) {}
+
+  private logger = new Logger(BuildingRepository.name);
 
   private toSchema(building: Building) {
     const schema = this.repository.create({
@@ -20,6 +23,8 @@ export class BuildingRepository implements IBuildingRepository {
       client: { id: building.client.id },
       unitPrice: building.unitPrice,
       unitCount: building.unitCount,
+      activeUnits: building.activeUnits,
+      binsAssigned: building.binsAssigned,
     });
 
     return schema;
@@ -52,6 +57,8 @@ export class BuildingRepository implements IBuildingRepository {
       client: client,
       unitPrice: schema.unitPrice,
       unitCount: schema.unitCount,
+      activeUnits: schema.activeUnits,
+      binsAssigned: schema.binsAssigned,
     });
   }
   async findAll(): Promise<Building[]> {
@@ -73,7 +80,9 @@ export class BuildingRepository implements IBuildingRepository {
   }
 
   async save(building: Building): Promise<Building | null> {
+    this.logger.debug(`RAw Building`, building);
     const schema = this.toSchema(building);
+    this.logger.debug(`Schema`, schema);
     const savedBuilding = await this.repository.save(schema);
 
     // Reload with relations to properly map to domain
@@ -81,6 +90,8 @@ export class BuildingRepository implements IBuildingRepository {
       where: { id: savedBuilding.id },
       relations: ['client', 'location'],
     });
+
+    this.logger.debug(`Saved building`, savedBuilding);
 
     return reloaded ? this.toDomain(reloaded) : null;
   }

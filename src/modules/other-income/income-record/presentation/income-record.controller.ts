@@ -96,7 +96,7 @@ export class IncomeRecordController {
   // -----------------------
   // CREATE
   // -----------------------
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Post()
   @ApiOperation({ summary: 'Create a new income record' })
   @ApiBody({ type: CreateIncomeRecordDto })

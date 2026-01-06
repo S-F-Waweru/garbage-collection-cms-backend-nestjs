@@ -113,7 +113,7 @@ export abstract class IClientRepository {
 - GET /:id -> findById(id) -> FindClientByIdUseCase
 - PUT /:id -> update(id, dto) -> UpdateClientUseCase
 - DELETE /:id -> deactivate(id) -> DeactivateClientUseCase
-- Use @UseGuards(JwtAuthGuard)
+- Use // @UseGuards(JwtAuthGuard)
 - Use @CurrentUser() decorator for userId
 ```
 

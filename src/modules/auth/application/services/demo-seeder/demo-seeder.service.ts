@@ -155,8 +155,11 @@ export class DemoSeederService implements OnModuleInit {
       }
 
       const res = await queryRunner.query(
-        `INSERT INTO buildings (id, name, "clientId", "locationId", "unitPrice", "unitCount", "createdAt", "updatedAt")
-         VALUES (gen_random_uuid(), $1, $2, $3, 1500, 20, NOW(), NOW()) RETURNING id, "clientId"`,
+        `INSERT INTO buildings
+         (id, name, "clientId", "locationId", "unitPrice", "unitCount", "activeUnits", "binsAssigned", "createdAt", "updatedAt")
+         VALUES
+           (gen_random_uuid(), $1, $2, $3, 1500, 20, 20, 20, NOW(), NOW())
+           RETURNING id, "clientId"`,
         [name, c.id, locations[0].id],
       );
       results.push(res[0]);
@@ -216,37 +219,50 @@ export class DemoSeederService implements OnModuleInit {
     );
   }
 
+  private getInvoiceDateForMonth(month: number): Date {
+    const year = new Date().getFullYear() - 1; // last year
+    return new Date(year, month, 1);
+  }
+
   private async seedInvoices(
     queryRunner: QueryRunner,
     buildings: any[],
     userId: string,
   ): Promise<any[]> {
     const results: any[] = [];
+
     for (const b of buildings) {
-      const clientShort = String(b.clientId).slice(0, 6).toUpperCase();
-      const invoiceNumber = `INV-${new Date().getFullYear()}-${clientShort}`;
+      for (let month = 0; month < 12; month++) {
+        const invoiceDate = this.getInvoiceDateForMonth(month);
+        const dueDate = this.addDays(invoiceDate, 14);
 
-      const exist = await queryRunner.query(
-        'SELECT id, "totalAmount", "invoiceNumber" FROM invoices WHERE "invoiceNumber" = $1',
-        [invoiceNumber],
-      );
-      if (exist.length > 0) {
-        results.push(exist[0]);
-        continue;
+        const clientShort = String(b.clientId).slice(0, 4).toUpperCase();
+        const invoiceNumber = `INV-${invoiceDate.getFullYear()}-${month + 1}-${clientShort}`;
+
+        const exist = await queryRunner.query(
+          'SELECT id, "totalAmount", "invoiceNumber", "clientId" FROM invoices WHERE "invoiceNumber" = $1',
+          [invoiceNumber],
+        );
+        if (exist.length > 0) {
+          results.push(exist[0]);
+          continue;
+        }
+
+        const res = await queryRunner.query(
+          `INSERT INTO invoices (
+            id, "invoiceNumber", "clientId",
+            "billingPeriodStart", "billingPeriodEnd",
+            "invoiceDate", "dueDate", "unitCount", "unitPrice", subtotal,
+            "creditApplied", "totalAmount", "amountPaid", balance, status, "createdBy", "createdAt", "updatedAt"
+          ) VALUES (gen_random_uuid(), $1, $2, $3, $3, $3, $4, 20, 1500, 30000, 0, 30000, 0, 30000, 'PENDING', $5, NOW(), NOW())
+          RETURNING id, "totalAmount", "clientId", "invoiceNumber"`,
+          [invoiceNumber, b.clientId, invoiceDate, dueDate, userId],
+        );
+
+        results.push(res[0]);
       }
-
-      const invDate = this.getRandomDate(1);
-      const res = await queryRunner.query(
-        `INSERT INTO invoices (
-          id, "invoiceNumber", "clientId", "billingPeriodStart", "billingPeriodEnd",
-          "invoiceDate", "dueDate", "unitCount", "unitPrice", subtotal,
-          "creditApplied", "totalAmount", "amountPaid", balance, status, "createdBy", "createdAt", "updatedAt"
-        ) VALUES (gen_random_uuid(), $1, $2, $3, $3, $3, $4, 20, 1500, 30000, 0, 30000, 0, 30000, 'PENDING', $5, NOW(), NOW())
-        RETURNING id, "totalAmount", "clientId", "invoiceNumber"`,
-        [invoiceNumber, b.clientId, invDate, this.addDays(invDate, 14), userId],
-      );
-      results.push(res[0]);
     }
+
     return results;
   }
 

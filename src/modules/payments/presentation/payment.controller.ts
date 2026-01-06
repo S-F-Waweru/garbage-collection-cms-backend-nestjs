@@ -5,11 +5,10 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Logger,
   Param,
   Post,
   Query,
-  Req,
-  UseGuards,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -29,7 +28,6 @@ import { RecordPaymentUseCase } from '../application/usecases/record-payment.use
 import { ListPaginatedPaymentsUseCase } from '../application/usecases/get-paginated-payments';
 import { CurrentUser } from '../../../shared/decorators/current-user.decorator';
 import type { CurrentUserDto } from '../../expences/petty-cash/presentation/petty-cash.controller';
-import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 
 export interface RequestwithUser extends Request {
   user?: any;
@@ -37,15 +35,17 @@ export interface RequestwithUser extends Request {
 
 @ApiTags('Payments')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+// @UseGuards(JwtAuthGuard)
 @Controller('payments')
 export class PaymentController {
   constructor(
     private readonly recordPaymentUseCase: RecordPaymentUseCase,
     private readonly getPaymentUseCase: GetPaymentUseCase,
     private readonly listPaymentsUseCase: ListPaymentsUseCase,
-    private readonly listPaginatedUsecase: ListPaginatedPaymentsUseCase,
+    private readonly listPaginatedUseCase: ListPaginatedPaymentsUseCase,
   ) {}
+
+  logger = new Logger(PaymentController.name);
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -139,7 +139,8 @@ export class PaymentController {
     @Query('page') page: string = '1',
     @Query('limit') limit: string = '10',
   ) {
-    return await this.listPaginatedUsecase.execute({
+    this.logger.debug(`Reaching here.`);
+    return await this.listPaginatedUseCase.execute({
       page: parseInt(page, 10),
       limit: parseInt(limit, 10),
     });

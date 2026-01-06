@@ -72,6 +72,7 @@ export class RefreshTokenUseCase {
     const newAccessToken = this.jwtService.generateAccessToken({
       userId: user.id,
       email: user.email.value,
+      role: user.role,
     });
 
     const newRefreshTokenString = this.jwtService.generateRefreshToken({

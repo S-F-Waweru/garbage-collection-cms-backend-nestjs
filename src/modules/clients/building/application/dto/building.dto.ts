@@ -20,6 +20,14 @@ export class CreateBuildingDto {
   @IsNotEmpty()
   @IsNumber()
   unitCount: number;
+
+  @IsNotEmpty()
+  @IsNumber()
+  activeUnits: number;
+
+  @IsNotEmpty()
+  @IsNumber()
+  binsAssigned: number;
 }
 
 export class CreateClientBuildingDto {
@@ -38,6 +46,14 @@ export class CreateClientBuildingDto {
   @IsNotEmpty()
   @IsNumber()
   unitCount: number;
+
+  @IsNotEmpty()
+  @IsNumber()
+  activeUnits: number;
+
+  @IsNotEmpty()
+  @IsNumber()
+  binsAssigned: number;
 }
 
 export class UpdateBuildingDto {
@@ -59,5 +75,13 @@ export class UpdateBuildingDto {
 
   @IsNotEmpty()
   @IsNumber()
-  unitCount: number;
+  unitCount: number
+
+  @IsNotEmpty()
+  @IsNumber()
+  activeUnits: number;
+
+  @IsNotEmpty()
+  @IsNumber()
+  binsAssigned: number;
 }

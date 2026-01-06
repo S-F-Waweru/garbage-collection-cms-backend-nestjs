@@ -169,7 +169,7 @@ async handleMonthlyInvoiceGeneration() {
 // invoice.controller.ts
 
 @Post('generate')
-@UseGuards(JwtAuthGuard)
+// @UseGuards(JwtAuthGuard)
 async generate(@Body() dto: GenerateInvoiceDto, @CurrentUser() user: any) {
   const invoice = await this.generateInvoiceUseCase.execute(dto, user.userId);
   return InvoiceResponseDto.fromDomain(invoice);
@@ -308,7 +308,7 @@ async execute(dto: RecordPaymentDto, userId: string): Promise<Payment> {
 // payment.controller.ts
 
 @Post()
-@UseGuards(JwtAuthGuard)
+// @UseGuards(JwtAuthGuard)
 async recordPayment(@Body() dto: RecordPaymentDto, @CurrentUser() user: any) {
   const payment = await this.recordPaymentUseCase.execute(dto, user.userId);
   return PaymentResponseDto.fromDomain(payment);
