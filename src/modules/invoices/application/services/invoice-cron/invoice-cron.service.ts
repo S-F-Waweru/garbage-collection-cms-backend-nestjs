@@ -16,7 +16,7 @@ export class InvoiceCronService {
     private readonly generateInvoiceUseCase: GenerateInvoiceUseCase, // Direct injection
   ) {}
 
-  @Cron(CronExpression.EVERY_5_SECONDS)
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async handleMonthlyInvoiceGeneration() {
     const today = new Date();
     const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);

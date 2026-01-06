@@ -21,6 +21,7 @@ import { ResetPasswordUseCase } from './application/use-cases/reset-password.use
 import { JwtStrategy } from './presentation/strategies/jwt.strategy';
 import { RefreshTokenUseCase } from './application/use-cases/refresh-token.use-case';
 import { DemoSeederService } from './application/services/demo-seeder/demo-seeder.service';
+import { ViewPaginatedUsersUsecase } from './application/use-cases/view-paginated-users.usecase';
 
 @Module({
   imports: [
@@ -64,6 +65,7 @@ import { DemoSeederService } from './application/services/demo-seeder/demo-seede
     },
 
     ResetPasswordUseCase,
+    ViewPaginatedUsersUsecase,
   ],
   controllers: [AuthController],
   exports: [

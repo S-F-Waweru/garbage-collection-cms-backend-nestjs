@@ -12,7 +12,7 @@ import { GetClientCreditUseCase } from '../application/usecase/getClientCredit.u
 import { IncrementBalanceUseCase } from '../application/usecase/increment-balance.use-case';
 import { UpdateBalanceUseCase } from '../application/usecase/update-balance.usecase';
 
-@Controller('client-credit')
+@Controller('credit')
 export class ClientCreditController {
   constructor(
     private readonly createClientCreditUseCase: CreateClientCreditUseCase,
@@ -28,7 +28,7 @@ export class ClientCreditController {
     return this.createClientCreditUseCase.execute(dto);
   }
 
-  @Get('client/:clientId')
+  @Get(':clientId')
   async getClientCredit(@Param('clientId') clientId: string) {
     return this.getClientCreditUseCase.execute({ clientId });
   }

@@ -5,6 +5,8 @@ import {
   HttpCode,
   HttpStatus,
   Post,
+  Put,
+  Query,
   Req,
   UnauthorizedException,
   UseGuards,
@@ -13,6 +15,7 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiOperation,
+  ApiQuery,
   ApiResponse,
   ApiTags,
   ApiUnauthorizedResponse,
@@ -31,6 +34,8 @@ import { CurrentUser } from '../../../../shared/decorators/current-user.decorato
 import { Public } from '../decorators/public.decorator';
 import { RefreshTokenUseCase } from '../../application/use-cases/refresh-token.use-case';
 import type { CurrentUserDto } from '../../../expences/petty-cash/presentation/petty-cash.controller';
+import { get } from 'node:https';
+import { ViewPaginatedUsersUsecase } from '../../application/use-cases/view-paginated-users.usecase';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -40,6 +45,7 @@ export class AuthController {
     private readonly loginUseCase: LoginUseCase,
     private readonly changePasswordUseCase: ChangePasswordUseCase,
     private readonly refreshTokenUseCase: RefreshTokenUseCase,
+    private readonly getUsersUseCase: ViewPaginatedUsersUsecase,
   ) {}
 
   // ---------------------------
@@ -142,4 +148,23 @@ export class AuthController {
       message: 'This is a protected route',
     };
   }
+  @Get('users')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Get Users (paginated)' })
+  @ApiQuery({ name: 'page', required: false, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, example: 10 })
+  @ApiResponse({ status: 200, description: 'Users fetched successfully' })
+  async getUsers(
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '10',
+  ) {
+    return this.getUsersUseCase.execute({
+      page: Number(page),
+      limit: Number(limit),
+    });
+  }
+
+  // todo;/
+  @Put('users/:id')
+  changeRole() {}
 }

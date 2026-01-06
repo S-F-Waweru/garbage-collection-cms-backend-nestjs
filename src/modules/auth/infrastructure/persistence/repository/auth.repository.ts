@@ -41,6 +41,17 @@ export class AuthRepository implements IAuthRepository {
       deletedAt: new Date(),
     });
   }
+  async getPaginatedUsers(
+    skip: number,
+    limit: number,
+  ): Promise<[User[], number]> {
+    const [schemas, total] = await this.repository.findAndCount({
+      where: { deletedAt: IsNull() },
+      skip,
+      take: limit,
+    });
+    return [schemas.map((s) => this.toDomain(s)), total];
+  }
 
   async exists(email: Email): Promise<boolean> {
     const count = await this.repository.count({
