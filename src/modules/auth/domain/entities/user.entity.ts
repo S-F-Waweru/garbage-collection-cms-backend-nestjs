@@ -1,8 +1,8 @@
 import { BaseEntity } from '../../../../shared/domain/entities/base.entity';
-import { Email } from '../value-objects/email.vo';
-import { Password } from '../value-objects/Password.vo';
 import { BadRequestException } from '@nestjs/common';
 import { Role } from '../../policies/rbac.policy';
+import { Email } from '../value-objects/email.vo';
+import { Password } from '../value-objects/Password.vo';
 
 // todo add value objects => Password, Email
 export class User extends BaseEntity {
@@ -82,6 +82,11 @@ export class User extends BaseEntity {
 
   changePassword(newPassword: string): void {
     this._password = new Password(newPassword);
+  }
+
+  setRole(role: Role) {
+    this._role = role;
+    this.touch();
   }
 
   // Getters

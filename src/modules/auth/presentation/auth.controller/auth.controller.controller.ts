@@ -4,6 +4,8 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Param,
+  Patch,
   Post,
   Put,
   Query,
@@ -25,6 +27,7 @@ import { RegisterUseCase } from '../../application/use-cases/register.use-case.t
 import { LoginUseCase } from '../../application/use-cases/login.use-case.ts/login.use-case';
 import {
   ChangePasswordDto,
+  ChangeRoleDTO,
   LoginDto,
   RegisterDto,
 } from '../../application/dto/auth.request.dto';
@@ -36,6 +39,7 @@ import { RefreshTokenUseCase } from '../../application/use-cases/refresh-token.u
 import type { CurrentUserDto } from '../../../expences/petty-cash/presentation/petty-cash.controller';
 import { get } from 'node:https';
 import { ViewPaginatedUsersUsecase } from '../../application/use-cases/view-paginated-users.usecase';
+import { UpdateRoleUsecase } from '../../application/use-cases/update-roles.usecase';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -46,6 +50,7 @@ export class AuthController {
     private readonly changePasswordUseCase: ChangePasswordUseCase,
     private readonly refreshTokenUseCase: RefreshTokenUseCase,
     private readonly getUsersUseCase: ViewPaginatedUsersUsecase,
+    private readonly updateRole: UpdateRoleUsecase,
   ) {}
 
   // ---------------------------
@@ -165,6 +170,17 @@ export class AuthController {
   }
 
   // todo;/
-  @Put('users/:id')
-  changeRole() {}
+  @Patch('users/:id/role')
+  async changeRole(
+    @CurrentUser() user: any,
+    @Param('id') targetUserId: string,
+    @Body() dto: ChangeRoleDTO,
+  ) {
+    const loggedUserId = user.userId;
+
+    // Ensure the DTO userId matches the route parameter
+    dto.userId = targetUserId;
+
+    return await this.updateRole.execute(loggedUserId, dto);
+  }
 }

@@ -146,7 +146,7 @@ export class Payment extends BaseEntity {
     const payment = new Payment(props, props.id);
     payment._createdAt = props.createdAt;
     payment._updatedAt = props.updatedAt;
-    payment.validate();
+    // payment.validate();
     return payment;
   }
 

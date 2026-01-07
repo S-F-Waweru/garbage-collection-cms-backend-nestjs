@@ -5,6 +5,7 @@ import {
   Matches,
   MinLength,
   IsOptional,
+  IsNotEmpty,
 } from 'class-validator';
 import { Role } from '../../policies/rbac.policy';
 
@@ -62,4 +63,14 @@ export class ResetPasswordDto {
   newPassword: string;
   @IsString()
   token: string;
+}
+
+export class ChangeRoleDTO {
+  @IsString()
+  @IsNotEmpty({ message: 'User ID is required' })
+  userId: string;
+
+  @IsEnum(Role, { message: 'Role must be one of: admin, accountant, director' })
+  @IsNotEmpty({ message: 'Role is required' })
+  role: Role;
 }

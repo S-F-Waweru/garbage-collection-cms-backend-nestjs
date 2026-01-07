@@ -11,17 +11,31 @@ import { FindClientByIdUseCase } from './application/use-cases/find-by-id.use-ca
 import { IClientRepository } from './domain/interface/client.repository.interface';
 import { ClientRepository } from './infrastructure/perisistence/repository/client.repository';
 import { FindAllClientsRawUseCase } from './application/use-cases/find-raw-clients.usecase';
+import { ICreditClientRepository } from 'src/modules/client-credit/domain/client_credit.repository.interfacace';
+import { ClientCreditRepository } from 'src/modules/client-credit/infrastructure/persisitence/repository/client-credit.repository';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { ClientCreditSchema } from 'src/modules/client-credit/infrastructure/persisitence/schema/client-credit.schema';
 
 @Module({
-  imports: [RepositoriesModule, LocationModule],
+  imports: [
+    RepositoriesModule,
+    LocationModule,
+    TypeOrmModule.forFeature([ClientCreditSchema]),
+  ],
   controllers: [ClientController],
+
   providers: [
     CreateClientUseCase,
     UpdateClientUseCase,
     DeleteClientUseCase,
     FindAllClientsUseCase,
     FindClientByIdUseCase,
-    FindAllClientsRawUseCase
+    FindAllClientsRawUseCase,
+
+    {
+      provide: ICreditClientRepository,
+      useClass: ClientCreditRepository,
+    },
   ],
   exports: [RepositoriesModule],
 })

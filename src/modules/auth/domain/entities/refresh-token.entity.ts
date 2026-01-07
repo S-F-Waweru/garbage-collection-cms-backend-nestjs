@@ -8,14 +8,17 @@ export class RefreshToken extends BaseEntity {
   private _isRevoked: boolean;
   private _revokedAt?: Date;
 
-  private constructor(props: {
-    id?: string;
-    tokenHash: string;
-    userId: string;
-    expiresAt: Date;
-    isRevoked?: boolean;
-    revokedAt?: Date;
-  }) {
+  private constructor(
+    props: {
+      id?: string;
+      tokenHash: string;
+      userId: string;
+      expiresAt: Date;
+      isRevoked?: boolean;
+      revokedAt?: Date;
+    },
+    skipValidation = false,
+  ) {
     super(props.id);
     this._tokenHash = props.tokenHash;
     this._userId = props.userId;
@@ -23,7 +26,9 @@ export class RefreshToken extends BaseEntity {
     this._isRevoked = props.isRevoked || false;
     this._revokedAt = props.revokedAt;
 
-    this.validate();
+    if (!skipValidation) {
+      this.validate();
+    }
   }
 
   private validate(): void {
@@ -63,14 +68,17 @@ export class RefreshToken extends BaseEntity {
     isRevoked: boolean;
     revokedAt?: Date;
   }): RefreshToken {
-    return new RefreshToken({
-      id: props.id,
-      tokenHash: props.tokenHash,
-      userId: props.userId,
-      expiresAt: props.expiresAt,
-      isRevoked: props.isRevoked,
-      revokedAt: props.revokedAt,
-    });
+    return new RefreshToken(
+      {
+        id: props.id,
+        tokenHash: props.tokenHash,
+        userId: props.userId,
+        expiresAt: props.expiresAt,
+        isRevoked: props.isRevoked,
+        revokedAt: props.revokedAt,
+      },
+      true, // Skip validation for persisted tokens
+    );
   }
 
   // Business methods
@@ -92,15 +100,19 @@ export class RefreshToken extends BaseEntity {
   get tokenHash(): string {
     return this._tokenHash;
   }
+
   get userId(): string {
     return this._userId;
   }
+
   get expiresAt(): Date {
     return this._expiresAt;
   }
+
   get isRevoked(): boolean {
     return this._isRevoked;
   }
+
   get revokedAt(): Date | undefined {
     return this._revokedAt;
   }

@@ -3,6 +3,7 @@ import {
   Inject,
   NotFoundException,
   BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { IClientRepository } from 'src/modules/clients/client/domain/interface/client.repository.interface';
 import { ClientCredit } from '../../domain/client-credit.entity';
@@ -20,8 +21,10 @@ export class CreateClientCreditUseCase {
     @Inject(IClientRepository)
     private readonly clientRepository: IClientRepository,
   ) {}
+  private logger = new Logger(CreateClientCreditUseCase.name);
 
   async execute(dto: CreateClientCreditDto): Promise<ClientCreditResponseDto> {
+    this.logger.debug(dto);
     // Check if client exists
     const client = await this.clientRepository.findById(dto.clientId);
     if (!client) {

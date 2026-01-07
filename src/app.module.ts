@@ -29,6 +29,7 @@ import { PaymentSchema } from './modules/payments/infrastructure/payment.schema'
 import { ClientCreditSchema } from './modules/client-credit/infrastructure/persisitence/schema/client-credit.schema';
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 import { APP_GUARD } from '@nestjs/core';
+import { PasswordResetTokenSchema } from './modules/auth/infrastructure/persistence/schema/password-reset-schema';
 
 @Module({
   imports: [
@@ -58,6 +59,7 @@ import { APP_GUARD } from '@nestjs/core';
           ClientCreditSchema,
           InvoiceSchema,
           PaymentSchema,
+          PasswordResetTokenSchema,
         ],
         synchronize: true,
         logging: true,

@@ -37,15 +37,33 @@ export class PaymentRepository implements IPaymentRepository {
   }
 
   async save(payment: Payment): Promise<Payment> {
-    const data = payment.toObject();
-    const schema = this.repo.create(data);
-    const saved = await this.repo.save(schema);
+    try {
+      const data = {
+        id: payment.id,
+        paymentNumber: payment.paymentNumber,
+        clientId: payment.clientId,
+        amount: payment.amount,
+        paymentMethod: payment.paymentMethod,
+        paymentDate: payment.paymentDate,
+        referenceNumber: payment.referenceNumber,
+        notes: payment.notes,
+        createdBy: payment.createdBy,
+        appliedToInvoices: payment.appliedToInvoices,
+        excessAmount: payment.excessAmount,
+      };
 
-    // Handle array case
-    if (Array.isArray(saved)) {
-      return this.toDomain(saved[0]);
+      console.log('Attempting to save:', JSON.stringify(data, null, 2));
+      const saved = await this.repo.save(data);
+      console.log('Save successful:', saved);
+
+      return Array.isArray(saved)
+        ? this.toDomain(saved[0])
+        : this.toDomain(saved);
+    } catch (error) {
+      console.error('PAYMENT SAVE ERROR:', error.message);
+      console.error('Full error:', error);
+      throw error;
     }
-    return this.toDomain(saved);
   }
 
   async findById(id: string): Promise<Payment | null> {

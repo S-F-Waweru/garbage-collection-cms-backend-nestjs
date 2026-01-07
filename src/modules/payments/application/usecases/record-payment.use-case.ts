@@ -14,6 +14,7 @@ import { RecordPaymentDto } from '../payment.dto';
 import { IInvoiceRepository } from 'src/modules/invoices/domain/invoice.repository.intreface';
 import { IPaymentRepository } from '../../domain/payment.repositiory.interface';
 import { ICreditClientRepository } from 'src/modules/client-credit/domain/client_credit.repository.interfacace';
+import { PaymentSchema } from '../../infrastructure/payment.schema';
 
 @Injectable()
 export class RecordPaymentUseCase {
@@ -31,17 +32,13 @@ export class RecordPaymentUseCase {
   logger = new Logger(RecordPaymentUseCase.name);
 
   async execute(dto: RecordPaymentDto, userId: string): Promise<Payment> {
-    this.logger.debug(userId);
-    // 1. Validate client exists
     const client = await this.clientRepo.findById(dto.clientId);
     if (!client) {
       throw new BadRequestException('Client not found');
     }
 
-    // 2. Get next payment number
     const paymentNumber = await this.paymentRepo.getNextPaymentNumber();
 
-    // 3. Create payment entity
     const payment = Payment.create({
       paymentNumber,
       clientId: dto.clientId,
@@ -52,54 +49,66 @@ export class RecordPaymentUseCase {
       notes: dto.notes,
       createdBy: userId,
     });
-    this.logger.log(payment);
 
-    // 4. Apply payment to invoices in a transaction
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
-      // Get outstanding invoices (oldest first - FIFO)
+      // Save payment FIRST inside transaction
+      const savedPayment = await queryRunner.manager.save(PaymentSchema, {
+        id: payment.id,
+        paymentNumber: payment.paymentNumber,
+        clientId: payment.clientId,
+        amount: payment.amount,
+        paymentMethod: payment.paymentMethod,
+        paymentDate: payment.paymentDate,
+        referenceNumber: payment.referenceNumber,
+        notes: payment.notes,
+        createdBy: payment.createdBy,
+        appliedToInvoices: payment.appliedToInvoices,
+        excessAmount: payment.excessAmount,
+      });
+
+      // Get outstanding invoices
       const outstandingInvoices =
         await this.invoiceRepo.findOutstandingByClient(dto.clientId);
-
       let remainingAmount = dto.amount;
 
-      // Apply to invoices
       for (const invoice of outstandingInvoices) {
         if (remainingAmount <= 0) break;
 
         const amountToApply = Math.min(remainingAmount, invoice.balance);
-
-        // Update invoice
         invoice.applyPayment(amountToApply);
         await this.invoiceRepo.update(invoice.id, invoice);
 
-        // Track application in payment
         payment.addInvoiceApplication(
           invoice.id,
           invoice.invoiceNumber,
           amountToApply,
         );
-
         remainingAmount -= amountToApply;
       }
 
-      // If there's excess, add to client credit
       if (remainingAmount > 0) {
         payment.setExcessAmount(remainingAmount);
         await this.creditRepo.incrementBalance(dto.clientId, remainingAmount);
       }
 
-      this.logger.log(payment);
-      // Save payment
-      const savedPayment = await this.paymentRepo.save(payment);
-
-      console.log(savedPayment);
-
+      // Update payment with invoice applications
+      await queryRunner.manager.update(PaymentSchema, payment.id, {
+        appliedToInvoices: payment.appliedToInvoices as any,  // Cast to any
+        excessAmount: payment.excessAmount,
+      });
+      
       await queryRunner.commitTransaction();
-      return savedPayment;
+      
+      const finalPayment = await this.paymentRepo.findById(payment.id);
+      if (!finalPayment) {
+        throw new BadRequestException('Payment not found after save');
+      }
+      
+      return finalPayment;
     } catch (error) {
       await queryRunner.rollbackTransaction();
       throw error;

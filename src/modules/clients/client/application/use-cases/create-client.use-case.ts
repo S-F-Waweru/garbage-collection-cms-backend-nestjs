@@ -12,6 +12,8 @@ import { IBuildingRepository } from '../../../building/domain/interface/buidling
 import { ILocationRepository } from '../../../../location/domain/interface/location.repository.inteface';
 import { CreateClientDto } from '../dtos/client.dto';
 import { log } from 'node:console';
+import { ICreditClientRepository } from 'src/modules/client-credit/domain/client_credit.repository.interfacace';
+import { ClientCredit } from 'src/modules/client-credit/domain/client-credit.entity';
 
 @Injectable()
 export class CreateClientUseCase {
@@ -23,6 +25,8 @@ export class CreateClientUseCase {
     private readonly buildingRepository: IBuildingRepository,
     @Inject(ILocationRepository)
     private readonly locationRepository: ILocationRepository,
+    @Inject(ICreditClientRepository)
+    private readonly creditRepository: ICreditClientRepository,
   ) {}
 
   async execute(dto: CreateClientDto): Promise<Client> {
@@ -45,10 +49,11 @@ export class CreateClientUseCase {
 
     // Save the client first to get an ID
     const savedClient = await this.clientRepository.save(client);
-    console.log(savedClient);
-
-    this.logger.debug(savedClient);
-
+    const credit = ClientCredit.create({
+      client: savedClient,
+      balance: 0,
+    });
+    await this.creditRepository.save(credit);
     // If buildings are provided, create and save them
     if (dto.buildings && dto.buildings.length > 0) {
       const buildingPromises = dto.buildings.map(async (buildingDto) => {

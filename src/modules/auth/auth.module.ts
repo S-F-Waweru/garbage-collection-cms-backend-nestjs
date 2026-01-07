@@ -22,6 +22,10 @@ import { JwtStrategy } from './presentation/strategies/jwt.strategy';
 import { RefreshTokenUseCase } from './application/use-cases/refresh-token.use-case';
 import { DemoSeederService } from './application/services/demo-seeder/demo-seeder.service';
 import { ViewPaginatedUsersUsecase } from './application/use-cases/view-paginated-users.usecase';
+import { UpdateRoleUsecase } from './application/use-cases/update-roles.usecase';
+import { IPasswordResetTokenRepository } from './domain/interfaces/password.reposiory.interface';
+import { PasswordResetTokenRepository } from './infrastructure/persistence/repository/password-reset-token.repository';
+import { PasswordResetTokenSchema } from './infrastructure/persistence/schema/password-reset-schema';
 
 @Module({
   imports: [
@@ -37,7 +41,11 @@ import { ViewPaginatedUsersUsecase } from './application/use-cases/view-paginate
       }),
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([UserSchema, RefreshTokenSchema]),
+    TypeOrmModule.forFeature([
+      UserSchema,
+      RefreshTokenSchema,
+      PasswordResetTokenSchema,
+    ]),
   ],
   providers: [
     // Strategies and guards
@@ -50,6 +58,8 @@ import { ViewPaginatedUsersUsecase } from './application/use-cases/view-paginate
     AdminSeederService,
     DemoSeederService,
     RefreshTokenUseCase,
+    UpdateRoleUsecase,
+    ResetPasswordUseCase,
 
     //Services
     PasswordHasherService,
@@ -57,6 +67,12 @@ import { ViewPaginatedUsersUsecase } from './application/use-cases/view-paginate
     {
       provide: IRefreshTokenRepository,
       useClass: RefreshTokenRepository,
+    },
+
+    PasswordResetTokenRepository,
+    {
+      provide: IPasswordResetTokenRepository,
+      useClass: PasswordResetTokenRepository,
     },
 
     {
