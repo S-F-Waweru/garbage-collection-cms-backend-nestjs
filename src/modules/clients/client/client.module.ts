@@ -15,12 +15,15 @@ import { ICreditClientRepository } from 'src/modules/client-credit/domain/client
 import { ClientCreditRepository } from 'src/modules/client-credit/infrastructure/persisitence/repository/client-credit.repository';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ClientCreditSchema } from 'src/modules/client-credit/infrastructure/persisitence/schema/client-credit.schema';
+import { SystemUserService } from 'src/modules/auth/application/services/system-user.service';
+import { AuthModule } from 'src/modules/auth/auth.module';
 
 @Module({
   imports: [
     RepositoriesModule,
     LocationModule,
     TypeOrmModule.forFeature([ClientCreditSchema]),
+    AuthModule,
   ],
   controllers: [ClientController],
 
@@ -31,6 +34,7 @@ import { ClientCreditSchema } from 'src/modules/client-credit/infrastructure/per
     FindAllClientsUseCase,
     FindClientByIdUseCase,
     FindAllClientsRawUseCase,
+    SystemUserService,
 
     {
       provide: ICreditClientRepository,

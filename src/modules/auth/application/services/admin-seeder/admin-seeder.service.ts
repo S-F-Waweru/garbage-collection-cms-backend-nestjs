@@ -17,7 +17,7 @@ export class AdminSeederService {
   ) {}
 
   async seedDefaultAdmin() {
-    const adminEmail = process.env.ADMIN_EMAIL || 'admin@garbagecms.com';
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@helapay.africa';
     const adminPassword = process.env.ADMIN_PASSWORD || 'Admin@123';
 
     try {

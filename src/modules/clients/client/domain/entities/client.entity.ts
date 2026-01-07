@@ -76,13 +76,6 @@ export class Client extends BaseEntity {
       throw new BadRequestException('Phone is required');
     }
 
-    // const phoneRegex = /^(?:\+254|0)[17]\d{8}$/; <= Kenyan
-    // const phoneRegex = /^\+[1-9]\d{1,14}$/;
-
-    // if (!phoneRegex.test(this._phone)) {
-    //   throw new BadRequestException('Invalid  phone number format');
-    // }
-
     if (this._paymentMethod === undefined || this._paymentMethod === null) {
       throw new BadRequestException('PaymentMethod is required');
     }
@@ -91,10 +84,6 @@ export class Client extends BaseEntity {
     if (this._billingDate < 1 || this._billingDate > 31) {
       throw new BadRequestException('Billing date must be between 1 and 31');
     }
-
-    // Validate for months with fewer days
-    // Note: We can't validate specific months here, just the range
-    // Actual month validation happens during invoice generation
   }
 
   static create(props: {
@@ -161,8 +150,7 @@ export class Client extends BaseEntity {
     this.validate();
   }
 
-  //   getters
-
+  // Getters
   get firstName() {
     return this._firstName;
   }
@@ -187,7 +175,7 @@ export class Client extends BaseEntity {
     return this._KRAPin;
   }
 
-  get billingDate() {
+  get billingDate(): number {
     return this._billingDate;
   }
 
@@ -197,5 +185,12 @@ export class Client extends BaseEntity {
 
   get paymentMethod() {
     return this._paymentMethod;
+  }
+
+  // Setter method - extracts day from date
+  setBillingDate(date: Date): void {
+    this._billingDate = date.getDate(); // Gets day of month (1-31)
+    this.validate(); // Validate the new billing date
+    this.touch();
   }
 }

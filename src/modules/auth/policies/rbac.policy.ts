@@ -4,6 +4,7 @@ export enum Role {
   ADMIN = 'admin',
   DIRECTOR = 'director',
   ACCOUNTANT = 'accountant',
+  SYSTEM = 'system',
 }
 export const roles: RolesBuilder = new RolesBuilder();
 

@@ -186,7 +186,7 @@ export class InvoiceRepository implements IInvoiceRepository {
       billingPeriodEnd: schema.billingPeriodEnd,
       invoiceDate: schema.invoiceDate,
       dueDate: schema.dueDate,
-      unitCount: schema.unitCount,
+      activeUnits: schema.activeUnits,
       unitPrice: schema.unitPrice,
       subtotal: schema.subtotal,
       creditApplied: schema.creditApplied,

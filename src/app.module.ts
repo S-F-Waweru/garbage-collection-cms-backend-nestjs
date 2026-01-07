@@ -30,6 +30,7 @@ import { ClientCreditSchema } from './modules/client-credit/infrastructure/persi
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 import { APP_GUARD } from '@nestjs/core';
 import { PasswordResetTokenSchema } from './modules/auth/infrastructure/persistence/schema/password-reset-schema';
+import { SystemUserService } from './modules/auth/application/services/system-user.service';
 
 @Module({
   imports: [

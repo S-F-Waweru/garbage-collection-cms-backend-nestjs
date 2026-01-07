@@ -26,6 +26,7 @@ import { UpdateRoleUsecase } from './application/use-cases/update-roles.usecase'
 import { IPasswordResetTokenRepository } from './domain/interfaces/password.reposiory.interface';
 import { PasswordResetTokenRepository } from './infrastructure/persistence/repository/password-reset-token.repository';
 import { PasswordResetTokenSchema } from './infrastructure/persistence/schema/password-reset-schema';
+import { SystemUserService } from './application/services/system-user.service';
 
 @Module({
   imports: [
@@ -60,6 +61,7 @@ import { PasswordResetTokenSchema } from './infrastructure/persistence/schema/pa
     RefreshTokenUseCase,
     UpdateRoleUsecase,
     ResetPasswordUseCase,
+    SystemUserService,
 
     //Services
     PasswordHasherService,
@@ -89,14 +91,18 @@ import { PasswordResetTokenSchema } from './infrastructure/persistence/schema/pa
     IRefreshTokenRepository,
     PasswordHasherService,
     JwtStrategy,
+    SystemUserService,
   ],
 })
 export class AuthModule implements OnModuleInit {
   constructor(
     private readonly adminSeederService: AdminSeederService,
     private readonly demoSeeder: DemoSeederService,
+    private readonly systemUserService: SystemUserService,
   ) {}
   async onModuleInit() {
+    // Ensure system user exists
+    await this.systemUserService.ensureSystemUserExists();
     await this.adminSeederService.seedDefaultAdmin();
     await this.demoSeeder.seedDemoData();
   }

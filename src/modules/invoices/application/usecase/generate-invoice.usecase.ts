@@ -42,8 +42,8 @@ export class GenerateInvoiceUseCase {
     let totalAmount = 0;
 
     for (const building of client.buildings) {
-      totalUnits += building.unitCount;
-      totalAmount += building.unitCount * building.unitPrice;
+      totalUnits += building.activeUnits;
+      totalAmount += building.activeUnits* building.unitPrice;
     }
 
     const subtotal = totalAmount;
@@ -77,7 +77,7 @@ export class GenerateInvoiceUseCase {
       billingPeriodEnd: dto.billingPeriodEnd,
       invoiceDate: dto.invoiceDate || new Date(),
       dueDate,
-      unitCount: totalUnits,
+      activeUnits: totalUnits,
       unitPrice: totalAmount / totalUnits, // Average
       subtotal,
       creditApplied: creditToApply,

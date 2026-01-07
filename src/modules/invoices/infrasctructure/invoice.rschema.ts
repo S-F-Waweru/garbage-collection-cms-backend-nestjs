@@ -44,7 +44,7 @@ export class InvoiceSchema {
   dueDate: Date;
 
   @Column('int')
-  unitCount: number;
+  activeUnits: number;
 
   @Column('decimal', { precision: 10, scale: 2 })
   unitPrice: number;

@@ -252,7 +252,7 @@ export class DemoSeederService implements OnModuleInit {
           `INSERT INTO invoices (
             id, "invoiceNumber", "clientId",
             "billingPeriodStart", "billingPeriodEnd",
-            "invoiceDate", "dueDate", "unitCount", "unitPrice", subtotal,
+            "invoiceDate", "dueDate", "activeUnits", "unitPrice", subtotal,
             "creditApplied", "totalAmount", "amountPaid", balance, status, "createdBy", "createdAt", "updatedAt"
           ) VALUES (gen_random_uuid(), $1, $2, $3, $3, $3, $4, 20, 1500, 30000, 0, 30000, 0, 30000, 'PENDING', $5, NOW(), NOW())
           RETURNING id, "totalAmount", "clientId", "invoiceNumber"`,
