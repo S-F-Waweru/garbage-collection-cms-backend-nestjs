@@ -1,4 +1,3 @@
-// infrastructure/report.repository.ts
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
@@ -16,8 +15,6 @@ import {
   ReportSummary,
 } from '../domain/report-result.entity';
 
-// Import other schemas as needed
-
 @Injectable()
 export class ReportRepository implements IReportRepository {
   constructor(
@@ -26,6 +23,14 @@ export class ReportRepository implements IReportRepository {
     private readonly dataSource: DataSource,
   ) {}
 
+  private toCents(amount: string | number | null | undefined): number {
+    return Math.round((Number(amount) || 0) * 100);
+  }
+
+  private fromCents(cents: number): number {
+    return cents / 100;
+  }
+
   async getOutstandingBalances(
     filters?: ReportFilters,
   ): Promise<OutstandingBalanceItem[]> {
@@ -33,7 +38,7 @@ export class ReportRepository implements IReportRepository {
       .createQueryBuilder()
       .select([
         'i.clientId as "clientId"',
-        'c.firstName as "clientFirstName"', // Add closing quote here
+        'c.firstName as "clientFirstName"',
         'c.lastName as "clientLastName"',
         'i.id as "invoiceId"',
         'i.invoiceNumber as "invoiceNumber"',
@@ -55,22 +60,24 @@ export class ReportRepository implements IReportRepository {
         startDate: filters.startDate,
       });
     }
-
     if (filters?.endDate) {
       query = query.andWhere('i.invoiceDate <= :endDate', {
         endDate: filters.endDate,
       });
     }
-
     if (filters?.clientId) {
-      query = query.andWhere('i.clientId = :clientId', {
-        clientId: filters.clientId,
-      });
+      query = query.andWhere('i.clientId = :clientId', { clientId: filters.clientId });
     }
 
     query = query.orderBy('i.invoiceDate', 'ASC');
 
-    return query.getRawMany();
+    const results = await query.getRawMany();
+    return results.map((r) => ({
+      ...r,
+      totalAmount: this.fromCents(this.toCents(r.totalAmount)),
+      amountPaid: this.fromCents(this.toCents(r.amountPaid)),
+      balance: this.fromCents(this.toCents(r.balance)),
+    }));
   }
 
   async getRevenueByClient(
@@ -96,42 +103,24 @@ export class ReportRepository implements IReportRepository {
       .andWhere('"i"."status" != :cancelled', { cancelled: 'CANCELLED' })
       .andWhere('"i"."deletedAt" IS NULL');
 
-    if (filters?.startDate) {
-      query = query.andWhere('"i"."invoiceDate" >= :startDate', {
-        startDate: filters.startDate,
-      });
-    }
+    if (filters?.startDate) query = query.andWhere('"i"."invoiceDate" >= :startDate', { startDate: filters.startDate });
+    if (filters?.endDate) query = query.andWhere('"i"."invoiceDate" <= :endDate', { endDate: filters.endDate });
+    if (filters?.clientId) query = query.andWhere('"i"."clientId" = :clientId', { clientId: filters.clientId });
 
-    if (filters?.endDate) {
-      query = query.andWhere('"i"."invoiceDate" <= :endDate', {
-        endDate: filters.endDate,
-      });
-    }
-
-    if (filters?.clientId) {
-      query = query.andWhere('"i"."clientId" = :clientId', {
-        clientId: filters.clientId,
-      });
-    }
-
-    query = query
-      .groupBy('"i"."clientId", "c"."firstName", "c"."lastName"')
-      .orderBy('"totalInvoiced"', 'DESC');
+    query = query.groupBy('"i"."clientId", "c"."firstName", "c"."lastName"').orderBy('"totalInvoiced"', 'DESC');
 
     const results = await query.getRawMany();
 
     return results.map((r) => ({
       ...r,
-      totalInvoiced: parseFloat(r.totalInvoiced || 0),
-      totalPaid: parseFloat(r.totalPaid || 0),
-      totalOutstanding: parseFloat(r.totalOutstanding || 0),
-      invoiceCount: parseInt(r.invoiceCount || 0),
+      totalInvoiced: this.fromCents(this.toCents(r.totalInvoiced)),
+      totalPaid: this.fromCents(this.toCents(r.totalPaid)),
+      totalOutstanding: this.fromCents(this.toCents(r.totalOutstanding)),
+      invoiceCount: parseInt(r.invoiceCount || '0', 10),
     }));
   }
 
-  async getRevenueByLocation(
-    filters?: ReportFilters,
-  ): Promise<RevenueByLocationItem[]> {
+  async getRevenueByLocation(filters?: ReportFilters): Promise<RevenueByLocationItem[]> {
     let query = this.dataSource
       .createQueryBuilder()
       .select([
@@ -144,61 +133,30 @@ export class ReportRepository implements IReportRepository {
         'COUNT("i"."id") as "invoiceCount"',
       ])
       .from('invoices', 'i')
-      .leftJoin(
-        'clients',
-        'c',
-        '"i"."clientId" = "c"."id" AND "c"."deletedAt" IS NULL',
-      )
-      .leftJoin(
-        'buildings',
-        'b',
-        '"b"."clientId" = "c"."id" AND "b"."deletedAt" IS NULL',
-      )
-      .leftJoin(
-        'locations',
-        'l',
-        '"b"."locationId" = "l"."id" AND "l"."deletedAt" IS NULL',
-      )
+      .leftJoin('clients', 'c', '"i"."clientId" = "c"."id" AND "c"."deletedAt" IS NULL')
+      .leftJoin('buildings', 'b', '"b"."clientId" = "c"."id" AND "b"."deletedAt" IS NULL')
+      .leftJoin('locations', 'l', '"b"."locationId" = "l"."id" AND "l"."deletedAt" IS NULL')
       .where('"i"."status" != :cancelled', { cancelled: 'CANCELLED' })
       .andWhere('"i"."deletedAt" IS NULL');
 
-    if (filters?.startDate) {
-      query = query.andWhere('"i"."invoiceDate" >= :startDate', {
-        startDate: filters.startDate,
-      });
-    }
+    if (filters?.startDate) query = query.andWhere('"i"."invoiceDate" >= :startDate', { startDate: filters.startDate });
+    if (filters?.endDate) query = query.andWhere('"i"."invoiceDate" <= :endDate', { endDate: filters.endDate });
+    if (filters?.city) query = query.andWhere('"l"."city" = :city', { city: filters.city });
+    if (filters?.region) query = query.andWhere('"l"."region" = :region', { region: filters.region });
 
-    if (filters?.endDate) {
-      query = query.andWhere('"i"."invoiceDate" <= :endDate', {
-        endDate: filters.endDate,
-      });
-    }
-
-    if (filters?.city) {
-      query = query.andWhere('"l"."city" = :city', { city: filters.city });
-    }
-
-    if (filters?.region) {
-      query = query.andWhere('"l"."region" = :region', {
-        region: filters.region,
-      });
-    }
-
-    query = query
-      .groupBy('"l"."city", "l"."region"')
-      .orderBy('"totalInvoiced"', 'DESC');
+    query = query.groupBy('"l"."city", "l"."region"').orderBy('"totalInvoiced"', 'DESC');
 
     const results = await query.getRawMany();
-
     return results.map((r) => ({
       ...r,
-      totalInvoiced: parseFloat(r.totalInvoiced || 0),
-      totalPaid: parseFloat(r.totalPaid || 0),
-      totalOutstanding: parseFloat(r.totalOutstanding || 0),
-      clientCount: parseInt(r.clientCount || 0),
-      invoiceCount: parseInt(r.invoiceCount || 0),
+      totalInvoiced: this.fromCents(this.toCents(r.totalInvoiced)),
+      totalPaid: this.fromCents(this.toCents(r.totalPaid)),
+      totalOutstanding: this.fromCents(this.toCents(r.totalOutstanding)),
+      clientCount: parseInt(r.clientCount || '0', 10),
+      invoiceCount: parseInt(r.invoiceCount || '0', 10),
     }));
   }
+
   async getPettyCashSummary(filters?: ReportFilters): Promise<PettyCashItem[]> {
     let query = this.dataSource
       .createQueryBuilder()
@@ -210,33 +168,17 @@ export class ReportRepository implements IReportRepository {
         'u.id as "enteredBy"',
       ])
       .from('petty_cashes', 'pc')
-      .leftJoin(
-        'users',
-        'u',
-        '"pc"."createdBy"::uuid = "u"."id" AND "u"."deletedAt" IS NULL',
-      )
+      .leftJoin('users', 'u', '"pc"."createdBy"::uuid = "u"."id" AND "u"."deletedAt" IS NULL')
       .where('pc.deletedAt IS NULL');
 
-    if (filters?.startDate) {
-      query = query.andWhere('pc.createdAt >= :startDate', {
-        startDate: filters.startDate,
-      });
-    }
-
-    if (filters?.endDate) {
-      query = query.andWhere('pc.createdAt <= :endDate', {
-        endDate: filters.endDate,
-      });
-    }
+    if (filters?.startDate) query = query.andWhere('pc.createdAt >= :startDate', { startDate: filters.startDate });
+    if (filters?.endDate) query = query.andWhere('pc.createdAt <= :endDate', { endDate: filters.endDate });
 
     query = query.orderBy('pc.createdAt', 'DESC');
-
     const results = await query.getRawMany();
-
     return results.map((r) => ({
       ...r,
-      totalAmount: parseFloat(r.totalAmount || '0'),
-      // balance: parseFloat(r.balance || '0'), // uncomment if balance exists
+      totalAmount: this.fromCents(this.toCents(r.totalAmount)),
     }));
   }
 
@@ -250,7 +192,6 @@ export class ReportRepository implements IReportRepository {
         'oi.unitType as "unitType"',
         'oi.unitPrice as "unitPrice"',
         'oi.unitCount as "unitCount"',
-        'oi.recordedAt as "recordedAt"',
         'oi.unitPrice * oi.unitCount as "total"',
         'oi.recordedBy as "enteredBy"',
       ])
@@ -258,41 +199,27 @@ export class ReportRepository implements IReportRepository {
       .leftJoin('users', 'u', '"oi"."recordedBy"::uuid = "u"."id"')
       .where('oi.deletedAt IS NULL');
 
-    if (filters?.startDate) {
-      query = query.andWhere('oi.recordedAt >= :startDate', {
-        startDate: filters.startDate,
-      });
-    }
-
-    if (filters?.endDate) {
-      query = query.andWhere('oi.recordedAt <= :endDate', {
-        endDate: filters.endDate,
-      });
-    }
+    if (filters?.startDate) query = query.andWhere('oi.recordedAt >= :startDate', { startDate: filters.startDate });
+    if (filters?.endDate) query = query.andWhere('oi.recordedAt <= :endDate', { endDate: filters.endDate });
 
     query = query.orderBy('oi.recordedAt', 'DESC');
-
     const results = await query.getRawMany();
-
     return results.map((r) => ({
       ...r,
-      unitPrice: parseFloat(r.unitPrice || '0'),
-      quantity: parseFloat(r.unitCount || '0'),
-      total: parseFloat(r.total || '0'),
+      unitPrice: this.fromCents(this.toCents(r.unitPrice)),
+      quantity: this.fromCents(this.toCents(r.unitCount)),
+      total: this.fromCents(this.toCents(r.total)),
     }));
   }
 
   async getSummaryStatistics(filters?: ReportFilters): Promise<ReportSummary> {
-    // Total clients
-    const clientQuery = this.dataSource
+    const clientStats = await this.dataSource
       .createQueryBuilder()
       .select(['COUNT(*) as "totalClients"'])
-      .from('clients', 'c');
+      .from('clients', 'c')
+      .getRawOne();
 
-    const clientStats = await clientQuery.getRawOne();
-
-    // Invoice stats
-    let invoiceQuery = this.dataSource
+    const invoiceStats = await this.dataSource
       .createQueryBuilder()
       .select([
         'SUM(i."totalAmount") as "totalRevenue"',
@@ -302,72 +229,40 @@ export class ReportRepository implements IReportRepository {
         `COUNT(CASE WHEN i.status = 'PAID' THEN 1 END) as "paidInvoices"`,
         `COUNT(CASE WHEN i.status = 'PENDING' THEN 1 END) as "pendingInvoices"`,
         `COUNT(CASE WHEN i.status = 'OVERDUE' THEN 1 END) as "overdueInvoices"`,
-        `COUNT(CASE WHEN i.status = 'PARTIALLY_PAID' THEN 1 END) as "partialInvoices"`, // Add this
+        `COUNT(CASE WHEN i.status = 'PARTIALLY_PAID' THEN 1 END) as "partialInvoices"`,
         'AVG(i."totalAmount") as "averageInvoiceAmount"',
       ])
       .from('invoices', 'i')
-      .where('i.status != :cancelled', { cancelled: 'CANCELLED' });
+      .where('i.status != :cancelled', { cancelled: 'CANCELLED' })
+      .getRawOne();
 
-    if (filters?.startDate) {
-      invoiceQuery = invoiceQuery.andWhere('i.invoiceDate >= :startDate', {
-        startDate: filters.startDate,
-      });
-    }
-
-    if (filters?.endDate) {
-      invoiceQuery = invoiceQuery.andWhere('i.invoiceDate <= :endDate', {
-        endDate: filters.endDate,
-      });
-    }
-
-    const invoiceStats = await invoiceQuery.getRawOne();
-
-    // Petty cash balance
-    const pettyCashQuery = this.dataSource
+    const pettyCash = await this.dataSource
       .createQueryBuilder()
       .select('pc.totalAmount', 'totalAmount')
       .from('petty_cashes', 'pc')
       .orderBy('pc.createdAt', 'DESC')
-      .limit(1);
+      .limit(1)
+      .getRawOne();
 
-    const pettyCash = await pettyCashQuery.getRawOne();
-
-    // Other income total
-    let otherIncomeQuery = this.dataSource
+    const otherIncome = await this.dataSource
       .createQueryBuilder()
       .select('SUM(oi."unitPrice" * oi."unitCount") as "otherIncomeTotal"')
-      .from('income_records', 'oi');
-
-    if (filters?.startDate) {
-      otherIncomeQuery = otherIncomeQuery.andWhere(
-        'oi.createdAt >= :startDate',
-        {
-          startDate: filters.startDate,
-        },
-      );
-    }
-
-    if (filters?.endDate) {
-      otherIncomeQuery = otherIncomeQuery.andWhere('oi.createdAt <= :endDate', {
-        endDate: filters.endDate,
-      });
-    }
-
-    const otherIncome = await otherIncomeQuery.getRawOne();
+      .from('income_records', 'oi')
+      .getRawOne();
 
     return {
-      totalClients: parseInt(clientStats?.totalClients || 0),
-      activeClients: parseInt(clientStats?.activeClients || 0),
-      totalRevenue: parseFloat(invoiceStats?.totalRevenue || 0),
-      totalOutstanding: parseFloat(invoiceStats?.totalOutstanding || 0),
-      totalPaid: parseFloat(invoiceStats?.totalPaid || 0),
-      totalInvoices: parseInt(invoiceStats?.totalInvoices || 0),
-      paidInvoices: parseInt(invoiceStats?.paidInvoices || 0),
-      pendingInvoices: parseInt(invoiceStats?.pendingInvoices || 0),
-      overdueInvoices: parseInt(invoiceStats?.overdueInvoices || 0),
-      averageInvoiceAmount: parseFloat(invoiceStats?.averageInvoiceAmount || 0),
-      pettyCashBalance: parseFloat(pettyCash?.balance || 0),
-      otherIncomeTotal: parseFloat(otherIncome?.otherIncomeTotal || 0),
+      totalClients: parseInt(clientStats?.totalClients || '0', 10),
+      activeClients: parseInt(clientStats?.activeClients || '0', 10),
+      totalRevenue: this.fromCents(this.toCents(invoiceStats?.totalRevenue)),
+      totalOutstanding: this.fromCents(this.toCents(invoiceStats?.totalOutstanding)),
+      totalPaid: this.fromCents(this.toCents(invoiceStats?.totalPaid)),
+      totalInvoices: parseInt(invoiceStats?.totalInvoices || '0', 10),
+      paidInvoices: parseInt(invoiceStats?.paidInvoices || '0', 10),
+      pendingInvoices: parseInt(invoiceStats?.pendingInvoices || '0', 10),
+      overdueInvoices: parseInt(invoiceStats?.overdueInvoices || '0', 10),
+      averageInvoiceAmount: this.fromCents(this.toCents(invoiceStats?.averageInvoiceAmount)),
+      pettyCashBalance: this.fromCents(this.toCents(pettyCash?.totalAmount)),
+      otherIncomeTotal: this.fromCents(this.toCents(otherIncome?.otherIncomeTotal)),
       reportPeriod: {
         startDate: filters?.startDate || new Date(0),
         endDate: filters?.endDate || new Date(),

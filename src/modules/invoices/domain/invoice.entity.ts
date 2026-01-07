@@ -283,6 +283,27 @@ export class Invoice extends BaseEntity {
   }
 
   // Business Logic - Apply payment to invoice
+  // applyPayment(amount: number): void {
+  //   if (amount <= 0) {
+  //     throw new BadRequestException('Payment amount must be greater than 0');
+  //   }
+
+  //   if (this._status === InvoiceStatus.CANCELLED) {
+  //     throw new BadRequestException(
+  //       'Cannot apply payment to cancelled invoice',
+  //     );
+  //   }
+
+  //   if (amount > this._balance) {
+  //     throw new BadRequestException('Payment amount exceeds invoice balance');
+  //   }
+
+  //   this._amountPaid += amount;
+  //   this._balance = this._totalAmount - this._amountPaid;
+  //   this.updateStatusAfterPayment();
+  //   this.touch();
+  // }
+
   applyPayment(amount: number): void {
     if (amount <= 0) {
       throw new BadRequestException('Payment amount must be greater than 0');
@@ -294,12 +315,21 @@ export class Invoice extends BaseEntity {
       );
     }
 
-    if (amount > this._balance) {
+    // Convert all amounts to cents to avoid floating point errors
+    const totalCents = Math.round(this._totalAmount * 100);
+    const paidCents = Math.round(this._amountPaid * 100);
+    const amountCents = Math.round(amount * 100);
+
+    if (amountCents > totalCents - paidCents) {
       throw new BadRequestException('Payment amount exceeds invoice balance');
     }
 
-    this._amountPaid += amount;
-    this._balance = this._totalAmount - this._amountPaid;
+    const newPaidCents = paidCents + amountCents;
+    this._amountPaid = newPaidCents / 100;
+
+    const newBalanceCents = totalCents - newPaidCents;
+    this._balance = newBalanceCents / 100;
+
     this.updateStatusAfterPayment();
     this.touch();
   }

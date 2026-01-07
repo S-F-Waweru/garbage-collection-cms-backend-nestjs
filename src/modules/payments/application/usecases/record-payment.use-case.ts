@@ -31,6 +31,91 @@ export class RecordPaymentUseCase {
   ) {}
   logger = new Logger(RecordPaymentUseCase.name);
 
+  // async execute(dto: RecordPaymentDto, userId: string): Promise<Payment> {
+  //   const client = await this.clientRepo.findById(dto.clientId);
+  //   if (!client) {
+  //     throw new BadRequestException('Client not found');
+  //   }
+
+  //   const paymentNumber = await this.paymentRepo.getNextPaymentNumber();
+
+  //   const payment = Payment.create({
+  //     paymentNumber,
+  //     clientId: dto.clientId,
+  //     amount: dto.amount,
+  //     paymentMethod: dto.paymentMethod,
+  //     paymentDate: dto.paymentDate,
+  //     referenceNumber: dto.referenceNumber,
+  //     notes: dto.notes,
+  //     createdBy: userId,
+  //   });
+
+  //   const queryRunner = this.dataSource.createQueryRunner();
+  //   await queryRunner.connect();
+  //   await queryRunner.startTransaction();
+
+  //   try {
+  //     // Save payment FIRST inside transaction
+  //     const savedPayment = await queryRunner.manager.save(PaymentSchema, {
+  //       id: payment.id,
+  //       paymentNumber: payment.paymentNumber,
+  //       clientId: payment.clientId,
+  //       amount: payment.amount,
+  //       paymentMethod: payment.paymentMethod,
+  //       paymentDate: payment.paymentDate,
+  //       referenceNumber: payment.referenceNumber,
+  //       notes: payment.notes,
+  //       createdBy: payment.createdBy,
+  //       appliedToInvoices: payment.appliedToInvoices,
+  //       excessAmount: payment.excessAmount,
+  //     });
+
+  //     // Get outstanding invoices
+  //     const outstandingInvoices =
+  //       await this.invoiceRepo.findOutstandingByClient(dto.clientId);
+  //     let remainingAmount = dto.amount;
+
+  //     for (const invoice of outstandingInvoices) {
+  //       if (remainingAmount <= 0) break;
+
+  //       const amountToApply = Math.min(remainingAmount, invoice.balance);
+  //       invoice.applyPayment(amountToApply);
+  //       await this.invoiceRepo.update(invoice.id, invoice);
+
+  //       payment.addInvoiceApplication(
+  //         invoice.id,
+  //         invoice.invoiceNumber,
+  //         amountToApply,
+  //       );
+  //       remainingAmount -= amountToApply;
+  //     }
+
+  //     if (remainingAmount > 0) {
+  //       payment.setExcessAmount(remainingAmount);
+  //       await this.creditRepo.incrementBalance(dto.clientId, remainingAmount);
+  //     }
+
+  //     // Update payment with invoice applications
+  //     await queryRunner.manager.update(PaymentSchema, payment.id, {
+  //       appliedToInvoices: payment.appliedToInvoices as any,  // Cast to any
+  //       excessAmount: payment.excessAmount,
+  //     });
+
+  //     await queryRunner.commitTransaction();
+
+  //     const finalPayment = await this.paymentRepo.findById(payment.id);
+  //     if (!finalPayment) {
+  //       throw new BadRequestException('Payment not found after save');
+  //     }
+
+  //     return finalPayment;
+  //   } catch (error) {
+  //     await queryRunner.rollbackTransaction();
+  //     throw error;
+  //   } finally {
+  //     await queryRunner.release();
+  //   }
+  // }
   async execute(dto: RecordPaymentDto, userId: string): Promise<Payment> {
     const client = await this.clientRepo.findById(dto.clientId);
     if (!client) {
@@ -39,10 +124,13 @@ export class RecordPaymentUseCase {
 
     const paymentNumber = await this.paymentRepo.getNextPaymentNumber();
 
+    // convert payment amount to cents
+    const paymentAmountCents = Math.round(dto.amount * 100);
+
     const payment = Payment.create({
       paymentNumber,
       clientId: dto.clientId,
-      amount: dto.amount,
+      amount: dto.amount, // stored as decimal for display
       paymentMethod: dto.paymentMethod,
       paymentDate: dto.paymentDate,
       referenceNumber: dto.referenceNumber,
@@ -55,8 +143,7 @@ export class RecordPaymentUseCase {
     await queryRunner.startTransaction();
 
     try {
-      // Save payment FIRST inside transaction
-      const savedPayment = await queryRunner.manager.save(PaymentSchema, {
+      await queryRunner.manager.save(PaymentSchema, {
         id: payment.id,
         paymentNumber: payment.paymentNumber,
         clientId: payment.clientId,
@@ -66,48 +153,54 @@ export class RecordPaymentUseCase {
         referenceNumber: payment.referenceNumber,
         notes: payment.notes,
         createdBy: payment.createdBy,
-        appliedToInvoices: payment.appliedToInvoices,
-        excessAmount: payment.excessAmount,
+        appliedToInvoices: [],
+        excessAmount: 0,
       });
 
-      // Get outstanding invoices
       const outstandingInvoices =
         await this.invoiceRepo.findOutstandingByClient(dto.clientId);
-      let remainingAmount = dto.amount;
+
+      let remainingCents = paymentAmountCents;
 
       for (const invoice of outstandingInvoices) {
-        if (remainingAmount <= 0) break;
+        if (remainingCents <= 0) break;
 
-        const amountToApply = Math.min(remainingAmount, invoice.balance);
-        invoice.applyPayment(amountToApply);
-        await this.invoiceRepo.update(invoice.id, invoice);
+        const invoiceBalanceCents = Math.round(invoice.balance * 100);
+        const applyCents = Math.min(remainingCents, invoiceBalanceCents);
+
+        // apply using decimal value
+        invoice.applyPayment(applyCents / 100);
+
+        this.logger.debug(`INVOICE AMOUNT`, invoice);
+        await this.invoiceRepo.save(invoice);
 
         payment.addInvoiceApplication(
           invoice.id,
           invoice.invoiceNumber,
-          amountToApply,
+          applyCents / 100,
         );
-        remainingAmount -= amountToApply;
+
+        remainingCents -= applyCents;
       }
 
-      if (remainingAmount > 0) {
-        payment.setExcessAmount(remainingAmount);
-        await this.creditRepo.incrementBalance(dto.clientId, remainingAmount);
+      if (remainingCents > 0) {
+        const excess = remainingCents / 100;
+        payment.setExcessAmount(excess);
+        await this.creditRepo.incrementBalance(dto.clientId, excess);
       }
 
-      // Update payment with invoice applications
       await queryRunner.manager.update(PaymentSchema, payment.id, {
-        appliedToInvoices: payment.appliedToInvoices as any,  // Cast to any
+        appliedToInvoices: payment.appliedToInvoices as any,
         excessAmount: payment.excessAmount,
       });
-      
+
       await queryRunner.commitTransaction();
-      
+
       const finalPayment = await this.paymentRepo.findById(payment.id);
       if (!finalPayment) {
         throw new BadRequestException('Payment not found after save');
       }
-      
+
       return finalPayment;
     } catch (error) {
       await queryRunner.rollbackTransaction();

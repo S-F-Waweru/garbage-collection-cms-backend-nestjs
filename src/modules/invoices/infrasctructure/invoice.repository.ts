@@ -1,7 +1,7 @@
 // infrastructure/invoice.repository.ts
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource, IsNull } from 'typeorm';
+import { Repository, DataSource, IsNull, DeepPartial } from 'typeorm';
 import { Invoice, InvoiceStatus } from '../domain/invoice.entity';
 import {
   IInvoiceRepository,
@@ -35,19 +35,39 @@ export class InvoiceRepository implements IInvoiceRepository {
     }
   }
 
+  // async save(invoice: Invoice): Promise<Invoice> {
+  //   const data = invoice.toObject();
+  //   const schema = this.repo.create(data);
+  //   const saved = await this.repo.save(schema);
+  //   const result = await this.repo.findOne({
+  //     where: { id: invoice.id },
+  //   });
+  //   if (!result) {
+  //     throw new NotFoundException('Resuls not found');
+  //   }
+
+  //   return this.toDomain(result);
+  // }
   async save(invoice: Invoice): Promise<Invoice> {
     const data = invoice.toObject();
-    const schema = this.repo.create(data);
-    const saved = await this.repo.save(schema);
-    const result = await this.repo.findOne({
-      where: { id: invoice.id },
-    });
-    if (!result) {
-      throw new NotFoundException('Resuls not found');
+    
+    // Check if this is an update or create
+    const existing = await this.repo.findOne({ where: { id: invoice.id } });
+    
+    if (existing) {
+      // Update existing
+      Object.assign(existing, data);
+      const savedSchema = await this.repo.save(existing);
+      return this.toDomain(savedSchema);
+    } else {
+      // Create new - ensure we're creating a single entity
+      const schema = this.repo.create(data as DeepPartial<InvoiceSchema>);
+      const savedSchema = await this.repo.save(schema);
+      return this.toDomain(savedSchema);
     }
-
-    return this.toDomain(result);
   }
+    
+
 
   async findById(id: string): Promise<Invoice | null> {
     const schema = await this.repo.findOne({ where: { id } });

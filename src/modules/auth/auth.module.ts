@@ -104,6 +104,6 @@ export class AuthModule implements OnModuleInit {
     // Ensure system user exists
     await this.systemUserService.ensureSystemUserExists();
     await this.adminSeederService.seedDefaultAdmin();
-    await this.demoSeeder.seedDemoData();
+    // await this.demoSeeder.seedDemoData();
   }
 }

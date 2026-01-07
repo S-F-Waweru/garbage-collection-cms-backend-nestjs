@@ -4,7 +4,7 @@ import { BaseEntity } from 'src/shared/domain/entities/base.entity';
 
 export class ClientCredit extends BaseEntity {
   private _client: Client;
-  private _balance: number;
+  private _balanceCents: number; // store in cents
 
   constructor(
     props: { id?: string; client: Client; balance: number },
@@ -12,7 +12,8 @@ export class ClientCredit extends BaseEntity {
   ) {
     super(props.id);
     this._client = props.client;
-    this._balance = props.balance || 0;
+    // convert to cents for internal storage
+    this._balanceCents = Math.round((props.balance || 0) * 100);
 
     if (!skipValidation) {
       this.validate();
@@ -20,17 +21,12 @@ export class ClientCredit extends BaseEntity {
   }
 
   validate() {
-    // Validate balance is not negative
-    if (this._balance < 0) {
+    if (this._balanceCents < 0) {
       throw new BadRequestException('Balance cannot be negative');
     }
-
-    // Validate balance is a valid number
-    if (isNaN(this._balance)) {
+    if (isNaN(this._balanceCents)) {
       throw new BadRequestException('Balance must be a valid number');
     }
-
-    // Only validate client for new entities (not loaded from DB)
     if (!this.id && !this._client) {
       throw new BadRequestException('Client is required');
     }
@@ -56,20 +52,18 @@ export class ClientCredit extends BaseEntity {
         client: props.client,
         balance: props.balance,
       },
-      true, // Skip validation for persisted entities
+      true, // skip validation for persisted
     );
-
     credit._createdAt = props.createdAt;
     credit._updatedAt = props.updatedAt;
-
     return credit;
   }
 
   updateBalance(amount: number) {
     if (amount < 0) {
-      throw new BadRequestException('The amount cannot be a negative amount');
+      throw new BadRequestException('Balance cannot be negative');
     }
-    this._balance = amount;
+    this._balanceCents = Math.round(amount * 100);
     this.validate();
   }
 
@@ -77,7 +71,7 @@ export class ClientCredit extends BaseEntity {
     if (amount <= 0) {
       throw new BadRequestException('Increment amount must be positive');
     }
-    this._balance += amount;
+    this._balanceCents += Math.round(amount * 100);
     this.validate();
   }
 
@@ -85,19 +79,20 @@ export class ClientCredit extends BaseEntity {
     if (amount <= 0) {
       throw new BadRequestException('Decrement amount must be positive');
     }
-    if (this._balance < amount) {
+    const decrementCents = Math.round(amount * 100);
+    if (this._balanceCents < decrementCents) {
       throw new BadRequestException('Insufficient credit balance');
     }
-    this._balance -= amount;
+    this._balanceCents -= decrementCents;
     this.validate();
   }
 
-  // Getters
-  get balance() {
-    return this._balance;
+  // Get balance in decimal for display
+  get balance(): number {
+    return this._balanceCents / 100;
   }
 
-  get client() {
+  get client(): Client {
     return this._client;
   }
 }
