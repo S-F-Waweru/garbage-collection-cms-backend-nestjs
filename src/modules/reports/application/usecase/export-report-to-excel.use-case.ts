@@ -31,6 +31,9 @@ export class ExportReportToExcelUseCase {
       case ReportType.OTHER_INCOME:
         this.addOtherIncomeSheet(worksheet, data);
         break;
+      case ReportType.PAYMENTS: // Make sure this exists
+        this.addPaymentsSheet(worksheet, data);
+        break;
       default:
         throw new BadRequestException(`Unsupported report type: ${reportType}`);
     }
@@ -46,8 +49,67 @@ export class ExportReportToExcelUseCase {
       [ReportType.REVENUE_BY_LOCATION]: 'Revenue by Location',
       [ReportType.PETTY_CASH]: 'Petty Cash',
       [ReportType.OTHER_INCOME]: 'Other Income',
+      [ReportType.PAYMENTS]: 'Payments',
     };
     return names[reportType] || 'Report';
+  }
+
+  private addPaymentsSheet(worksheet: ExcelJS.Worksheet, data: any[]) {
+    worksheet.columns = [
+      { header: 'Payment Number', key: 'paymentNumber', width: 20 },
+      { header: 'Client Name', key: 'clientName', width: 30 },
+      { header: 'Payment Date', key: 'paymentDate', width: 15 },
+      { header: 'Amount (KES)', key: 'amount', width: 18 },
+      { header: 'Payment Method', key: 'paymentMethod', width: 18 },
+      { header: 'Reference Number', key: 'referenceNumber', width: 20 },
+      { header: 'Applied to Invoices', key: 'appliedInvoices', width: 25 },
+      { header: 'Excess Amount (KES)', key: 'excessAmount', width: 20 },
+    ];
+
+    data.forEach((item) => {
+      worksheet.addRow({
+        paymentNumber: item.paymentNumber,
+        clientName: `${item.clientFirstName} ${item.clientLastName}`,
+        paymentDate: this.formatDate(item.paymentDate),
+        amount: this.formatCurrency(item.amount),
+        paymentMethod: item.paymentMethod,
+        referenceNumber: item.referenceNumber || '',
+        appliedInvoices: Array.isArray(item.appliedToInvoices)
+          ? item.appliedToInvoices.map((inv) => inv.invoiceNumber).join(', ')
+          : 'None',
+        excessAmount: this.formatCurrency(item.excessAmount),
+      });
+    });
+
+    // Add total row with floating-point fix
+    const totalAmount = data.reduce((sum, item) => {
+      return sum + Math.round(parseFloat(item.amount || 0) * 100);
+    }, 0);
+
+    const totalExcess = data.reduce((sum, item) => {
+      return sum + Math.round(parseFloat(item.excessAmount || 0) * 100);
+    }, 0);
+
+    const totalRow = worksheet.addRow({
+      paymentNumber: 'TOTAL',
+      clientName: '',
+      paymentDate: '',
+      amount: this.formatCurrency(totalAmount / 100),
+      paymentMethod: '',
+      referenceNumber: '',
+      appliedInvoices: '',
+      excessAmount: this.formatCurrency(totalExcess / 100),
+    });
+
+    totalRow.font = { bold: true };
+    totalRow.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFE0E0E0' },
+    };
+
+    this.styleHeader(worksheet);
+    this.applyBorders(worksheet);
   }
 
   private addOutstandingBalancesSheet(

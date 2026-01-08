@@ -8,6 +8,7 @@ export enum ReportType {
   PETTY_CASH = 'PETTY_CASH',
   OTHER_INCOME = 'OTHER_INCOME',
   SUMMARY = 'SUMMARY',
+  PAYMENTS = 'PAYMENTS',
 }
 
 export interface OutstandingBalanceItem {

@@ -27,6 +27,9 @@ import { GetRevenueReportUseCase } from '../application/usecase/get-revenue-repo
 import { GetSummaryStatisticsUseCase } from '../application/usecase/get-summary-statistics.use-case';
 import { ReportType } from '../domain/report-result.entity';
 import { GetExpenseIncomeChartUseCase } from '../application/usecase/get-expense-income-chart.usecase';
+import { GetPaymentUseCase } from 'src/modules/payments/application/usecases/get-payment.use-case';
+import { PaymentExcelReport } from '../application/usecase/getpaymentpreport-to-excel.usecase';
+import { GetPaymentReportUseCase } from '../application/usecase/get-payment-report.use-case';
 
 @ApiTags('Reports')
 @ApiBearerAuth()
@@ -40,6 +43,8 @@ export class ReportController {
     private readonly getSummaryStatisticsUseCase: GetSummaryStatisticsUseCase,
     private readonly exportReportToExcelUseCase: ExportReportToExcelUseCase,
     private readonly getExpenseIncomeChartUseCase: GetExpenseIncomeChartUseCase,
+    private readonly getPaymentReportUseCase: GetPaymentReportUseCase,
+    private readonly paymentExcelReport: PaymentExcelReport,
   ) {}
 
   @Get('outstanding-balances')
@@ -314,6 +319,13 @@ export class ReportController {
         filename = `other-income-${new Date().toISOString().split('T')[0]}.xlsx`;
         break;
 
+      case 'payments':
+        report = await this.getPaymentReportUseCase.execute(parsedFilters);
+        console.log('Report type:', report.type); // Add this debug line
+        console.log('ReportType.PAYMENTS:', ReportType.PAYMENTS); // Add this debug line
+        filename = `payments-${new Date().toISOString().split('T')[0]}.xlsx`;
+        break;
+
       default:
         return res.status(HttpStatus.BAD_REQUEST).json({
           message: 'Invalid report type',
@@ -378,5 +390,40 @@ export class ReportController {
   })
   async getExpenseIncomeChart(@Query('year') year: number) {
     return await this.getExpenseIncomeChartUseCase.execute(year);
+  }
+
+  @Get('payments')
+  @ApiOperation({
+    summary: 'Get payments report',
+    description:
+      'Returns all payments with client details and applied invoices',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Payments report generated successfully',
+  })
+  @ApiQuery({
+    name: 'startDate',
+    required: false,
+    description: 'Filter from date (YYYY-MM-DD)',
+  })
+  @ApiQuery({
+    name: 'endDate',
+    required: false,
+    description: 'Filter to date (YYYY-MM-DD)',
+  })
+  @ApiQuery({
+    name: 'clientId',
+    required: false,
+    description: 'Filter by client UUID',
+  })
+  async getPaymentsReport(@Query() filters: ReportFiltersDto) {
+    const parsedFilters = {
+      startDate: filters.startDate ? new Date(filters.startDate) : undefined,
+      endDate: filters.endDate ? new Date(filters.endDate) : undefined,
+      clientId: filters.clientId,
+    };
+
+    return await this.getPaymentReportUseCase.execute(parsedFilters);
   }
 }

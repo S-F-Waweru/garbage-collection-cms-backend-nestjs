@@ -19,6 +19,9 @@ import { ExpenseSchema } from '../expences/expence/infrastructure/expense.schema
 import { IncomeCategorySchema } from '../other-income/income-category/infrastructure/schema/IncomeCategory.schema';
 import { IncomeRecordRepository } from '../other-income/income-record/infrastructure/schema/repository/income-record.repository';
 import { ExpenseRepository } from '../expences/expence/infrastructure/expense.repository';
+import { GetPaymentReportUseCase } from './application/usecase/get-payment-report.use-case';
+import { PaymentExcelReport } from './application/usecase/getpaymentpreport-to-excel.usecase';
+import { IReportRepository } from './domain/report.repository.interface';
 
 @Module({
   imports: [
@@ -34,7 +37,7 @@ import { ExpenseRepository } from '../expences/expence/infrastructure/expense.re
   providers: [
     // Repository
     {
-      provide: 'IReportRepository',
+      provide: IReportRepository,
       useClass: ReportRepository,
     },
     IncomeRecordRepository, // Add this
@@ -48,8 +51,10 @@ import { ExpenseRepository } from '../expences/expence/infrastructure/expense.re
     GetSummaryStatisticsUseCase,
     GetExpenseIncomeChartUseCase,
     ExportReportToExcelUseCase,
+    GetPaymentReportUseCase,
+    PaymentExcelReport,
   ],
   controllers: [ReportController],
-  exports: ['IReportRepository'],
+  exports: [IReportRepository],
 })
 export class ReportModule {}

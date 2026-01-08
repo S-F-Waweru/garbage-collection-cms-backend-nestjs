@@ -7,7 +7,7 @@ import { RevenueGroupBy } from '../reports.dto';
 @Injectable()
 export class GetRevenueReportUseCase {
   constructor(
-    @Inject('IReportRepository')
+    @Inject(IReportRepository)
     private readonly reportRepo: IReportRepository,
   ) {}
 

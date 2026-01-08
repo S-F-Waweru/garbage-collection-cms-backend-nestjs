@@ -6,7 +6,7 @@ import { IReportRepository } from '../../domain/report.repository.interface';
 @Injectable()
 export class GetSummaryStatisticsUseCase {
   constructor(
-    @Inject('IReportRepository')
+    @Inject(IReportRepository)
     private readonly reportRepo: IReportRepository,
   ) {}
 

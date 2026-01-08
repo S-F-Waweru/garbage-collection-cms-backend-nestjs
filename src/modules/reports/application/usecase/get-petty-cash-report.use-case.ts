@@ -6,7 +6,7 @@ import { ReportResult, ReportType } from '../../domain/report-result.entity';
 @Injectable()
 export class GetPettyCashReportUseCase {
   constructor(
-    @Inject('IReportRepository')
+    @Inject(IReportRepository)
     private readonly reportRepo: IReportRepository,
   ) {}
 

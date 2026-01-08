@@ -29,6 +29,19 @@ export interface IReportRepository {
   getPettyCashSummary(filters?: ReportFilters): Promise<PettyCashItem[]>;
   getOtherIncome(filters?: ReportFilters): Promise<OtherIncomeItem[]>;
   getSummaryStatistics(filters?: ReportFilters): Promise<ReportSummary>;
+  getPaymentSummary(filters?: ReportFilters): Promise<PaymentSummaryItem[]>;
 }
-
 export const IReportRepository = Symbol('IReportRepository');
+
+export interface PaymentSummaryItem {
+  paymentNumber: string;
+  clientId: string;
+  clientFirstName: string;
+  clientLastName: string;
+  amount: number;
+  paymentMethod: string;
+  paymentDate: Date;
+  referenceNumber: string;
+  appliedToInvoices: any[];
+  excessAmount: number;
+}

@@ -1,6 +1,6 @@
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1YzQxZjg3ZS0wNDE3LTRmNTUtOWNjMy0zZjI1MmRjODc3NmYiLCJlbWFpbCI6ImFkbWluQGdhcmJhZ2VjbXMuY29tIiwiaWF0IjoxNzY1OTU4NDA5LCJleHAiOjE3NjU5NTkzMDl9.-P9OlCiEBqSXhHL_CvdhVP5flOzxAQHQghfe8cXYwO0
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJiZGI2ZTZjYy05YmY0LTQ5MDQtYjQxMC1lMWY4OGYzN2JmMDYiLCJlbWFpbCI6InMud2F3ZXJ1bmRlZ3dhQGdtYWlsLmNvbSIsInJvbGUiOiJhY2NvdW50YW50IiwiaWF0IjoxNzY3ODQ5Njk4LCJleHAiOjE3Njc4NTA1OTh9.UoAz1hov0GPIOagVXlX20J1uJJAUNs0sdpV_Kem0ROc
 
-@clientId =318aa9c1-92fa-4057-b09a-451fcbe8b3c4
+@clientId = 318aa9c1-92fa-4057-b09a-451fcbe8b3c4
 
 ### Get Outstanding Balances Report
 GET http://localhost:3300/reports/outstanding-balances
@@ -38,6 +38,14 @@ Authorization: Bearer {{token}}
 GET http://localhost:3300/reports/summary?startDate=2025-01-01&endDate=2025-12-31
 Authorization: Bearer {{token}}
 
+### Get Payments Report
+GET http://localhost:3300/reports/payments
+Authorization: Bearer {{token}}
+
+### Get Payments Report with Filters
+GET http://localhost:3300/reports/payments?startDate=2025-01-01&endDate=2025-12-31&clientId={{clientId}}
+Authorization: Bearer {{token}}
+
 ### Export Outstanding Balances to Excel
 GET http://localhost:3300/reports/export/outstanding-balances?startDate=2024-01-01&endDate=2024-12-31
 Authorization: Bearer {{token}}
@@ -52,4 +60,12 @@ Authorization: Bearer {{token}}
 
 ### Export Other Income Report to Excel
 GET http://localhost:3300/reports/export/other-income
+Authorization: Bearer {{token}}
+
+### Export Payments Report to Excel
+GET http://localhost:3300/reports/export/payments
+Authorization: Bearer {{token}}
+
+### Export Payments Report to Excel with Filters
+GET http://localhost:3300/reports/export/payments?startDate=2024-01-01&endDate=2024-12-31&clientId={{clientId}}
 Authorization: Bearer {{token}}

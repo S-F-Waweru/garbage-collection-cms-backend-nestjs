@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import {
   IReportRepository,
+  PaymentSummaryItem,
   ReportFilters,
 } from '../domain/report.repository.interface';
 import { InvoiceSchema } from 'src/modules/invoices/infrasctructure/invoice.rschema';
@@ -22,6 +23,53 @@ export class ReportRepository implements IReportRepository {
     private readonly invoiceRepo: Repository<InvoiceSchema>,
     private readonly dataSource: DataSource,
   ) {}
+
+  async getPaymentSummary(
+    filters?: ReportFilters,
+  ): Promise<PaymentSummaryItem[]> {
+    let query = this.dataSource
+      .createQueryBuilder()
+      .select([
+        'p.paymentNumber as "paymentNumber"',
+        'p.clientId as "clientId"',
+        'c.firstName as "clientFirstName"',
+        'c.lastName as "clientLastName"',
+        'p.amount as "amount"',
+        'p.paymentMethod as "paymentMethod"',
+        'p.paymentDate as "paymentDate"',
+        'p.referenceNumber as "referenceNumber"',
+        'p.appliedToInvoices as "appliedToInvoices"',
+        'p.excessAmount as "excessAmount"',
+      ])
+      .from('payments', 'p')
+      .leftJoin('clients', 'c', 'p.clientId = c.id AND c.deletedAt IS NULL');
+    // .where('p.deletedAt IS NULL');
+
+    if (filters?.startDate) {
+      query = query.andWhere('p.paymentDate >= :startDate', {
+        startDate: filters.startDate,
+      });
+    }
+    if (filters?.endDate) {
+      query = query.andWhere('p.paymentDate <= :endDate', {
+        endDate: filters.endDate,
+      });
+    }
+    if (filters?.clientId) {
+      query = query.andWhere('p.clientId = :clientId', {
+        clientId: filters.clientId,
+      });
+    }
+
+    query = query.orderBy('p.paymentDate', 'DESC');
+
+    const results = await query.getRawMany();
+    return results.map((r) => ({
+      ...r,
+      amount: this.fromCents(this.toCents(r.amount)),
+      excessAmount: this.fromCents(this.toCents(r.excessAmount)),
+    }));
+  }
 
   private toCents(amount: string | number | null | undefined): number {
     return Math.round((Number(amount) || 0) * 100);
@@ -66,7 +114,9 @@ export class ReportRepository implements IReportRepository {
       });
     }
     if (filters?.clientId) {
-      query = query.andWhere('i.clientId = :clientId', { clientId: filters.clientId });
+      query = query.andWhere('i.clientId = :clientId', {
+        clientId: filters.clientId,
+      });
     }
 
     query = query.orderBy('i.invoiceDate', 'ASC');
@@ -103,11 +153,22 @@ export class ReportRepository implements IReportRepository {
       .andWhere('"i"."status" != :cancelled', { cancelled: 'CANCELLED' })
       .andWhere('"i"."deletedAt" IS NULL');
 
-    if (filters?.startDate) query = query.andWhere('"i"."invoiceDate" >= :startDate', { startDate: filters.startDate });
-    if (filters?.endDate) query = query.andWhere('"i"."invoiceDate" <= :endDate', { endDate: filters.endDate });
-    if (filters?.clientId) query = query.andWhere('"i"."clientId" = :clientId', { clientId: filters.clientId });
+    if (filters?.startDate)
+      query = query.andWhere('"i"."invoiceDate" >= :startDate', {
+        startDate: filters.startDate,
+      });
+    if (filters?.endDate)
+      query = query.andWhere('"i"."invoiceDate" <= :endDate', {
+        endDate: filters.endDate,
+      });
+    if (filters?.clientId)
+      query = query.andWhere('"i"."clientId" = :clientId', {
+        clientId: filters.clientId,
+      });
 
-    query = query.groupBy('"i"."clientId", "c"."firstName", "c"."lastName"').orderBy('"totalInvoiced"', 'DESC');
+    query = query
+      .groupBy('"i"."clientId", "c"."firstName", "c"."lastName"')
+      .orderBy('"totalInvoiced"', 'DESC');
 
     const results = await query.getRawMany();
 
@@ -120,7 +181,9 @@ export class ReportRepository implements IReportRepository {
     }));
   }
 
-  async getRevenueByLocation(filters?: ReportFilters): Promise<RevenueByLocationItem[]> {
+  async getRevenueByLocation(
+    filters?: ReportFilters,
+  ): Promise<RevenueByLocationItem[]> {
     let query = this.dataSource
       .createQueryBuilder()
       .select([
@@ -133,18 +196,42 @@ export class ReportRepository implements IReportRepository {
         'COUNT("i"."id") as "invoiceCount"',
       ])
       .from('invoices', 'i')
-      .leftJoin('clients', 'c', '"i"."clientId" = "c"."id" AND "c"."deletedAt" IS NULL')
-      .leftJoin('buildings', 'b', '"b"."clientId" = "c"."id" AND "b"."deletedAt" IS NULL')
-      .leftJoin('locations', 'l', '"b"."locationId" = "l"."id" AND "l"."deletedAt" IS NULL')
+      .leftJoin(
+        'clients',
+        'c',
+        '"i"."clientId" = "c"."id" AND "c"."deletedAt" IS NULL',
+      )
+      .leftJoin(
+        'buildings',
+        'b',
+        '"b"."clientId" = "c"."id" AND "b"."deletedAt" IS NULL',
+      )
+      .leftJoin(
+        'locations',
+        'l',
+        '"b"."locationId" = "l"."id" AND "l"."deletedAt" IS NULL',
+      )
       .where('"i"."status" != :cancelled', { cancelled: 'CANCELLED' })
       .andWhere('"i"."deletedAt" IS NULL');
 
-    if (filters?.startDate) query = query.andWhere('"i"."invoiceDate" >= :startDate', { startDate: filters.startDate });
-    if (filters?.endDate) query = query.andWhere('"i"."invoiceDate" <= :endDate', { endDate: filters.endDate });
-    if (filters?.city) query = query.andWhere('"l"."city" = :city', { city: filters.city });
-    if (filters?.region) query = query.andWhere('"l"."region" = :region', { region: filters.region });
+    if (filters?.startDate)
+      query = query.andWhere('"i"."invoiceDate" >= :startDate', {
+        startDate: filters.startDate,
+      });
+    if (filters?.endDate)
+      query = query.andWhere('"i"."invoiceDate" <= :endDate', {
+        endDate: filters.endDate,
+      });
+    if (filters?.city)
+      query = query.andWhere('"l"."city" = :city', { city: filters.city });
+    if (filters?.region)
+      query = query.andWhere('"l"."region" = :region', {
+        region: filters.region,
+      });
 
-    query = query.groupBy('"l"."city", "l"."region"').orderBy('"totalInvoiced"', 'DESC');
+    query = query
+      .groupBy('"l"."city", "l"."region"')
+      .orderBy('"totalInvoiced"', 'DESC');
 
     const results = await query.getRawMany();
     return results.map((r) => ({
@@ -168,11 +255,21 @@ export class ReportRepository implements IReportRepository {
         'u.id as "enteredBy"',
       ])
       .from('petty_cashes', 'pc')
-      .leftJoin('users', 'u', '"pc"."createdBy"::uuid = "u"."id" AND "u"."deletedAt" IS NULL')
+      .leftJoin(
+        'users',
+        'u',
+        '"pc"."createdBy"::uuid = "u"."id" AND "u"."deletedAt" IS NULL',
+      )
       .where('pc.deletedAt IS NULL');
 
-    if (filters?.startDate) query = query.andWhere('pc.createdAt >= :startDate', { startDate: filters.startDate });
-    if (filters?.endDate) query = query.andWhere('pc.createdAt <= :endDate', { endDate: filters.endDate });
+    if (filters?.startDate)
+      query = query.andWhere('pc.createdAt >= :startDate', {
+        startDate: filters.startDate,
+      });
+    if (filters?.endDate)
+      query = query.andWhere('pc.createdAt <= :endDate', {
+        endDate: filters.endDate,
+      });
 
     query = query.orderBy('pc.createdAt', 'DESC');
     const results = await query.getRawMany();
@@ -199,8 +296,14 @@ export class ReportRepository implements IReportRepository {
       .leftJoin('users', 'u', '"oi"."recordedBy"::uuid = "u"."id"')
       .where('oi.deletedAt IS NULL');
 
-    if (filters?.startDate) query = query.andWhere('oi.recordedAt >= :startDate', { startDate: filters.startDate });
-    if (filters?.endDate) query = query.andWhere('oi.recordedAt <= :endDate', { endDate: filters.endDate });
+    if (filters?.startDate)
+      query = query.andWhere('oi.recordedAt >= :startDate', {
+        startDate: filters.startDate,
+      });
+    if (filters?.endDate)
+      query = query.andWhere('oi.recordedAt <= :endDate', {
+        endDate: filters.endDate,
+      });
 
     query = query.orderBy('oi.recordedAt', 'DESC');
     const results = await query.getRawMany();
@@ -254,15 +357,21 @@ export class ReportRepository implements IReportRepository {
       totalClients: parseInt(clientStats?.totalClients || '0', 10),
       activeClients: parseInt(clientStats?.activeClients || '0', 10),
       totalRevenue: this.fromCents(this.toCents(invoiceStats?.totalRevenue)),
-      totalOutstanding: this.fromCents(this.toCents(invoiceStats?.totalOutstanding)),
+      totalOutstanding: this.fromCents(
+        this.toCents(invoiceStats?.totalOutstanding),
+      ),
       totalPaid: this.fromCents(this.toCents(invoiceStats?.totalPaid)),
       totalInvoices: parseInt(invoiceStats?.totalInvoices || '0', 10),
       paidInvoices: parseInt(invoiceStats?.paidInvoices || '0', 10),
       pendingInvoices: parseInt(invoiceStats?.pendingInvoices || '0', 10),
       overdueInvoices: parseInt(invoiceStats?.overdueInvoices || '0', 10),
-      averageInvoiceAmount: this.fromCents(this.toCents(invoiceStats?.averageInvoiceAmount)),
+      averageInvoiceAmount: this.fromCents(
+        this.toCents(invoiceStats?.averageInvoiceAmount),
+      ),
       pettyCashBalance: this.fromCents(this.toCents(pettyCash?.totalAmount)),
-      otherIncomeTotal: this.fromCents(this.toCents(otherIncome?.otherIncomeTotal)),
+      otherIncomeTotal: this.fromCents(
+        this.toCents(otherIncome?.otherIncomeTotal),
+      ),
       reportPeriod: {
         startDate: filters?.startDate || new Date(0),
         endDate: filters?.endDate || new Date(),
