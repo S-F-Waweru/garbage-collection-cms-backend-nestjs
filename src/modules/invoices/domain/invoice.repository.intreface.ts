@@ -1,4 +1,5 @@
-import { InvoiceStatus, Invoice } from './invoice.entity';
+import { InvoiceStatus } from '../application/models';
+import {  Invoice } from './invoice.entity';
 
 export interface InvoiceFilters {
   clientId?: string;

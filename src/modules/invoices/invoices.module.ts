@@ -16,6 +16,8 @@ import { ClientModule } from '../clients/client/client.module';
 import { IInvoiceRepository } from './domain/invoice.repository.intreface';
 import { ClientCreditModule } from '../client-credit/client-credit.module';
 import { GetAllInvoicesPaginatedUseCase } from './application/usecase/get-all-invoices-paginate';
+import { BulkDownloadInvoicesUseCase } from './application/usecase/bulk-download-invoices.use-case';
+import { DownloadInvoicePdfUseCase } from './application/usecase/download-invoice-pdf.use-case';
 
 @Module({
   imports: [
@@ -36,6 +38,8 @@ import { GetAllInvoicesPaginatedUseCase } from './application/usecase/get-all-in
     MarkOverdueInvoicesUseCase,
     InvoiceCronService,
     GetAllInvoicesPaginatedUseCase,
+    BulkDownloadInvoicesUseCase,
+    DownloadInvoicePdfUseCase,
   ],
   controllers: [InvoiceController],
   exports: [IInvoiceRepository, GenerateInvoiceUseCase], // ✅ Fixed: token reference

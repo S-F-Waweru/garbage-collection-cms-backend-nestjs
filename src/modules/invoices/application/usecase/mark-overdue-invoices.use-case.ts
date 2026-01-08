@@ -1,8 +1,8 @@
 // application/use-cases/mark-overdue-invoices.use-case.ts
 import { Injectable, Inject, Logger } from '@nestjs/common';
 
-import { InvoiceStatus } from '../../domain/invoice.entity';
 import { IInvoiceRepository } from '../../domain/invoice.repository.intreface';
+import { InvoiceStatus } from '../models';
 
 @Injectable()
 export class MarkOverdueInvoicesUseCase {

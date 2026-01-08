@@ -9,7 +9,8 @@ import { IClientRepository } from '../../../clients/client/domain/interface/clie
 import { ICreditClientRepository } from '../../../client-credit/domain/client_credit.repository.interfacace';
 import { IInvoiceRepository } from '../../domain/invoice.repository.intreface';
 import { GenerateInvoiceDto } from '../dto/invoice.dto';
-import { Invoice, InvoiceStatus } from '../../domain/invoice.entity';
+import { Invoice } from '../../domain/invoice.entity';
+import { InvoiceStatus } from '../models';
 
 @Injectable()
 export class GenerateInvoiceUseCase {
@@ -43,7 +44,7 @@ export class GenerateInvoiceUseCase {
 
     for (const building of client.buildings) {
       totalUnits += building.activeUnits;
-      totalAmount += building.activeUnits* building.unitPrice;
+      totalAmount += building.activeUnits * building.unitPrice;
     }
 
     const subtotal = totalAmount;

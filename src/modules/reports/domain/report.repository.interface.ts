@@ -1,5 +1,6 @@
 // domain/report.repository.interface.ts
 
+import { InvoiceStatus } from 'src/modules/invoices/application/models';
 import {
   OutstandingBalanceItem,
   RevenueByClientItem,
@@ -15,6 +16,7 @@ export interface ReportFilters {
   clientId?: string;
   city?: string;
   region?: string;
+  status?: string;
 }
 
 export interface IReportRepository {
@@ -30,6 +32,7 @@ export interface IReportRepository {
   getOtherIncome(filters?: ReportFilters): Promise<OtherIncomeItem[]>;
   getSummaryStatistics(filters?: ReportFilters): Promise<ReportSummary>;
   getPaymentSummary(filters?: ReportFilters): Promise<PaymentSummaryItem[]>;
+  getInvoiceSummary(filters?: ReportFilters): Promise<InvoiceSummaryItem[]>;
 }
 export const IReportRepository = Symbol('IReportRepository');
 
@@ -44,4 +47,18 @@ export interface PaymentSummaryItem {
   referenceNumber: string;
   appliedToInvoices: any[];
   excessAmount: number;
+}
+
+export interface InvoiceSummaryItem {
+  id: string;
+  invoiceNumber: string;
+  clientId: string;
+  clientFirstName: string;
+  clientLastName: string;
+  invoiceDate: Date;
+  dueDate: Date;
+  totalAmount: number;
+  amountPaid: number;
+  balance: number;
+  status: InvoiceStatus;
 }

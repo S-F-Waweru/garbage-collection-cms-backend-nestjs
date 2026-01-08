@@ -11,10 +11,10 @@ import {
   Index,
   DeleteDateColumn,
 } from 'typeorm';
-import { InvoiceStatus } from '../domain/invoice.entity';
 import { ClientSchema } from '../../clients/client/infrastructure/perisistence/schema/client.schema';
 import { PaymentSchema } from '../../payments/infrastructure/payment.schema';
 import { UserSchema } from '../../auth/infrastructure/persistence/schema/user.schema';
+import { InvoiceStatus } from '../application/models';
 
 @Entity('invoices')
 @Index(['clientId', 'invoiceDate'])

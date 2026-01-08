@@ -2,6 +2,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import * as ExcelJS from 'exceljs';
 import { ReportType } from '../../domain/report-result.entity';
+import { InvoiceSummaryItem } from '../../domain/report.repository.interface';
 
 @Injectable()
 export class ExportReportToExcelUseCase {
@@ -34,6 +35,9 @@ export class ExportReportToExcelUseCase {
       case ReportType.PAYMENTS: // Make sure this exists
         this.addPaymentsSheet(worksheet, data);
         break;
+      case ReportType.INVOICE:
+        this.addInvoiceSheet(worksheet, data);
+        break;
       default:
         throw new BadRequestException(`Unsupported report type: ${reportType}`);
     }
@@ -50,6 +54,7 @@ export class ExportReportToExcelUseCase {
       [ReportType.PETTY_CASH]: 'Petty Cash',
       [ReportType.OTHER_INCOME]: 'Other Income',
       [ReportType.PAYMENTS]: 'Payments',
+      [ReportType.INVOICE]: 'Invoices',
     };
     return names[reportType] || 'Report';
   }
@@ -110,6 +115,52 @@ export class ExportReportToExcelUseCase {
 
     this.styleHeader(worksheet);
     this.applyBorders(worksheet);
+  }
+
+  private addInvoiceSheet(worksheet: ExcelJS.Worksheet, data: InvoiceSummaryItem[]) {
+    // 1. Define Columns
+    worksheet.columns = [
+      { header: 'Invoice Number', key: 'invoiceNumber', width: 20 },
+      { header: 'Client Name', key: 'clientName', width: 30 },
+      { header: 'Date', key: 'invoiceDate', width: 15 },
+      { header: 'Due Date', key: 'dueDate', width: 15 },
+      { header: 'Status', key: 'status', width: 15 },
+      { header: 'Total Amount', key: 'totalAmount', width: 15, style: { numFmt: '"$"#,##0.00' } },
+      { header: 'Amount Paid', key: 'amountPaid', width: 15, style: { numFmt: '"$"#,##0.00' } },
+      { header: 'Balance', key: 'balance', width: 15, style: { numFmt: '"$"#,##0.00' } },
+    ];
+
+    // 2. Format the Header Row
+    worksheet.getRow(1).font = { bold: true };
+    worksheet.getRow(1).fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'F2F2F2' }
+    };
+
+    // 3. Add Data Rows
+    data.forEach((item) => {
+      worksheet.addRow({
+        invoiceNumber: item.invoiceNumber,
+        clientName: `${item.clientFirstName} ${item.clientLastName}`,
+        invoiceDate: item.invoiceDate,
+        dueDate: item.dueDate,
+        status: item.status,
+        totalAmount: item.totalAmount,
+        amountPaid: item.amountPaid,
+        balance: item.balance,
+      });
+    });
+
+    // 4. Optional: Add a total row at the bottom
+    const totalRow = data.reduce((acc, curr) => acc + (curr.balance || 0), 0);
+    if (data.length > 0) {
+      const lastRow = worksheet.addRow({
+        status: 'TOTAL UNPAID:',
+        balance: totalRow
+      });
+      lastRow.font = { bold: true };
+    }
   }
 
   private addOutstandingBalancesSheet(
@@ -456,4 +507,6 @@ export class ExportReportToExcelUseCase {
     const num = typeof amount === 'string' ? parseFloat(amount) : amount;
     return num.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   }
+
+
 }

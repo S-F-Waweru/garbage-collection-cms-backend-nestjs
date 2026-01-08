@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import {
+  InvoiceSummaryItem,
   IReportRepository,
   PaymentSummaryItem,
   ReportFilters,
@@ -23,61 +24,6 @@ export class ReportRepository implements IReportRepository {
     private readonly invoiceRepo: Repository<InvoiceSchema>,
     private readonly dataSource: DataSource,
   ) {}
-
-  async getPaymentSummary(
-    filters?: ReportFilters,
-  ): Promise<PaymentSummaryItem[]> {
-    let query = this.dataSource
-      .createQueryBuilder()
-      .select([
-        'p.paymentNumber as "paymentNumber"',
-        'p.clientId as "clientId"',
-        'c.firstName as "clientFirstName"',
-        'c.lastName as "clientLastName"',
-        'p.amount as "amount"',
-        'p.paymentMethod as "paymentMethod"',
-        'p.paymentDate as "paymentDate"',
-        'p.referenceNumber as "referenceNumber"',
-        'p.appliedToInvoices as "appliedToInvoices"',
-        'p.excessAmount as "excessAmount"',
-      ])
-      .from('payments', 'p')
-      .leftJoin('clients', 'c', 'p.clientId = c.id AND c.deletedAt IS NULL');
-    // .where('p.deletedAt IS NULL');
-
-    if (filters?.startDate) {
-      query = query.andWhere('p.paymentDate >= :startDate', {
-        startDate: filters.startDate,
-      });
-    }
-    if (filters?.endDate) {
-      query = query.andWhere('p.paymentDate <= :endDate', {
-        endDate: filters.endDate,
-      });
-    }
-    if (filters?.clientId) {
-      query = query.andWhere('p.clientId = :clientId', {
-        clientId: filters.clientId,
-      });
-    }
-
-    query = query.orderBy('p.paymentDate', 'DESC');
-
-    const results = await query.getRawMany();
-    return results.map((r) => ({
-      ...r,
-      amount: this.fromCents(this.toCents(r.amount)),
-      excessAmount: this.fromCents(this.toCents(r.excessAmount)),
-    }));
-  }
-
-  private toCents(amount: string | number | null | undefined): number {
-    return Math.round((Number(amount) || 0) * 100);
-  }
-
-  private fromCents(cents: number): number {
-    return cents / 100;
-  }
 
   async getOutstandingBalances(
     filters?: ReportFilters,
@@ -124,6 +70,114 @@ export class ReportRepository implements IReportRepository {
     const results = await query.getRawMany();
     return results.map((r) => ({
       ...r,
+      totalAmount: this.fromCents(this.toCents(r.totalAmount)),
+      amountPaid: this.fromCents(this.toCents(r.amountPaid)),
+      balance: this.fromCents(this.toCents(r.balance)),
+    }));
+  }
+
+  async getPaymentSummary(
+    filters?: ReportFilters,
+  ): Promise<PaymentSummaryItem[]> {
+    let query = this.dataSource
+      .createQueryBuilder()
+      .select([
+        'p.paymentNumber as "paymentNumber"',
+        'p.clientId as "clientId"',
+        'c.firstName as "clientFirstName"',
+        'c.lastName as "clientLastName"',
+        'p.amount as "amount"',
+        'p.paymentMethod as "paymentMethod"',
+        'p.paymentDate as "paymentDate"',
+        'p.referenceNumber as "referenceNumber"',
+        'p.appliedToInvoices as "appliedToInvoices"',
+        'p.excessAmount as "excessAmount"',
+      ])
+      .from('payments', 'p')
+      .leftJoin('clients', 'c', 'p.clientId = c.id AND c.deletedAt IS NULL');
+    // .where('p.deletedAt IS NULL');
+    if (filters?.startDate) {
+      query = query.andWhere('p.paymentDate >= :startDate', {
+        startDate: filters.startDate,
+      });
+    }
+    if (filters?.endDate) {
+      query = query.andWhere('p.paymentDate <= :endDate', {
+        endDate: filters.endDate,
+      });
+    }
+    if (filters?.clientId) {
+      query = query.andWhere('p.clientId = :clientId', {
+        clientId: filters.clientId,
+      });
+    }
+
+    query = query.orderBy('p.paymentDate', 'DESC');
+
+    const results = await query.getRawMany();
+    return results.map((r) => ({
+      ...r,
+      amount: this.fromCents(this.toCents(r.amount)),
+      excessAmount: this.fromCents(this.toCents(r.excessAmount)),
+    }));
+  }
+
+  private toCents(amount: string | number | null | undefined): number {
+    return Math.round((Number(amount) || 0) * 100);
+  }
+
+  private fromCents(cents: number): number {
+    return cents / 100;
+  }
+
+  async getInvoiceSummary(
+    filters?: ReportFilters,
+  ): Promise<InvoiceSummaryItem[]> {
+    let query = this.dataSource
+      .createQueryBuilder()
+      .select([
+        'i.id as "id"',
+        'i.invoiceNumber as "invoiceNumber"',
+        'i.clientId as "clientId"',
+        'c.firstName as "clientFirstName"',
+        'c.lastName as "clientLastName"',
+        'i.invoiceDate as "invoiceDate"',
+        'i.dueDate as "dueDate"',
+        'i.totalAmount as "totalAmount"',
+        'i.amountPaid as "amountPaid"',
+        'i.balance as "balance"',
+        'i.status as "status"',
+      ])
+      .from(InvoiceSchema, 'i')
+      .leftJoin('clients', 'c', 'i.clientId = c.id AND c.deletedAt IS NULL')
+      .where('i.deletedAt IS NULL');
+
+    // Apply dynamic filters
+    if (filters?.startDate) {
+      query = query.andWhere('i.invoiceDate >= :startDate', {
+        startDate: filters.startDate,
+      });
+    }
+
+    if (filters?.endDate) {
+      query = query.andWhere('i.invoiceDate <= :endDate', {
+        endDate: filters.endDate,
+      });
+    }
+
+    if (filters?.clientId) {
+      query = query.andWhere('i.clientId = :clientId', {
+        clientId: filters.clientId,
+      });
+    }
+
+    // Execute and format financial values
+    const results = await query.getRawMany();
+
+    return results.map((r) => ({
+      ...r,
+      // Converting to cents and back ensures we handle floating point
+      // precision issues often found in 'decimal' or 'numeric' types
       totalAmount: this.fromCents(this.toCents(r.totalAmount)),
       amountPaid: this.fromCents(this.toCents(r.amountPaid)),
       balance: this.fromCents(this.toCents(r.balance)),

@@ -1,7 +1,8 @@
 // application/dto/report-filters.dto.ts
-import { IsOptional, IsDateString, IsUUID, IsString } from 'class-validator';
+import { IsOptional, IsDateString, IsUUID, IsString, IsEnum } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { ApiProperty } from '@nestjs/swagger';
+import { InvoiceStatus } from 'src/modules/invoices/application/models';
 
 export class ReportFiltersDto {
   @ApiPropertyOptional({
@@ -43,9 +44,12 @@ export class ReportFiltersDto {
   @IsOptional()
   @IsString()
   region?: string;
+
+
+  @IsOptional()
+  @IsEnum(InvoiceStatus)
+  status?: InvoiceStatus;
 }
-// application/dto/revenue-report-filters.dto.ts
-import { IsEnum } from 'class-validator';
 
 export enum RevenueGroupBy {
   CLIENT = 'client',

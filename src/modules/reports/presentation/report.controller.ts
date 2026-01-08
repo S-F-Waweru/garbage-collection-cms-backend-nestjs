@@ -30,6 +30,8 @@ import { GetExpenseIncomeChartUseCase } from '../application/usecase/get-expense
 import { GetPaymentUseCase } from 'src/modules/payments/application/usecases/get-payment.use-case';
 import { PaymentExcelReport } from '../application/usecase/getpaymentpreport-to-excel.usecase';
 import { GetPaymentReportUseCase } from '../application/usecase/get-payment-report.use-case';
+import { Public } from 'src/modules/auth/presentation/decorators/public.decorator';
+import { GetInvoiceReportUseCase } from '../application/usecase/get-invoice-report.use-case';
 
 @ApiTags('Reports')
 @ApiBearerAuth()
@@ -44,7 +46,7 @@ export class ReportController {
     private readonly exportReportToExcelUseCase: ExportReportToExcelUseCase,
     private readonly getExpenseIncomeChartUseCase: GetExpenseIncomeChartUseCase,
     private readonly getPaymentReportUseCase: GetPaymentReportUseCase,
-    private readonly paymentExcelReport: PaymentExcelReport,
+    private readonly getInvoiceReportUsecase: GetInvoiceReportUseCase,
   ) {}
 
   @Get('outstanding-balances')
@@ -326,6 +328,11 @@ export class ReportController {
         filename = `payments-${new Date().toISOString().split('T')[0]}.xlsx`;
         break;
 
+      case 'invoices':
+        report = await this.getPaymentReportUseCase.execute(parsedFilters);
+        filename = `payments-${new Date().toISOString().split('T')[0]}.xlsx`;
+        break;
+
       default:
         return res.status(HttpStatus.BAD_REQUEST).json({
           message: 'Invalid report type',
@@ -334,6 +341,8 @@ export class ReportController {
             'revenue',
             'petty-cash',
             'other-income',
+            'payments',
+            'invoices',
           ],
         });
     }
@@ -425,5 +434,41 @@ export class ReportController {
     };
 
     return await this.getPaymentReportUseCase.execute(parsedFilters);
+  }
+
+  @Public()
+  @Get('invoices')
+  @ApiOperation({
+    summary: 'Get invoices report',
+    description:
+      'Returns all invoices with client details and applied invoices',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'invoices report generated successfully',
+  })
+  @ApiQuery({
+    name: 'startDate',
+    required: false,
+    description: 'Filter from date (YYYY-MM-DD)',
+  })
+  @ApiQuery({
+    name: 'endDate',
+    required: false,
+    description: 'Filter to date (YYYY-MM-DD)',
+  })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    description: 'Filter by client UUID',
+  })
+  async getInvoiceReport(@Query() filters: ReportFiltersDto) {
+    const parsedFilters = {
+      startDate: filters.startDate ? new Date(filters.startDate) : undefined,
+      endDate: filters.endDate ? new Date(filters.endDate) : undefined,
+      status: filters.status,
+    };
+
+    return await this.getInvoiceReportUsecase.execute(parsedFilters);
   }
 }

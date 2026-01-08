@@ -15,10 +15,10 @@ import { ClientCredit } from 'src/modules/client-credit/domain/client-credit.ent
 import { ICreditClientRepository } from 'src/modules/client-credit/domain/client_credit.repository.interfacace';
 import {
   Invoice,
-  InvoiceStatus,
 } from 'src/modules/invoices/domain/invoice.entity';
 import { IInvoiceRepository } from 'src/modules/invoices/domain/invoice.repository.intreface';
 import { SystemUserService } from 'src/modules/auth/application/services/system-user.service';
+import { InvoiceStatus } from 'src/modules/invoices/application/models';
 
 @Injectable()
 export class CreateClientUseCase {

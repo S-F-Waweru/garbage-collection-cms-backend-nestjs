@@ -22,6 +22,7 @@ import { ExpenseRepository } from '../expences/expence/infrastructure/expense.re
 import { GetPaymentReportUseCase } from './application/usecase/get-payment-report.use-case';
 import { PaymentExcelReport } from './application/usecase/getpaymentpreport-to-excel.usecase';
 import { IReportRepository } from './domain/report.repository.interface';
+import { GetInvoiceReportUseCase } from './application/usecase/get-invoice-report.use-case';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { IReportRepository } from './domain/report.repository.interface';
     ExportReportToExcelUseCase,
     GetPaymentReportUseCase,
     PaymentExcelReport,
+    GetInvoiceReportUseCase,
   ],
   controllers: [ReportController],
   exports: [IReportRepository],

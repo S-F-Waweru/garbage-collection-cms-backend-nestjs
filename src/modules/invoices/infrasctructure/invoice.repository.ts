@@ -2,12 +2,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource, IsNull, DeepPartial } from 'typeorm';
-import { Invoice, InvoiceStatus } from '../domain/invoice.entity';
+import { Invoice } from '../domain/invoice.entity';
 import {
   IInvoiceRepository,
   InvoiceFilters,
 } from '../domain/invoice.repository.intreface';
 import { InvoiceSchema } from './invoice.rschema';
+import { InvoiceStatus } from '../application/models';
 
 @Injectable()
 export class InvoiceRepository implements IInvoiceRepository {
@@ -50,10 +51,10 @@ export class InvoiceRepository implements IInvoiceRepository {
   // }
   async save(invoice: Invoice): Promise<Invoice> {
     const data = invoice.toObject();
-    
+
     // Check if this is an update or create
     const existing = await this.repo.findOne({ where: { id: invoice.id } });
-    
+
     if (existing) {
       // Update existing
       Object.assign(existing, data);
@@ -66,8 +67,6 @@ export class InvoiceRepository implements IInvoiceRepository {
       return this.toDomain(savedSchema);
     }
   }
-    
-
 
   async findById(id: string): Promise<Invoice | null> {
     const schema = await this.repo.findOne({ where: { id } });

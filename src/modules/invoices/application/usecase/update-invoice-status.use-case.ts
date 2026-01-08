@@ -6,8 +6,9 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 
-import { Invoice, InvoiceStatus } from '../../domain/invoice.entity';
+import { Invoice } from '../../domain/invoice.entity';
 import { IInvoiceRepository } from '../../domain/invoice.repository.intreface';
+import { InvoiceStatus } from '../models';
 
 @Injectable()
 export class UpdateInvoiceStatusUseCase {

@@ -1,14 +1,7 @@
 // invoice.entity.ts
 import { BaseEntity } from 'src/shared/domain/entities/base.entity';
 import { BadRequestException } from '@nestjs/common';
-
-export enum InvoiceStatus {
-  PENDING = 'PENDING',
-  PARTIALLY_PAID = 'PARTIALLY_PAID',
-  PAID = 'PAID',
-  OVERDUE = 'OVERDUE',
-  CANCELLED = 'CANCELLED',
-}
+import { InvoiceStatus } from '../application/models';
 
 interface InvoiceProps {
   invoiceNumber: string;
