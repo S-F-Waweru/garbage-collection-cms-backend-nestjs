@@ -2,6 +2,7 @@ import { Injectable, Inject, NotFoundException, Logger } from '@nestjs/common';
 import { IInvoiceRepository } from '../../domain/invoice.repository.intreface';
 import { IClientRepository } from 'src/modules/clients/client/domain/interface/client.repository.interface';
 import PDFDocument from 'pdfkit';
+import { Invoice } from '../../domain/invoice.entity';
 
 @Injectable()
 export class DownloadInvoicePdfUseCase {
@@ -28,12 +29,19 @@ export class DownloadInvoicePdfUseCase {
       doc.on('end', () => resolve(Buffer.concat(chunks)));
       doc.on('error', reject);
 
+      // Extract building name from client data if available
+      const buildingName =
+        client?.buildings && client.buildings.length > 0
+          ? client.buildings[0].name
+          : null;
+
+      // --- PDF SECTIONS ---
       this.generateHeader(doc, invoice);
       this.generateCustomerInformation(doc, invoice, client);
-      this.generateInvoiceTable(doc, invoice);
+      this.generateInvoiceTable(doc, invoice, buildingName);
       this.generateFooter(doc, invoice);
 
-      // --- Optional: Paid Watermark ---
+      // Add "PAID" Watermark for fully settled invoices
       if (invoice.isPaid()) {
         this.addStatusWatermark(doc, 'PAID');
       }
@@ -42,54 +50,73 @@ export class DownloadInvoicePdfUseCase {
     });
   }
 
-  private generateHeader(doc: PDFKit.PDFDocument, invoice: any) {
+  private generateHeader(doc: PDFKit.PDFDocument, invoice: Invoice) {
+    // Brand Identity
+    doc
+      .fillColor('#2e7d32') // Brand Green
+      .fontSize(22)
+      .font('Helvetica-Bold')
+      .text('SustainableSweeps', 50, 50)
+      .fillColor('#666666')
+      .fontSize(10)
+      .font('Helvetica-Oblique')
+      .text('Transforming Mess into Freshness', 50, 75)
+      .moveDown();
+
+    // Invoice Meta-data
     doc
       .fillColor('#444444')
-      .fontSize(20)
-      .text('TAX INVOICE', 50, 50) // Common terminology in Kenya
-      .fontSize(10)
+      .fontSize(16)
       .font('Helvetica-Bold')
-      .text(invoice.invoiceNumber, 200, 50, { align: 'right' })
+      .text('TAX INVOICE', 200, 50, { align: 'right' })
+      .fontSize(10)
       .font('Helvetica')
+      .text(`Invoice No: ${invoice.invoiceNumber}`, 200, 72, { align: 'right' })
       .text(
         `Date: ${new Date(invoice.invoiceDate).toLocaleDateString('en-GB')}`,
         200,
-        65,
+        85,
         { align: 'right' },
       )
       .text(
         `Due Date: ${new Date(invoice.dueDate).toLocaleDateString('en-GB')}`,
         200,
-        80,
+        98,
         { align: 'right' },
       );
 
-    this.generateHr(doc, 95);
+    this.generateHr(doc, 120);
   }
 
   private generateCustomerInformation(
     doc: PDFKit.PDFDocument,
-    invoice: any,
+    invoice: Invoice,
     client: any,
   ) {
-    const top = 115;
+    const top = 140;
 
+    // Bill To Section
     doc
       .fontSize(10)
       .font('Helvetica-Bold')
       .text('BILL TO:', 50, top)
       .font('Helvetica')
-      .text(`${client?.firstName} ${client?.lastName}`, 50, top + 15)
+      .text(
+        `${client?.firstName || ''} ${client?.lastName || ''}`,
+        50,
+        top + 15,
+      )
       .font('Helvetica-Bold')
-      .text(client?.companyName || 'Individual Client', 50, top + 30)
+      .text(client?.companyName || 'Valued Client', 50, top + 30)
       .font('Helvetica')
-      .text(`Email: ${client?.email}`, 50, top + 45)
-      .text(`Phone: ${client?.phone}`, 50, top + 60)
+      .text(`Email: ${client?.email || 'N/A'}`, 50, top + 45)
+      .text(`Phone: ${client?.phone || 'N/A'}`, 50, top + 60)
       .text(`KRA PIN: ${client?.KRAPin || 'N/A'}`, 50, top + 75);
 
+    // Context & Payment Info
     doc
       .font('Helvetica-Bold')
-      .text('Billing Period:', 350, top)
+      .text('Service Period:', 350, top)
       .font('Helvetica')
       .text(
         `${new Date(invoice.billingPeriodStart).toLocaleDateString('en-GB')} - ${new Date(invoice.billingPeriodEnd).toLocaleDateString('en-GB')}`,
@@ -97,15 +124,23 @@ export class DownloadInvoicePdfUseCase {
         top + 15,
       )
       .font('Helvetica-Bold')
-      .text('Payment Mode:', 350, top + 40)
+      .text('Payment Mode:', 350, top + 45)
       .font('Helvetica')
-      .text(client?.paymentMethod || 'BANK', 350, top + 55);
+      .text(client?.paymentMethod || 'BANK/MPESA', 350, top + 60);
 
-    this.generateHr(doc, 210);
+    this.generateHr(doc, 235);
   }
 
-  private generateInvoiceTable(doc: PDFKit.PDFDocument, invoice: any) {
-    const tableTop = 230;
+  private generateInvoiceTable(
+    doc: PDFKit.PDFDocument,
+    invoice: Invoice,
+    buildingName: string | null,
+  ) {
+    const tableTop = 255;
+
+    const description = buildingName
+      ? `Subscription Services: ${buildingName}`
+      : 'Cleaning & Maintenance Subscription';
 
     doc.font('Helvetica-Bold');
     this.generateTableRow(
@@ -122,7 +157,7 @@ export class DownloadInvoicePdfUseCase {
     this.generateTableRow(
       doc,
       tableTop + 25,
-      'Service Subscription',
+      description,
       invoice.activeUnits.toString(),
       this.formatKsh(invoice.unitPrice),
       this.formatKsh(invoice.subtotal),
@@ -131,7 +166,7 @@ export class DownloadInvoicePdfUseCase {
     const lineEnd = tableTop + 45;
     this.generateHr(doc, lineEnd);
 
-    // Totals Section
+    // Financial Summary
     const footerTop = lineEnd + 20;
     this.generateTotalRow(
       doc,
@@ -146,7 +181,7 @@ export class DownloadInvoicePdfUseCase {
       `- ${this.formatKsh(invoice.creditApplied)}`,
     );
 
-    doc.font('Helvetica-Bold').fontSize(12);
+    doc.font('Helvetica-Bold').fontSize(11);
     this.generateTotalRow(
       doc,
       footerTop + 45,
@@ -154,7 +189,7 @@ export class DownloadInvoicePdfUseCase {
       this.formatKsh(invoice.totalAmount),
     );
 
-    doc.fontSize(10).fillColor('#008000');
+    doc.fontSize(10).fillColor('#2e7d32');
     this.generateTotalRow(
       doc,
       footerTop + 65,
@@ -170,26 +205,35 @@ export class DownloadInvoicePdfUseCase {
       'Balance Due:',
       this.formatKsh(invoice.balance),
     );
-    doc.fillColor('#444444');
+
+    doc.fillColor('#444444').font('Helvetica');
   }
 
-  private generateFooter(doc: PDFKit.PDFDocument, invoice: any) {
+  private generateFooter(doc: PDFKit.PDFDocument, invoice: Invoice) {
     doc
       .fontSize(10)
       .font('Helvetica-Bold')
-      .text('Notes:', 50, 650)
+      .text('Notes:', 50, 680)
       .font('Helvetica')
-      .text(invoice.notes || 'No additional notes.', 50, 665, { width: 500 });
+      .text(
+        invoice.notes ||
+          'Thank you for your business. Please settle the balance by the due date.',
+        50,
+        695,
+        { width: 500 },
+      );
 
     doc
       .fontSize(8)
       .fillColor('#777777')
-      .text(
-        'This is a computer-generated document. No signature is required.',
-        50,
-        780,
-        { align: 'center', width: 500 },
-      );
+      .text('SustainableSweeps • Transforming Mess into Freshness', 50, 770, {
+        align: 'center',
+        width: 500,
+      })
+      .text('Computer-generated invoice. No signature required.', 50, 782, {
+        align: 'center',
+        width: 500,
+      });
   }
 
   private addStatusWatermark(doc: any, status: string) {
@@ -197,13 +241,13 @@ export class DownloadInvoicePdfUseCase {
       .save()
       .opacity(0.1)
       .fontSize(100)
-      .fillColor('#008000')
+      .fillColor('#2e7d32')
       .rotate(-45, { origin: [300, 400] })
       .text(status, 150, 400)
       .restore();
   }
 
-  // --- Helpers ---
+  // --- HELPER METHODS ---
 
   private generateTableRow(
     doc: any,
@@ -214,7 +258,7 @@ export class DownloadInvoicePdfUseCase {
     total: string,
   ) {
     doc
-      .text(desc, 50, y)
+      .text(desc, 50, y, { width: 220 })
       .text(qty, 280, y, { width: 50, align: 'right' })
       .text(price, 340, y, { width: 100, align: 'right' })
       .text(total, 450, y, { align: 'right' });
@@ -227,7 +271,7 @@ export class DownloadInvoicePdfUseCase {
   private generateHr(doc: any, y: number) {
     doc
       .strokeColor('#aaaaaa')
-      .lineWidth(1)
+      .lineWidth(0.5)
       .moveTo(50, y)
       .lineTo(550, y)
       .stroke();
@@ -235,6 +279,6 @@ export class DownloadInvoicePdfUseCase {
 
   private formatKsh(amount: any): string {
     const val = Number(amount);
-    return `Ksh ${val.toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    return `Ksh ${val.toLocaleString('en-KE', { minimumFractionDigits: 2 })}`;
   }
 }
