@@ -27,6 +27,9 @@ import { IPasswordResetTokenRepository } from './domain/interfaces/password.repo
 import { PasswordResetTokenRepository } from './infrastructure/persistence/repository/password-reset-token.repository';
 import { PasswordResetTokenSchema } from './infrastructure/persistence/schema/password-reset-schema';
 import { SystemUserService } from './application/services/system-user.service';
+import { TokenHasherService } from './application/services/tokenHasher';
+import { ITokenHasher } from './domain/interfaces/token-hasher.interface';
+import { TokenGeneratorService } from './application/services/token-generator.service';
 
 @Module({
   imports: [
@@ -69,6 +72,10 @@ import { SystemUserService } from './application/services/system-user.service';
     {
       provide: IRefreshTokenRepository,
       useClass: RefreshTokenRepository,
+    },
+    {
+      provide: ITokenHasher,
+      useClass: TokenHasherService,
     },
 
     PasswordResetTokenRepository,

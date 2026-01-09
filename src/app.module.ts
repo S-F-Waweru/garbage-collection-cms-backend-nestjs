@@ -18,7 +18,6 @@ import { IncomeCategorySchema } from './modules/other-income/income-category/inf
 import { PettyCashSchema } from './modules/expences/petty-cash/infrastructure/petty-cash-schema';
 import { ExpenseSchema } from './modules/expences/expence/infrastructure/expense.schema';
 import { ClientSchema } from './modules/clients/client/infrastructure/perisistence/schema/client.schema';
-import { BuildingController } from './modules/clients/building/presentation/building.controller';
 import { BuildingSchema } from './modules/clients/building/infrastructure/persistense/schema/buildingSchema';
 import { RepositoriesModule } from './shared/repositories/repositories.module';
 import { PaymentModule } from './modules/payments/payments.module';
@@ -30,7 +29,7 @@ import { ClientCreditSchema } from './modules/client-credit/infrastructure/persi
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 import { APP_GUARD } from '@nestjs/core';
 import { PasswordResetTokenSchema } from './modules/auth/infrastructure/persistence/schema/password-reset-schema';
-import { SystemUserService } from './modules/auth/application/services/system-user.service';
+import { ClientCreditModule } from './modules/client-credit/client-credit.module';
 
 @Module({
   imports: [
@@ -75,6 +74,7 @@ import { SystemUserService } from './modules/auth/application/services/system-us
     LocationModule,
     AuthModule,
     RepositoriesModule,
+    ClientCreditModule,
   ],
   controllers: [AppController],
   providers: [

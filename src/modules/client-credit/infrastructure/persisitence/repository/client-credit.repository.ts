@@ -1,5 +1,5 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Logger, NotFoundException } from '@nestjs/common';
 import { ClientCredit } from 'src/modules/client-credit/domain/client-credit.entity';
 import { Repository } from 'typeorm';
 import { ClientCreditSchema } from '../schema/client-credit.schema';
@@ -10,6 +10,7 @@ export class ClientCreditRepository implements ICreditClientRepository {
     @InjectRepository(ClientCreditSchema)
     private readonly repository: Repository<ClientCreditSchema>,
   ) {}
+  private logger = new Logger(ClientCreditRepository.name);
 
   async save(clientCredit: ClientCredit): Promise<ClientCredit> {
     const schema = this.toSchema(clientCredit);
@@ -105,6 +106,8 @@ export class ClientCreditRepository implements ICreditClientRepository {
   }
 
   private toDomain(schema: ClientCreditSchema): ClientCredit {
+    this.logger.debug('Tto domain.');
+    this.logger.debug(schema);
     return ClientCredit.fromPersistence({
       id: schema.id,
       client: schema.client,

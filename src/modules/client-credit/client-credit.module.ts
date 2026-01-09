@@ -9,7 +9,9 @@ import { DecrementBalanceUseCase } from './application/usecase/decreament-balanc
 import { GetClientCreditUseCase } from './application/usecase/getClientCredit.usecase';
 import { IncrementBalanceUseCase } from './application/usecase/increment-balance.use-case';
 import { UpdateBalanceUseCase } from './application/usecase/update-balance.usecase';
-import { RepositoriesModule } from '../../shared/repositories/repositories.module'; // Adjust path
+import { RepositoriesModule } from '../../shared/repositories/repositories.module';
+import { ClientCreditController } from './presentation/client-credit.contoller';
+import { GetCreditByClientIdUseCase } from './application/usecase/get-credit-by-client-id.use-case'; // Adjust path
 
 @Module({
   imports: [
@@ -22,8 +24,10 @@ import { RepositoriesModule } from '../../shared/repositories/repositories.modul
     GetClientCreditUseCase,
     IncrementBalanceUseCase,
     UpdateBalanceUseCase,
+    GetCreditByClientIdUseCase, //
     { provide: ICreditClientRepository, useClass: ClientCreditRepository },
   ],
+  controllers: [ClientCreditController],
   exports: [
     ICreditClientRepository, // ✅ Exports both for GenerateInvoiceUseCase
   ],

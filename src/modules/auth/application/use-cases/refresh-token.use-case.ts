@@ -8,6 +8,7 @@ import {
   RefreshTokenPayload,
 } from '../services/jwt-service/jwt-service.service';
 import { IAuthRepository } from '../../domain/interfaces/auth.repository.interface';
+import { ITokenHasher } from '../../domain/interfaces/token-hasher.interface';
 
 export interface RefreshTokenInput {
   refreshToken: string;
@@ -25,6 +26,8 @@ export class RefreshTokenUseCase {
     private readonly refreshTokenRepository: IRefreshTokenRepository,
     @Inject(IAuthRepository)
     private readonly userRepository: IAuthRepository,
+    @Inject(ITokenHasher)
+    private readonly tokenHasher: ITokenHasher,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -41,14 +44,11 @@ export class RefreshTokenUseCase {
     }
 
     // 2. Hash the token to find it in DB
-    // const tokenHash = crypto
-    //   .createHash('sha256')
-    //   .update(refreshTokenString)
-    //   .digest('hex');
+    const incomingHash = this.tokenHasher.hash(refreshTokenString);
 
     // 3. Find token in database
     const storedToken =
-      await this.refreshTokenRepository.findByToken(refreshTokenString);
+      await this.refreshTokenRepository.findByToken(incomingHash);
     if (!storedToken) {
       throw new UnauthorizedException('Refresh token not found');
     }
@@ -79,20 +79,12 @@ export class RefreshTokenUseCase {
       userId: user.id,
     });
 
-    // 8. Store new refresh token
-    // const newTokenHash = crypto
-    //   .createHash('sha256')
-    //   .update(newRefreshTokenString)
-    //   .digest('hex');
+    const tokenHash = this.tokenHasher.hash(newRefreshTokenString);
 
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7);
 
-    const newRefreshToken = RefreshToken.create(
-      newRefreshTokenString,
-      user.id,
-      expiresAt,
-    );
+    const newRefreshToken = RefreshToken.create(tokenHash, user.id, expiresAt);
 
     await this.refreshTokenRepository.save(newRefreshToken);
 

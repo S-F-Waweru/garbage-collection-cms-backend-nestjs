@@ -11,6 +11,7 @@ import { LoginDto } from '../../dto/auth.request.dto';
 import { Email } from '../../../domain/value-objects/email.vo';
 import { JwtService } from '../../services/jwt-service/jwt-service.service';
 import { RefreshToken } from '../../../domain/entities/refresh-token.entity';
+import { ITokenHasher } from 'src/modules/auth/domain/interfaces/token-hasher.interface';
 
 @Injectable()
 export class LoginUseCase {
@@ -19,6 +20,8 @@ export class LoginUseCase {
     private readonly authRepositor: IAuthRepository,
     @Inject(IRefreshTokenRepository)
     private readonly refreshTokenRepository: IRefreshTokenRepository,
+    @Inject(ITokenHasher)
+    private readonly tokenHasher: ITokenHasher,
     private readonly passwordHasher: PasswordHasherService,
     private readonly jwtService: JwtService,
   ) {}
@@ -50,16 +53,18 @@ export class LoginUseCase {
     });
 
     // 6. Generate new refresh token (JWT) for session extension
-    const refreshToken = this.jwtService.generateRefreshToken({
+    const refreshTokenString = this.jwtService.generateRefreshToken({
       userId: user.id,
     });
+
+    const tokenHash = this.tokenHasher.hash(refreshTokenString);
 
     // ✅ NEW: Create RefreshToken entity first
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7); // 7 days from now
 
     const refreshTokenEntity = RefreshToken.create(
-      refreshToken, // The token string
+      tokenHash, // The token string
       user.id, // User ID
       expiresAt, // Expiration date
     );
@@ -68,7 +73,7 @@ export class LoginUseCase {
     // 8. Return tokens and user information (excluding sensitive data)
     return {
       accessToken,
-      refreshToken,
+      refreshTokenString,
       user: {
         id: user.id,
         email: user.email.value,
