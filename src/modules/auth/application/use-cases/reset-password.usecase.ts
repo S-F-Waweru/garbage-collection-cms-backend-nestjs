@@ -1,19 +1,3 @@
-import { IsString, IsNotEmpty, MinLength, Matches } from 'class-validator';
-
-export class ResetPasswordDto {
-  @IsString()
-  @IsNotEmpty()
-  token: string;
-
-  @IsString()
-  @MinLength(8)
-  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/, {
-    message:
-      'Password must contain uppercase, lowercase, number, and special character',
-  })
-  newPassword: string;
-}
-
 import {
   BadRequestException,
   Inject,
@@ -21,10 +5,11 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { IPasswordResetTokenRepository } from 'src/modules/auth/domain/interfaces/password.reposiory.interface';
-import { Password } from 'src/modules/auth/domain/value-objects/Password.vo';
-import { PasswordHasherService } from '../../services/password-hasher-service/password-hasher-service.service';
-import { IAuthRepository } from 'src/modules/auth/domain/interfaces/auth.repository.interface';
+
+import { IAuthRepository } from '../../domain/interfaces/auth.repository.interface';
+import { IPasswordResetTokenRepository } from '../../domain/interfaces/password.reposiory.interface';
+import { PasswordHasherService } from '../services/password-hasher-service/password-hasher-service.service';
+import { Password } from '../../domain/value-objects/Password.vo';
 
 export interface ResetPasswordInput {
   token: string;

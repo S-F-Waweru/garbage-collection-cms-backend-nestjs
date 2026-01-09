@@ -17,7 +17,6 @@ import { PasswordHasherService } from './application/services/password-hasher-se
 import { LoginUseCase } from './application/use-cases/login.use-case.ts/login.use-case';
 import { JwtService } from './application/services/jwt-service/jwt-service.service';
 import { AdminSeederService } from './application/services/admin-seeder/admin-seeder.service';
-import { ResetPasswordUseCase } from './application/use-cases/reset-password.use-case/reset-password.use-case';
 import { JwtStrategy } from './presentation/strategies/jwt.strategy';
 import { RefreshTokenUseCase } from './application/use-cases/refresh-token.use-case';
 import { DemoSeederService } from './application/services/demo-seeder/demo-seeder.service';
@@ -29,7 +28,10 @@ import { PasswordResetTokenSchema } from './infrastructure/persistence/schema/pa
 import { SystemUserService } from './application/services/system-user.service';
 import { TokenHasherService } from './application/services/tokenHasher';
 import { ITokenHasher } from './domain/interfaces/token-hasher.interface';
-import { TokenGeneratorService } from './application/services/token-generator.service';
+import { RequestPasswordResetUseCase } from './application/use-cases/request-password-reset.usecase';
+import { ResetPasswordUseCase } from './application/use-cases/reset-password.usecase';
+import { IEmailSenderService } from './application/services/iemail-sender/iemail-sender.service';
+import { GmailEmailService } from './application/services/gmail-sender.service';
 
 @Module({
   imports: [
@@ -63,8 +65,10 @@ import { TokenGeneratorService } from './application/services/token-generator.se
     DemoSeederService,
     RefreshTokenUseCase,
     UpdateRoleUsecase,
-    ResetPasswordUseCase,
     SystemUserService,
+
+    ResetPasswordUseCase,
+    RequestPasswordResetUseCase,
 
     //Services
     PasswordHasherService,
@@ -82,6 +86,10 @@ import { TokenGeneratorService } from './application/services/token-generator.se
     {
       provide: IPasswordResetTokenRepository,
       useClass: PasswordResetTokenRepository,
+    },
+    {
+      provide: IEmailSenderService,
+      useClass: GmailEmailService, // Your actual email service implementation
     },
 
     {

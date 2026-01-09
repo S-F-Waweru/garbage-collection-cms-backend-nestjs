@@ -7,11 +7,7 @@ import {
   Param,
   Patch,
   Post,
-  Put,
   Query,
-  Req,
-  UnauthorizedException,
-  UseGuards,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -32,14 +28,14 @@ import {
   RegisterDto,
 } from '../../application/dto/auth.request.dto';
 import { ChangePasswordUseCase } from '../../application/use-cases/change-password.use-case/change-password-use-case.service';
-import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { CurrentUser } from '../../../../shared/decorators/current-user.decorator';
 import { Public } from '../decorators/public.decorator';
 import { RefreshTokenUseCase } from '../../application/use-cases/refresh-token.use-case';
 import type { CurrentUserDto } from '../../../expences/petty-cash/presentation/petty-cash.controller';
-import { get } from 'node:https';
 import { ViewPaginatedUsersUsecase } from '../../application/use-cases/view-paginated-users.usecase';
 import { UpdateRoleUsecase } from '../../application/use-cases/update-roles.usecase';
+import { ResetPasswordUseCase } from '../../application/use-cases/reset-password.usecase';
+import { RequestPasswordResetUseCase } from '../../application/use-cases/request-password-reset.usecase';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -51,6 +47,8 @@ export class AuthController {
     private readonly refreshTokenUseCase: RefreshTokenUseCase,
     private readonly getUsersUseCase: ViewPaginatedUsersUsecase,
     private readonly updateRole: UpdateRoleUsecase,
+    private readonly requestPasswordResetUseCase: RequestPasswordResetUseCase,
+    private readonly resetPasswordUseCase: ResetPasswordUseCase,
   ) {}
 
   // ---------------------------
@@ -130,6 +128,30 @@ export class AuthController {
       accessToken: result.accessToken,
       refreshToken: result.refreshToken,
     };
+  }
+
+  @Public()
+  @Post('password/request-reset')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Request password reset' })
+  @ApiResponse({
+    status: 200,
+    description: 'Reset email sent if account exists',
+  })
+  async requestPasswordReset(@Body() body: { email: string }) {
+    return this.requestPasswordResetUseCase.execute({ email: body.email });
+  }
+
+  @Public()
+  @Post('password/reset')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Reset password with token' })
+  @ApiResponse({ status: 200, description: 'Password reset successfully' })
+  async resetPassword(@Body() body: { token: string; newPassword: string }) {
+    return this.resetPasswordUseCase.execute({
+      token: body.token,
+      newPassword: body.newPassword,
+    });
   }
 
   // ---------------------------
