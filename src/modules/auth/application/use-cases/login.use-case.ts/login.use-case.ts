@@ -73,7 +73,7 @@ export class LoginUseCase {
     // 8. Return tokens and user information (excluding sensitive data)
     return {
       accessToken,
-      refreshTokenString,
+      refreshToken: refreshTokenString,
       user: {
         id: user.id,
         email: user.email.value,

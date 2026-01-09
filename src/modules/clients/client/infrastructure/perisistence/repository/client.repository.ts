@@ -2,7 +2,7 @@ import { IClientRepository } from '../../../domain/interface/client.repository.i
 import { Client } from '../../../domain/entities/client.entity';
 import { ClientSchema } from '../schema/client.schema';
 import { InjectRepository } from '@nestjs/typeorm';
-import { IsNull, Repository } from 'typeorm';
+import { FindOptionsWhere, ILike, IsNull, Repository } from 'typeorm';
 import { PaymentMethod } from '../../../../building/domain/building.entity';
 import { Injectable } from '@nestjs/common';
 
@@ -54,9 +54,30 @@ export class ClientRepository implements IClientRepository {
   async findAllPaginated(
     skip: number,
     limit: number,
+    searchTerm?: string,
   ): Promise<[Client[], number]> {
+    // 1. Define the base filter (Soft delete check)
+    let whereCondition:
+      | FindOptionsWhere<ClientSchema>
+      | FindOptionsWhere<ClientSchema>[] = {
+      deletedAt: IsNull(),
+    };
+
+    // 2. If searchTerm exists, create an OR condition across the 4 fields
+    if (searchTerm) {
+      const likeTerm = ILike(`%${searchTerm}%`);
+
+      // In TypeORM, an array [{}, {}] acts as (Cond1 OR Cond2)
+      whereCondition = [
+        { companyName: likeTerm, deletedAt: IsNull() },
+        { KRAPin: likeTerm, deletedAt: IsNull() },
+        { firstName: likeTerm, deletedAt: IsNull() },
+        { lastName: likeTerm, deletedAt: IsNull() },
+      ];
+    }
+
     const [schemas, total] = await this.repository.findAndCount({
-      where: { deletedAt: IsNull() },
+      where: whereCondition,
       skip,
       take: limit,
       relations: ['buildings'],

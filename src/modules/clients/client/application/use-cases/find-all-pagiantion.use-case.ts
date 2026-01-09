@@ -5,6 +5,7 @@ import { Client } from '../../domain/entities/client.entity';
 export interface PaginationParams {
   page: number;
   limit: number;
+  searchTerm?: string;
 }
 
 export interface PaginatedResult<T> {
@@ -23,12 +24,14 @@ export class FindAllClientsUseCase {
   ) {}
 
   async execute(params: PaginationParams): Promise<PaginatedResult<Client>> {
-    const { page, limit } = params;
+    const { page, limit, searchTerm } = params;
     const skip = (page - 1) * limit;
 
+    // Pass searchTerm to the repository
     const [clients, total] = await this.clientRepository.findAllPaginated(
       skip,
       limit,
+      searchTerm,
     );
 
     return {

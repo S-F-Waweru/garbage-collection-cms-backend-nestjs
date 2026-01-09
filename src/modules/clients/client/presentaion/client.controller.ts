@@ -42,7 +42,6 @@ export class ClientController {
     private readonly findClientByIdUseCase: FindClientByIdUseCase,
     private readonly findAllClientsUseCase: FindAllClientsUseCase,
     private readonly findAllClientsRawUseCase: FindAllClientsRawUseCase,
-    
   ) {}
 
   @Post()
@@ -59,20 +58,19 @@ export class ClientController {
   @ApiOperation({ summary: 'Get all clients (paginated)' })
   @ApiQuery({ name: 'page', required: false, example: 1 })
   @ApiQuery({ name: 'limit', required: false, example: 10 })
-  @ApiResponse({ status: 200, description: 'Clients fetched successfully' })
+  @ApiQuery({ name: 'searchTerm', required: false, type: String }) // Add this
   async findAll(
     @Query('page') page: string = '1',
     @Query('limit') limit: string = '10',
+    @Query('searchTerm') searchTerm?: string, // Add this
   ) {
-    console.log(
-      `DEBUG reaching the find all controlller ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^`,
-    );
     return this.findAllClientsUseCase.execute({
       page: parseInt(page, 10),
       limit: parseInt(limit, 10),
+      searchTerm, // Pass it here
     });
   }
-  
+
   @Get('raw')
   @ApiOperation({ summary: 'Get all clients (paginated)' })
   @ApiQuery({ name: 'page', required: false, example: 1 })
