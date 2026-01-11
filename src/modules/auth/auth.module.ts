@@ -32,6 +32,7 @@ import { RequestPasswordResetUseCase } from './application/use-cases/request-pas
 import { ResetPasswordUseCase } from './application/use-cases/reset-password.usecase';
 import { IEmailSenderService } from './application/services/iemail-sender/iemail-sender.service';
 import { GmailEmailService } from './application/services/gmail-sender.service';
+import { TokenGeneratorService } from './application/services/token-generator.service';
 
 @Module({
   imports: [
@@ -66,6 +67,7 @@ import { GmailEmailService } from './application/services/gmail-sender.service';
     RefreshTokenUseCase,
     UpdateRoleUsecase,
     SystemUserService,
+    TokenGeneratorService,
 
     ResetPasswordUseCase,
     RequestPasswordResetUseCase,

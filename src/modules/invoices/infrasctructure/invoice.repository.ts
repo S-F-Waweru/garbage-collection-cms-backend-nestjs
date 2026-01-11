@@ -1,5 +1,5 @@
 // infrastructure/invoice.repository.ts
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource, IsNull, DeepPartial } from 'typeorm';
 import { Invoice } from '../domain/invoice.entity';
@@ -196,27 +196,50 @@ export class InvoiceRepository implements IInvoiceRepository {
     return [];
   }
 
+  // private toDomain(schema: InvoiceSchema): Invoice {
+  //   return Invoice.createFromPersistence({
+  //     id: schema.id,
+  //     invoiceNumber: schema.invoiceNumber,
+  //     clientId: schema.clientId,
+  //     billingPeriodStart: new Date(schema.billingPeriodStart),
+  //     billingPeriodEnd: new Date(schema.billingPeriodEnd),
+  //     invoiceDate: schema.invoiceDate,
+  //     dueDate: schema.dueDate,
+  //     activeUnits: schema.activeUnits,
+  //     unitPrice: schema.unitPrice,
+  //     subtotal: schema.subtotal,
+  //     creditApplied: schema.creditApplied,
+  //     totalAmount: schema.totalAmount,
+  //     amountPaid: schema.amountPaid,
+  //     balance: schema.balance,
+  //     status: schema.status,
+  //     notes: schema.notes,
+  //     createdBy: schema.createdBy,
+  //     createdAt: new Date(schema.createdAt),
+  //     updatedAt: new Date(schema.updatedAt),
+  //   });
+  // }
   private toDomain(schema: InvoiceSchema): Invoice {
     return Invoice.createFromPersistence({
       id: schema.id,
       invoiceNumber: schema.invoiceNumber,
       clientId: schema.clientId,
-      billingPeriodStart: schema.billingPeriodStart,
-      billingPeriodEnd: schema.billingPeriodEnd,
-      invoiceDate: schema.invoiceDate,
-      dueDate: schema.dueDate,
-      activeUnits: schema.activeUnits,
-      unitPrice: schema.unitPrice,
-      subtotal: schema.subtotal,
-      creditApplied: schema.creditApplied,
-      totalAmount: schema.totalAmount,
-      amountPaid: schema.amountPaid,
-      balance: schema.balance,
+      billingPeriodStart: new Date(schema.billingPeriodStart),
+      billingPeriodEnd: new Date(schema.billingPeriodEnd),
+      invoiceDate: new Date(schema.invoiceDate),
+      dueDate: new Date(schema.dueDate),
+      activeUnits: Number(schema.activeUnits),
+      unitPrice: Number(schema.unitPrice),
+      subtotal: Number(schema.subtotal),
+      creditApplied: Number(schema.creditApplied),
+      totalAmount: Number(schema.totalAmount),
+      amountPaid: Number(schema.amountPaid),
+      balance: Number(schema.balance),
       status: schema.status,
       notes: schema.notes,
       createdBy: schema.createdBy,
-      createdAt: schema.createdAt,
-      updatedAt: schema.updatedAt,
+      createdAt: new Date(schema.createdAt),
+      updatedAt: new Date(schema.updatedAt),
     });
   }
 }

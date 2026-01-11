@@ -36,7 +36,7 @@ export class ClientSchema {
   @Column()
   phone: string;
 
-  @Column()
+  @Column({ type: 'enum', enum: PaymentMethod })
   paymentMethod: PaymentMethod;
 
   @Column({ default: 1 })
