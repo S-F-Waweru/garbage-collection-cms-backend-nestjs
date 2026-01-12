@@ -4,6 +4,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Logger,
   Param,
   Patch,
   Post,
@@ -50,6 +51,8 @@ export class AuthController {
     private readonly requestPasswordResetUseCase: RequestPasswordResetUseCase,
     private readonly resetPasswordUseCase: ResetPasswordUseCase,
   ) {}
+
+  logger = new Logger(AuthController.name);
 
   // ---------------------------
   // Register
@@ -139,6 +142,7 @@ export class AuthController {
     description: 'Reset email sent if account exists',
   })
   async requestPasswordReset(@Body() body: { email: string }) {
+    this.logger.debug(`Email gotten`);
     return this.requestPasswordResetUseCase.execute({ email: body.email });
   }
 
