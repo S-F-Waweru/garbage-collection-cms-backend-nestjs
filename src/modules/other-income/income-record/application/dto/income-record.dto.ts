@@ -64,8 +64,8 @@ export class UpdateIncomeRecordDto {
   unitCount?: number;
 
   @IsOptional()
-  @IsEnum(Unit)
-  unitType?: Unit;
+  @IsString()
+  unitType?: string;
 
   @IsOptional()
   @IsString()
