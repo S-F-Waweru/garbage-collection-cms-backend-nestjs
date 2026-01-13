@@ -18,6 +18,9 @@ import { ClientCreditModule } from '../client-credit/client-credit.module';
 import { GetAllInvoicesPaginatedUseCase } from './application/usecase/get-all-invoices-paginate';
 import { BulkDownloadInvoicesUseCase } from './application/usecase/bulk-download-invoices.use-case';
 import { DownloadInvoicePdfUseCase } from './application/usecase/download-invoice-pdf.use-case';
+import { SendInvoiceEmailUseCase } from '../auth/application/use-cases/SendInvoiceEmailUseCase.usecase';
+import { IEmailSenderService } from '../auth/application/services/iemail-sender/iemail-sender.service';
+import { GmailEmailService } from '../auth/application/services/gmail-sender.service';
 
 @Module({
   imports: [
@@ -31,6 +34,11 @@ import { DownloadInvoicePdfUseCase } from './application/usecase/download-invoic
       provide: IInvoiceRepository,
       useClass: InvoiceRepository,
     },
+    {
+      provide: IEmailSenderService,
+      useClass: GmailEmailService,
+    },
+
     GenerateInvoiceUseCase,
     GetInvoiceUseCase,
     ListInvoicesUseCase,
@@ -40,6 +48,7 @@ import { DownloadInvoicePdfUseCase } from './application/usecase/download-invoic
     GetAllInvoicesPaginatedUseCase,
     BulkDownloadInvoicesUseCase,
     DownloadInvoicePdfUseCase,
+    SendInvoiceEmailUseCase,
   ],
   controllers: [InvoiceController],
   exports: [IInvoiceRepository, GenerateInvoiceUseCase], // ✅ Fixed: token reference

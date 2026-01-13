@@ -24,6 +24,13 @@ export interface IEmailSenderService {
    * @param role - Role being assigned
    */
   sendInvitationEmail(to: Email, token: string, role: string): Promise<void>;
+
+  // iemail-sender.service.ts
+  sendInvoiceEmail(
+    to: Email,
+    invoiceBuffer: Buffer,
+    invoiceNumber: string,
+  ): Promise<void>;
 }
 
 export const IEmailSenderService = Symbol('IEmailSenderService');

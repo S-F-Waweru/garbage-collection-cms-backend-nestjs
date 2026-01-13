@@ -6,5 +6,6 @@
     "deleteOutDir": true,
     "watchAssets": true,
     "builder": "webpack"
-  }
+  },
+  "sourceMap": true
 }

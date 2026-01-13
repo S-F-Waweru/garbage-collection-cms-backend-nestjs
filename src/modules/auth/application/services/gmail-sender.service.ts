@@ -151,6 +151,64 @@ export class GmailEmailService implements IEmailSenderService {
     }
   }
 
+  async sendInvoiceEmail(
+    to: Email,
+    invoiceBuffer: Buffer,
+    invoiceNumber: string,
+  ) {
+    const mailOptions = {
+      from: this.fromEmail,
+      to: to.value,
+      subject: `Invoice ${invoiceNumber} - Sustainable Sweeps`,
+      html: `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .button { 
+              display: inline-block; 
+              padding: 12px 24px; 
+              background-color: #2e7d32; 
+              color: white; 
+              text-decoration: none; 
+              border-radius: 4px; 
+              margin: 20px 0;
+            }
+            .footer { margin-top: 30px; font-size: 12px; color: #666; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <h2>Your Invoice is Ready</h2>
+            <p>Please find attached invoice <strong>${invoiceNumber}</strong> for your recent services.</p>
+            <p>If you have any questions, please don't hesitate to contact us.</p>
+            <div class="footer">
+              <p>Thank you for your business!</p>
+              <p>&copy; ${new Date().getFullYear()} Sustainable Sweeps. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `,
+      attachments: [
+        {
+          filename: `invoice-${invoiceNumber}.pdf`,
+          content: invoiceBuffer,
+          contentType: 'application/pdf',
+        },
+      ],
+    };
+
+    try {
+      await this.transporter.sendMail(mailOptions);
+    } catch (error) {
+      this.logger.error(`Failed to send email to ${to.value}`, error.stack);
+    }
+    throw new Error('Failed to send email to ${to.value}`);');
+  }
+
   async sendInvitationEmail(
     to: Email,
     token: string,
@@ -213,11 +271,10 @@ export class GmailEmailService implements IEmailSenderService {
       await this.transporter.sendMail(mailOptions);
       this.logger.log(`Invitation email sent to ${to.value} for role: ${role}`);
     } catch (error) {
-      this.logger.error(
-        `Failed to send invitation email to ${to.value}`,
-        error.stack,
+      this.logger.warn(
+        // Use warn, not error
+        `Failed to send invitation email to ${to.value}: ${error.message}`,
       );
-      throw new Error('Failed to send invitation email');
     }
   }
 }

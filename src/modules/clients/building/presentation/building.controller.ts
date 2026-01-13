@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Logger,
   Param,
   Patch,
   Post,
@@ -31,6 +32,8 @@ export class BuildingController {
     private readonly findAllPaginatedBuildingsUseCase: FindAllPaginatedBuildingsUseCase,
     private readonly findClientBuildingsUseCase: FindBulidingsByClientIdUseCase,
   ) {}
+
+  logger = new Logger(BuildingController.name);
 
   @Post()
   async create(@Body() dto: CreateBuildingDto) {
@@ -71,6 +74,8 @@ export class BuildingController {
 
   @Patch(':id')
   async update(@Param('id') id: string, @Body() dto: UpdateBuildingDto) {
+    this.logger.debug(`Updating building with id: ${id}`);
+    this.logger.debug(`Updating building with dto: ${JSON.stringify(dto)}`);
     return await this.updateBuildingUseCase.execute(id, dto);
   }
 

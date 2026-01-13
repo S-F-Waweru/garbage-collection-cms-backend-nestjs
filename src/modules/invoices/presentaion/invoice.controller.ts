@@ -34,6 +34,7 @@ import { User } from '../../auth/domain/entities/user.entity';
 import { GetAllInvoicesPaginatedUseCase } from '../application/usecase/get-all-invoices-paginate';
 import { DownloadInvoicePdfUseCase } from '../application/usecase/download-invoice-pdf.use-case';
 import { BulkDownloadInvoicesUseCase } from '../application/usecase/bulk-download-invoices.use-case';
+import { SendInvoiceEmailUseCase } from '../../auth/application/use-cases/SendInvoiceEmailUseCase.usecase';
 
 interface RequestWithUser extends Request {
   user?: User;
@@ -51,6 +52,7 @@ export class InvoiceController {
     private readonly listPaginatedUsecase: GetAllInvoicesPaginatedUseCase,
     private readonly downloadPdfUseCase: DownloadInvoicePdfUseCase,
     private readonly bulkDownloadUseCase: BulkDownloadInvoicesUseCase,
+    private readonly sendInvoiceEmailUseCase: SendInvoiceEmailUseCase,
   ) {}
 
   @Post('generate')
@@ -106,6 +108,12 @@ export class InvoiceController {
 
     // Send the buffer directly
     res.send(buffer);
+  }
+
+  @Post(':id/send-email')
+  async sendInvoiceEmail(@Param('id') id: string) {
+    await this.sendInvoiceEmailUseCase.execute(id);
+    return { message: 'Invoice email sent successfully' };
   }
 
   @Post('bulk-download')

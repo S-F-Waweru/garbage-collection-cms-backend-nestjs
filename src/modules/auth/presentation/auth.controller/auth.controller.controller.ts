@@ -195,7 +195,6 @@ export class AuthController {
     });
   }
 
-  // todo;/
   @Patch('users/:id/role')
   async changeRole(
     @CurrentUser() user: any,

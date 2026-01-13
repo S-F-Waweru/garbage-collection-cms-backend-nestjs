@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Inject,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { IBuildingRepository } from '../../domain/interface/buidling.repsository.interface';
@@ -20,8 +21,12 @@ export class UpdateBuildingUseCase {
     @Inject(ILocationRepository)
     private readonly locationRepository: ILocationRepository,
   ) {}
+  logger = new Logger(UpdateBuildingUseCase.name);
 
   async execute(id: string, dto: UpdateBuildingDto) {
+    this.logger.debug(
+      `Updating building ${id} with data: ${JSON.stringify(dto)}`,
+    );
     const {
       name,
       locationId,
@@ -37,6 +42,8 @@ export class UpdateBuildingUseCase {
     if (!building) {
       throw new NotFoundException('Building not found');
     }
+
+    this.logger.debug(`Found building`, building);
 
     const location = await this.locationRepository.findById(locationId);
 
@@ -60,6 +67,9 @@ export class UpdateBuildingUseCase {
       activeUnits,
     });
 
+    this.logger.debug(`Updated buidling`, building);
+
+    await this.buildingRepository.save(building);
     return {
       id: building.id,
       message: `Building updated `,

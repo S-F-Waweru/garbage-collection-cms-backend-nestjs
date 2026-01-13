@@ -1,4 +1,12 @@
-import { IsEnum, IsInt, IsNumber, IsOptional, IsString, IsUUID, Min } from 'class-validator';
+import {
+  IsEnum,
+  IsInt,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Min,
+} from 'class-validator';
 
 export enum Unit {
   KG = 'KG',
@@ -23,7 +31,7 @@ export class CreateIncomeRecordDto {
   unitCount: number;
 
   @IsEnum(Unit)
-  unitType: Unit;
+  unitType: string;
 
   @IsOptional()
   @IsString()

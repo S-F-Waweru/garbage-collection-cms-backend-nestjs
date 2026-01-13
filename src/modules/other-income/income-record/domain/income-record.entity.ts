@@ -1,14 +1,13 @@
 import { BaseEntity } from '../../../../shared/domain/entities/base.entity';
 import { BadRequestException } from '@nestjs/common';
 import { IncomeCategory } from '../../income-category/domain/income-category.entity';
-import { Unit } from '../application/dto/income-record.dto';
 
 export class IncomeRecord extends BaseEntity {
   private _category: IncomeCategory;
   private _clientName: string;
   private _unitPrice: number;
   private _unitCount: number;
-  private _unitType: Unit;
+  private _unitType: string;
   private _notes?: string;
   private _recordedBy: string; // logged in user ID
   private _recordedAt: Date;
@@ -19,7 +18,7 @@ export class IncomeRecord extends BaseEntity {
     clientName: string;
     unitPrice: number;
     unitCount: number;
-    unitType: Unit;
+    unitType: string;
     notes?: string;
     recordedBy: string;
     recordedAt?: Date;
@@ -52,7 +51,7 @@ export class IncomeRecord extends BaseEntity {
     return this._unitCount;
   }
 
-  get unitType(): Unit {
+  get unitType(): string {
     return this._unitType;
   }
 
@@ -77,7 +76,7 @@ export class IncomeRecord extends BaseEntity {
     clientName: string;
     unitPrice: number;
     unitCount: number;
-    unitType: Unit;
+    unitType: string;
     notes?: string;
     recordedBy: string;
   }): IncomeRecord {
@@ -90,7 +89,7 @@ export class IncomeRecord extends BaseEntity {
     clientName: string;
     unitPrice: number;
     unitCount: number;
-    unitType: Unit;
+    unitType: string;
     notes?: string;
     recordedBy: string;
     recordedAt: Date;
@@ -104,11 +103,11 @@ export class IncomeRecord extends BaseEntity {
     if (!this._clientName || this._clientName.trim().length === 0)
       throw new BadRequestException('Client name cannot be empty');
     if (this._unitPrice <= 0)
-      throw new BadRequestException('Unit price must be greater than zero');
+      throw new BadRequestException('string price must be greater than zero');
     if (this._unitCount <= 0)
-      throw new BadRequestException('Unit count must be greater than zero');
+      throw new BadRequestException('string count must be greater than zero');
     if (!this._unitType)
-      throw new BadRequestException('Unit type must be specified');
+      throw new BadRequestException('string type must be specified');
     if (!this._recordedBy || this._recordedBy.trim().length === 0)
       throw new BadRequestException('RecordedBy (userId) is required');
   }
@@ -119,7 +118,7 @@ export class IncomeRecord extends BaseEntity {
     clientName?: string;
     unitPrice?: number;
     unitCount?: number;
-    unitType?: Unit;
+    unitType?: string;
     notes?: string;
   }): void {
     if (props.category !== undefined) this._category = props.category;

@@ -1,5 +1,5 @@
 // TypeScript
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Repository } from 'typeorm';
 
@@ -20,6 +20,8 @@ export class IncomeRecordRepository implements IIncomeRecordRepository {
     @InjectRepository(IncomeCategorySchema)
     private readonly categoryRepository: Repository<IncomeCategorySchema>,
   ) {}
+
+  logger = new Logger(IncomeRecordRepository.name);
 
   // -------------------------------
   // Helpers: Mapping Layer
@@ -96,6 +98,7 @@ export class IncomeRecordRepository implements IIncomeRecordRepository {
 
   async save(record: IncomeRecord): Promise<IncomeRecord> {
     const schema = await this.toSchema(record);
+
     const saved = await this.repository.save(schema);
     return this.toDomain(saved);
   }
