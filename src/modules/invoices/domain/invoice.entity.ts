@@ -166,6 +166,10 @@ export class Invoice extends BaseEntity {
     this._creator = creator;
   }
 
+  setStatus(newStatus: InvoiceStatus) {
+    this._status = newStatus;
+  }
+
   // Helper - Check if relationships are loaded
   hasClient(): boolean {
     return this._client !== undefined;

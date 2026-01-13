@@ -14,7 +14,10 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { PaymentMethod } from '../../../building/domain/building.entity';
-import { CreateBuildingDto, CreateClientBuildingDto } from '../../../building/application/dto/building.dto';
+import {
+  CreateBuildingDto,
+  CreateClientBuildingDto,
+} from '../../../building/application/dto/building.dto';
 
 export class CreateClientDto {
   @IsNotEmpty()
@@ -32,6 +35,10 @@ export class CreateClientDto {
   @IsNotEmpty()
   @IsString()
   lastName: string;
+
+  @IsNotEmpty()
+  @IsString()
+  billingDate: string;
 
   @IsNotEmpty()
   @IsEmail()
@@ -86,6 +93,10 @@ export class UpdateClientDto {
   @IsOptional()
   @IsEnum(PaymentMethod)
   paymentMethod?: PaymentMethod;
+
+  @IsNotEmpty()
+  @IsString()
+  billingDate: string;
 
   @IsOptional()
   @IsArray()

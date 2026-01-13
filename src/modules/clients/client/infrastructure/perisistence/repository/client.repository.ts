@@ -3,15 +3,19 @@ import { Client } from '../../../domain/entities/client.entity';
 import { ClientSchema } from '../schema/client.schema';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsWhere, ILike, IsNull, Repository } from 'typeorm';
-import { PaymentMethod } from '../../../../building/domain/building.entity';
-import { Injectable } from '@nestjs/common';
+import {
+  Building,
+  PaymentMethod,
+} from '../../../../building/domain/building.entity';
+import { Injectable, Logger } from '@nestjs/common';
+import { Location } from '../../../../../location/domain/entities/location.entity';
 
 @Injectable()
 export class ClientRepository implements IClientRepository {
+  logger = new Logger(ClientRepository.name);
   constructor(
     @InjectRepository(ClientSchema)
     private readonly repository: Repository<ClientSchema>,
-    // todo import the buidings Schema for getting the buidlings
   ) {}
   async delete(id: string): Promise<{ message: string }> {
     await this.repository.softDelete(id);
@@ -29,11 +33,21 @@ export class ClientRepository implements IClientRepository {
     return schemas.map((m) => this.toDomain(m));
   }
 
+  // async findById(id: string): Promise<Client | null> {
+  //   const schema = await this.repository.findOne({
+  //     where: { id, deletedAt: IsNull() },
+  //   });
+  //   this.logger.debug(schema);
+  //   return schema ? this.toDomain(schema) : null;
+  // }
+
   async findById(id: string): Promise<Client | null> {
     const schema = await this.repository.findOne({
       where: { id, deletedAt: IsNull() },
+      relations: ['buildings'], // Add this
     });
 
+    this.logger.debug(schema);
     return schema ? this.toDomain(schema) : null;
   }
 
@@ -94,6 +108,7 @@ export class ClientRepository implements IClientRepository {
       firstName: string;
       lastName: string;
       email: string;
+      billingDate: number;
       phone: string;
       paymentMethod: PaymentMethod;
     } = {
@@ -104,15 +119,65 @@ export class ClientRepository implements IClientRepository {
       lastName: client.lastName,
       email: client.email,
       phone: client.phone,
+      billingDate: client.billingDate,
       paymentMethod: client.paymentMethod,
     };
 
     return this.repository.create(data);
   }
 
+  // toDomain(schema: ClientSchema) {
+  //   const buildings = [];
+  //
+  //   return Client.fromPersistence({
+  //     id: schema.id,
+  //     companyName: schema.companyName,
+  //     KRAPin: schema.KRAPin,
+  //     firstName: schema.firstName,
+  //     lastName: schema.lastName,
+  //     email: schema.email,
+  //     phone: schema.phone,
+  //     billingDate: schema.billingDate,
+  //     paymentMethod: schema.paymentMethod,
+  //     buildings,
+  //   });
+  // }
   toDomain(schema: ClientSchema) {
-    // todo get the building herw
-    const buildings = [];
+    const buildings = schema.buildings
+      ? schema.buildings.map((b) => {
+          // Map Location
+          const location = Location.fromPersistence({
+            id: b.location.id,
+            city: b.location.city,
+            region: b.location.region,
+          });
+
+          // Create a temporary client reference to avoid circular dependency
+          const clientRef = Client.fromPersistence({
+            id: schema.id,
+            companyName: schema.companyName,
+            KRAPin: schema.KRAPin,
+            firstName: schema.firstName,
+            lastName: schema.lastName,
+            email: schema.email,
+            phone: schema.phone,
+            billingDate: schema.billingDate,
+            paymentMethod: schema.paymentMethod,
+            buildings: [], // Empty to avoid circular reference
+          });
+
+          return Building.fromPersistence({
+            id: b.id,
+            name: b.name,
+            location: location,
+            client: clientRef,
+            unitPrice: b.unitPrice,
+            unitCount: b.unitCount,
+            activeUnits: b.activeUnits,
+            binsAssigned: b.binsAssigned,
+          });
+        })
+      : [];
 
     return Client.fromPersistence({
       id: schema.id,

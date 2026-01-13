@@ -13,9 +13,7 @@ import { ILocationRepository } from '../../../../location/domain/interface/locat
 import { CreateClientDto } from '../dtos/client.dto';
 import { ClientCredit } from 'src/modules/client-credit/domain/client-credit.entity';
 import { ICreditClientRepository } from 'src/modules/client-credit/domain/client_credit.repository.interfacace';
-import {
-  Invoice,
-} from 'src/modules/invoices/domain/invoice.entity';
+import { Invoice } from 'src/modules/invoices/domain/invoice.entity';
 import { IInvoiceRepository } from 'src/modules/invoices/domain/invoice.repository.intreface';
 import { SystemUserService } from 'src/modules/auth/application/services/system-user.service';
 import { InvoiceStatus } from 'src/modules/invoices/application/models';
@@ -45,6 +43,7 @@ export class CreateClientUseCase {
       throw new ConflictException('User with this KRAPin exists');
     }
 
+    const billingDate = Number(dto.billingDate);
     // Create the client
     this.logger.debug(dto);
     const client = Client.create({
@@ -53,6 +52,7 @@ export class CreateClientUseCase {
       firstName: dto.firstName,
       lastName: dto.lastName,
       email: dto.email,
+      billingDate,
       phone: dto.phone,
       paymentMethod: dto.paymentMethod,
       buildings: [],

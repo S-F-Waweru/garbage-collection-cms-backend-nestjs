@@ -35,6 +35,8 @@ import { GetAllInvoicesPaginatedUseCase } from '../application/usecase/get-all-i
 import { DownloadInvoicePdfUseCase } from '../application/usecase/download-invoice-pdf.use-case';
 import { BulkDownloadInvoicesUseCase } from '../application/usecase/bulk-download-invoices.use-case';
 import { SendInvoiceEmailUseCase } from '../../auth/application/use-cases/SendInvoiceEmailUseCase.usecase';
+import { CurrentUser } from '../../../shared/decorators/current-user.decorator';
+import { InvoiceCronService } from '../application/services/invoice-cron/invoice-cron.service';
 
 interface RequestWithUser extends Request {
   user?: User;
@@ -53,6 +55,7 @@ export class InvoiceController {
     private readonly downloadPdfUseCase: DownloadInvoicePdfUseCase,
     private readonly bulkDownloadUseCase: BulkDownloadInvoicesUseCase,
     private readonly sendInvoiceEmailUseCase: SendInvoiceEmailUseCase,
+    private readonly invoiceCronService: InvoiceCronService,
   ) {}
 
   @Post('generate')
@@ -108,6 +111,11 @@ export class InvoiceController {
 
     // Send the buffer directly
     res.send(buffer);
+  }
+  @Post('invoices/:id/fix')
+  fixInvoice(@Param('id') id: string, @CurrentUser() user: any) {
+    const userId = user.userId as string;
+    return this.invoiceCronService.fixWrongInvoice(id, userId);
   }
 
   @Post(':id/send-email')

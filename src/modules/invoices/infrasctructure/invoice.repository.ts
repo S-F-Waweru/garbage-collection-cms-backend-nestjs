@@ -1,7 +1,7 @@
 // infrastructure/invoice.repository.ts
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource, IsNull, DeepPartial } from 'typeorm';
+import { Repository, DataSource, IsNull, DeepPartial, Not } from 'typeorm';
 import { Invoice } from '../domain/invoice.entity';
 import {
   IInvoiceRepository,
@@ -100,8 +100,38 @@ export class InvoiceRepository implements IInvoiceRepository {
     return schemas.map((s) => this.toDomain(s));
   }
 
+  // async findAll(filters?: InvoiceFilters): Promise<Invoice[]> {
+  //   const query = this.repo.createQueryBuilder('invoice');
+  //
+  //   if (filters?.clientId) {
+  //     query.andWhere('invoice.clientId = :clientId', {
+  //       clientId: filters.clientId,
+  //     });
+  //   }
+  //   if (filters?.status) {
+  //     query.andWhere('invoice.status = :status', { status: filters.status });
+  //   }
+  //   if (filters?.fromDate) {
+  //     query.andWhere('invoice.invoiceDate >= :fromDate', {
+  //       fromDate: filters.fromDate,
+  //     });
+  //   }
+  //   if (filters?.toDate) {
+  //     query.andWhere('invoice.invoiceDate <= :toDate', {
+  //       toDate: filters.toDate,
+  //     });
+  //   }
+  //
+  //   const schemas = await query
+  //     .orderBy('invoice.invoiceDate', 'DESC')
+  //     .getMany();
+  //   return schemas.map((s) => this.toDomain(s));
+  // }
   async findAll(filters?: InvoiceFilters): Promise<Invoice[]> {
-    const query = this.repo.createQueryBuilder('invoice');
+    // Add .leftJoinAndSelect to join the client table
+    const query = this.repo
+      .createQueryBuilder('invoice')
+      .leftJoinAndSelect('invoice.client', 'client');
 
     if (filters?.clientId) {
       query.andWhere('invoice.clientId = :clientId', {
@@ -125,6 +155,7 @@ export class InvoiceRepository implements IInvoiceRepository {
     const schemas = await query
       .orderBy('invoice.invoiceDate', 'DESC')
       .getMany();
+
     return schemas.map((s) => this.toDomain(s));
   }
 
@@ -166,6 +197,7 @@ export class InvoiceRepository implements IInvoiceRepository {
         clientId,
         billingPeriodStart: periodStart,
         billingPeriodEnd: periodEnd,
+        status: Not(InvoiceStatus.CANCELLED),
       },
     });
     return count > 0;
@@ -220,7 +252,7 @@ export class InvoiceRepository implements IInvoiceRepository {
   //   });
   // }
   private toDomain(schema: InvoiceSchema): Invoice {
-    return Invoice.createFromPersistence({
+    const invoice = Invoice.createFromPersistence({
       id: schema.id,
       invoiceNumber: schema.invoiceNumber,
       clientId: schema.clientId,
@@ -241,5 +273,12 @@ export class InvoiceRepository implements IInvoiceRepository {
       createdAt: new Date(schema.createdAt),
       updatedAt: new Date(schema.updatedAt),
     });
+
+    // ADD THESE LINES HERE:
+    if (schema.client) {
+      invoice.setClient(schema.client);
+    }
+
+    return invoice;
   }
 }

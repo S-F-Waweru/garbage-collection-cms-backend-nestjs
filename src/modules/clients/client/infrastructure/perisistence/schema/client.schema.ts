@@ -39,7 +39,7 @@ export class ClientSchema {
   @Column({ type: 'enum', enum: PaymentMethod })
   paymentMethod: PaymentMethod;
 
-  @Column({ default: 1 })
+  @Column()
   billingDate: number;
 
   // relations

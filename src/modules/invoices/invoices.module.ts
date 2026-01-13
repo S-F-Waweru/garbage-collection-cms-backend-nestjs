@@ -21,6 +21,7 @@ import { DownloadInvoicePdfUseCase } from './application/usecase/download-invoic
 import { SendInvoiceEmailUseCase } from '../auth/application/use-cases/SendInvoiceEmailUseCase.usecase';
 import { IEmailSenderService } from '../auth/application/services/iemail-sender/iemail-sender.service';
 import { GmailEmailService } from '../auth/application/services/gmail-sender.service';
+import { VoidInvoiceUseCase } from './application/usecase/void-invoice.usecase';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { GmailEmailService } from '../auth/application/services/gmail-sender.ser
     BulkDownloadInvoicesUseCase,
     DownloadInvoicePdfUseCase,
     SendInvoiceEmailUseCase,
+    VoidInvoiceUseCase,
   ],
   controllers: [InvoiceController],
   exports: [IInvoiceRepository, GenerateInvoiceUseCase], // ✅ Fixed: token reference

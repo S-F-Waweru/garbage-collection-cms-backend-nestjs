@@ -1,8 +1,9 @@
-import { Injectable, Logger, Inject } from '@nestjs/common';
+import { Injectable, Logger, Inject, NotFoundException } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { IInvoiceRepository } from '../../../domain/invoice.repository.intreface';
 import { GenerateInvoiceUseCase } from '../../usecase/generate-invoice.usecase';
 import { IClientRepository } from '../../../../clients/client/domain/interface/client.repository.interface';
+import { VoidInvoiceUseCase } from '../../usecase/void-invoice.usecase';
 
 @Injectable()
 export class InvoiceCronService {
@@ -11,9 +12,10 @@ export class InvoiceCronService {
   constructor(
     @Inject(IInvoiceRepository)
     private readonly invoiceRepository: IInvoiceRepository,
-    @Inject(IClientRepository) // Fixed DI syntax
-    private readonly clientRepository: IClientRepository, // Fixed property name
-    private readonly generateInvoiceUseCase: GenerateInvoiceUseCase, // Direct injection
+    @Inject(IClientRepository)
+    private readonly clientRepository: IClientRepository,
+    private readonly generateInvoiceUseCase: GenerateInvoiceUseCase,
+    private readonly voidInvoiceUseCase: VoidInvoiceUseCase,
   ) {}
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
@@ -26,13 +28,10 @@ export class InvoiceCronService {
     let failed = 0;
 
     try {
-      // 1. Get all active clients
       const clients = await this.clientRepository.findAll();
 
-      // 2. Generate for each client
       for (const client of clients) {
         try {
-          // Check if client's billing date is today
           if (client.billingDate === today.getDate()) {
             await this.generateInvoiceUseCase.execute(
               {
@@ -55,5 +54,24 @@ export class InvoiceCronService {
     }
 
     this.logger.log(`Generated ${generated} invoices, ${failed} failed`);
+  }
+
+  async fixWrongInvoice(wrongInvoiceId: string, userId: string) {
+    const oldInvoice = await this.invoiceRepository.findById(wrongInvoiceId);
+
+    if (!oldInvoice) return new NotFoundException(`Invoice not found`);
+    // Cancel and restore credit
+    await this.voidInvoiceUseCase.execute(wrongInvoiceId);
+
+    // Generate new correct invoice
+    return await this.generateInvoiceUseCase.execute(
+      {
+        clientId: oldInvoice.clientId,
+        billingPeriodStart: oldInvoice.billingPeriodStart,
+        billingPeriodEnd: oldInvoice.billingPeriodEnd,
+        invoiceDate: new Date(),
+      },
+      userId,
+    );
   }
 }
