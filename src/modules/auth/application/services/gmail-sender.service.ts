@@ -82,7 +82,7 @@ export class GmailEmailService implements IEmailSenderService {
         `Failed to send verification email to ${to.value}`,
         error.stack,
       );
-      throw new Error('Failed to send verification email');
+      // throw new Error('Failed to send verification email');
     }
   }
 

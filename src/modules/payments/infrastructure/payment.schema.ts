@@ -9,7 +9,7 @@ import {
   ManyToOne,
 } from 'typeorm';
 import { PaymentMethod } from '../domain/payment.entity';
-import { InvoiceSchema } from '../../invoices/infrasctructure/invoice.rschema';
+import { InvoiceSchema } from '../../invoices/infrasctructure/invoice.schema';
 
 @Entity('payments')
 @Index(['clientId', 'paymentDate'])

@@ -12,6 +12,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { InvoiceSchema } from '../../../../../invoices/infrasctructure/invoice.schema';
 
 @Entity('clients')
 export class ClientSchema {

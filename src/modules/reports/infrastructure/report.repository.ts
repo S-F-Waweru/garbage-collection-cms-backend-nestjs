@@ -7,7 +7,7 @@ import {
   PaymentSummaryItem,
   ReportFilters,
 } from '../domain/report.repository.interface';
-import { InvoiceSchema } from 'src/modules/invoices/infrasctructure/invoice.rschema';
+import { InvoiceSchema } from 'src/modules/invoices/infrasctructure/invoice.schema';
 import {
   OutstandingBalanceItem,
   RevenueByClientItem,

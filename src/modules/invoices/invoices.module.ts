@@ -9,7 +9,7 @@ import { ListInvoicesUseCase } from './application/usecase/list-invoices.use-cas
 import { MarkOverdueInvoicesUseCase } from './application/usecase/mark-overdue-invoices.use-case';
 import { UpdateInvoiceStatusUseCase } from './application/usecase/update-invoice-status.use-case';
 import { InvoiceRepository } from './infrasctructure/invoice.repository';
-import { InvoiceSchema } from './infrasctructure/invoice.rschema';
+import { InvoiceSchema } from './infrasctructure/invoice.schema';
 import { InvoiceController } from './presentaion/invoice.controller';
 import { InvoiceCronService } from './application/services/invoice-cron/invoice-cron.service';
 import { ClientModule } from '../clients/client/client.module';

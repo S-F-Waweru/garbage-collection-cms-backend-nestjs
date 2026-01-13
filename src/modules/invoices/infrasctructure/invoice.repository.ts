@@ -7,7 +7,7 @@ import {
   IInvoiceRepository,
   InvoiceFilters,
 } from '../domain/invoice.repository.intreface';
-import { InvoiceSchema } from './invoice.rschema';
+import { InvoiceSchema } from './invoice.schema';
 import { InvoiceStatus } from '../application/models';
 
 @Injectable()

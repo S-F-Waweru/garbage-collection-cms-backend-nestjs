@@ -4,7 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 // Presentation
 import { ReportController } from './presentation/report.controller';
-import { InvoiceSchema } from '../invoices/infrasctructure/invoice.rschema';
+import { InvoiceSchema } from '../invoices/infrasctructure/invoice.schema';
 import { ExportReportToExcelUseCase } from './application/usecase/export-report-to-excel.use-case';
 import { GetOtherIncomeReportUseCase } from './application/usecase/get-other-income-report.use-case';
 import { GetOutstandingBalancesUseCase } from './application/usecase/get-outstanding-balances.use-case';

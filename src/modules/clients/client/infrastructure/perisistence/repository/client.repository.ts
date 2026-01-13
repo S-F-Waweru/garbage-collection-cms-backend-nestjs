@@ -25,6 +25,24 @@ export class ClientRepository implements IClientRepository {
     };
   }
 
+  // async delete(id: string): Promise<{ message: string }> {
+  //   // 1. Find the client and include the invoices (or buildings/other relations)
+  //   const client = await this.repository.findOne({
+  //     where: { id },
+  //     relations: ['invoices', 'buildings'], // Add all relations you want to soft-delete
+  //   });
+
+  //   if (client) {
+  //     // 2. softRemove will apply the deletedAt timestamp to the client
+  //     // AND all related entities loaded in the 'relations' array
+  //     await this.repository.softRemove(client);
+  //   }
+
+  //   return {
+  //     message: `Client and related records deleted.`,
+  //   };
+  // }
+
   async findAll(): Promise<Client[]> {
     const schemas = await this.repository.find({
       where: { deletedAt: IsNull() },
@@ -143,8 +161,10 @@ export class ClientRepository implements IClientRepository {
   //   });
   // }
   toDomain(schema: ClientSchema) {
+    this.logger.debug(schema);
     const buildings = schema.buildings
       ? schema.buildings.map((b) => {
+          this.logger.debug(b);
           // Map Location
           const location = Location.fromPersistence({
             id: b.location.id,

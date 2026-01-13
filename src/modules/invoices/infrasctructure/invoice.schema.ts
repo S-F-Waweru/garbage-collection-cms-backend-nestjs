@@ -87,7 +87,9 @@ export class InvoiceSchema {
   deletedAt?: Date;
 
   // Relationships (optional - for joins)
-  @ManyToOne(() => ClientSchema)
+  @ManyToOne(() => ClientSchema, {
+    cascade: true,
+  })
   @JoinColumn({ name: 'clientId' })
   client?: ClientSchema;
 

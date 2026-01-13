@@ -23,7 +23,7 @@ import { RepositoriesModule } from './shared/repositories/repositories.module';
 import { PaymentModule } from './modules/payments/payments.module';
 import { InvoiceModule } from './modules/invoices/invoices.module';
 import { ReportModule } from './modules/reports/reports.module';
-import { InvoiceSchema } from './modules/invoices/infrasctructure/invoice.rschema';
+import { InvoiceSchema } from './modules/invoices/infrasctructure/invoice.schema';
 import { PaymentSchema } from './modules/payments/infrastructure/payment.schema';
 import { ClientCreditSchema } from './modules/client-credit/infrastructure/persisitence/schema/client-credit.schema';
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';

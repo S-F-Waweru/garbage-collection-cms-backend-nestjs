@@ -10,7 +10,7 @@ import { IBuildingRepository } from '../../modules/clients/building/domain/inter
 import { BuildingRepository } from '../../modules/clients/building/infrastructure/persistense/repository/building.repository';
 import { ILocationRepository } from '../../modules/location/domain/interface/location.repository.inteface';
 import { LocationRepository } from '../../modules/location/infrastracture/persistence/repository/location.repository';
-import { InvoiceSchema } from 'src/modules/invoices/infrasctructure/invoice.rschema';
+import { InvoiceSchema } from 'src/modules/invoices/infrasctructure/invoice.schema';
 import { IInvoiceRepository } from 'src/modules/invoices/domain/invoice.repository.intreface';
 import { InvoiceRepository } from 'src/modules/invoices/infrasctructure/invoice.repository';
 import { PaymentSchema } from 'src/modules/payments/infrastructure/payment.schema';
@@ -24,7 +24,7 @@ import { PaymentRepository } from 'src/modules/payments/infrastructure/payament.
       BuildingSchema,
       LocationSchema,
       InvoiceSchema,
-      PaymentSchema
+      PaymentSchema,
     ]),
   ],
   providers: [
@@ -45,16 +45,16 @@ import { PaymentRepository } from 'src/modules/payments/infrastructure/payament.
       useClass: InvoiceRepository,
     },
     {
-      provide : IPaymentRepository,
-      useClass :PaymentRepository
-    }
+      provide: IPaymentRepository,
+      useClass: PaymentRepository,
+    },
   ],
   exports: [
     IClientRepository,
     IBuildingRepository,
     ILocationRepository,
     IInvoiceRepository,
-    IPaymentRepository
+    IPaymentRepository,
   ],
 })
 export class RepositoriesModule {}
