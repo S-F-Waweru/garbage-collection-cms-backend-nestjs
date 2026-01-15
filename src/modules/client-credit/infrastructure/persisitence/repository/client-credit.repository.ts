@@ -4,6 +4,9 @@ import { ClientCredit } from 'src/modules/client-credit/domain/client-credit.ent
 import { Repository } from 'typeorm';
 import { ClientCreditSchema } from '../schema/client-credit.schema';
 import { ICreditClientRepository } from 'src/modules/client-credit/domain/client_credit.repository.interfacace';
+import { ClientSchema } from '../../../../clients/client/infrastructure/perisistence/schema/client.schema';
+import { Client } from '../../../../clients/client/domain/entities/client.entity';
+import { Building } from '../../../../clients/building/domain/building.entity';
 
 export class ClientCreditRepository implements ICreditClientRepository {
   constructor(
@@ -12,10 +15,29 @@ export class ClientCreditRepository implements ICreditClientRepository {
   ) {}
   private logger = new Logger(ClientCreditRepository.name);
 
+  // async save(clientCredit: ClientCredit): Promise<ClientCredit> {
+  //   const schema = this.toSchema(clientCredit);
+  //   const saved = await this.repository.save(schema);
+  //   return this.toDomain(saved);
+  // }
   async save(clientCredit: ClientCredit): Promise<ClientCredit> {
     const schema = this.toSchema(clientCredit);
+
+    // 1. Perform the save
     const saved = await this.repository.save(schema);
-    return this.toDomain(saved);
+
+    // 2. Fetch the record again with relations to satisfy the mapper
+    const fullSchema = await this.repository.findOne({
+      where: { id: saved.id },
+      relations: ['client'],
+    });
+
+    if (!fullSchema) {
+      throw new Error('Failed to retrieve client credit after saving.');
+    }
+
+    // 3. Now toDomain will have the 'client' object it needs
+    return this.toDomain(fullSchema);
   }
 
   async findById(id: string): Promise<ClientCredit | null> {
@@ -106,14 +128,27 @@ export class ClientCreditRepository implements ICreditClientRepository {
   }
 
   private toDomain(schema: ClientCreditSchema): ClientCredit {
-    this.logger.debug('Tto domain.');
-    this.logger.debug(schema);
     return ClientCredit.fromPersistence({
       id: schema.id,
-      client: schema.client,
+      client: this.mapClientToDomain(schema.client), // CONVERT HERE
       balance: schema.balance,
       createdAt: schema.createdAt,
       updatedAt: schema.updatedAt,
+    });
+  }
+
+  private mapClientToDomain(schema: ClientSchema): Client {
+    return Client.fromPersistence({
+      id: schema.id,
+      companyName: schema.companyName,
+      KRAPin: schema.KRAPin,
+      firstName: schema.firstName,
+      lastName: schema.lastName,
+      email: schema.email,
+      phone: schema.phone,
+      paymentMethod: schema.paymentMethod,
+      billingDate: schema.billingDate,
+      buildings: [],
     });
   }
 }

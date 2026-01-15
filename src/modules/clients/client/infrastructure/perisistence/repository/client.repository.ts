@@ -7,7 +7,7 @@ import {
   Building,
   PaymentMethod,
 } from '../../../../building/domain/building.entity';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Location } from '../../../../../location/domain/entities/location.entity';
 
 @Injectable()
@@ -17,12 +17,28 @@ export class ClientRepository implements IClientRepository {
     @InjectRepository(ClientSchema)
     private readonly repository: Repository<ClientSchema>,
   ) {}
-  async delete(id: string): Promise<{ message: string }> {
-    await this.repository.softDelete(id);
+  //         async delete(id: string): Promise<{ message: string }> {
+  //   await this.repository.softDelete(id);
+  //   return {
+  //     message: ` Client deleted.`,
+  //   };
+  // }
 
-    return {
-      message: ` Client deleted.`,
-    };
+  // client.service.ts
+  async delete(id: string): Promise<{ message: string }> {
+    // 1. Fetch the client AND the credit relation
+    // If you don't load 'credit', TypeORM won't know it needs to be deleted!
+    const client = await this.repository.findOne({
+      where: { id },
+      relations: ['credit', 'buildings', 'invoices', 'payments'],
+    });
+    if (!client) {
+      throw new NotFoundException('Client not found');
+    }
+    // 2. This one line will now update 'deleted_at' for BOTH
+    // because of the 'cascade: true' in the schema
+    await this.repository.softRemove(client);
+    return { message: 'Client and their credits soft-deleted automatically.' };
   }
 
   // async delete(id: string): Promise<{ message: string }> {

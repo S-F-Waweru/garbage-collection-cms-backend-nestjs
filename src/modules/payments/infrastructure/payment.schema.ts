@@ -7,9 +7,12 @@ import {
   UpdateDateColumn,
   Index,
   ManyToOne,
+  DeleteDateColumn,
+  JoinColumn,
 } from 'typeorm';
 import { PaymentMethod } from '../domain/payment.entity';
 import { InvoiceSchema } from '../../invoices/infrasctructure/invoice.schema';
+import { ClientSchema } from 'src/modules/clients/client/infrastructure/perisistence/schema/client.schema';
 
 @Entity('payments')
 @Index(['clientId', 'paymentDate'])
@@ -58,6 +61,15 @@ export class PaymentSchema {
   @UpdateDateColumn()
   updatedAt: Date;
 
+  @DeleteDateColumn()
+  deletedAt?: Date;
+
   @ManyToOne(() => InvoiceSchema, (invoice) => invoice.payments)
   invoice: InvoiceSchema;
+
+  // infrastructure/payment.schema.ts
+
+  @ManyToOne(() => ClientSchema, (client) => client.payments)
+  @JoinColumn({ name: 'clientId' }) // Tells TypeORM to use the existing clientId column
+  client: ClientSchema;
 }

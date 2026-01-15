@@ -13,6 +13,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { InvoiceSchema } from '../../../../../invoices/infrasctructure/invoice.schema';
+import { PaymentSchema } from '../../../../../payments/infrastructure/payment.schema';
 
 @Entity('clients')
 export class ClientSchema {
@@ -43,6 +44,10 @@ export class ClientSchema {
   @Column()
   billingDate: number;
 
+  @OneToMany(() => InvoiceSchema, (invoice) => invoice.client, {
+    cascade: true,
+  })
+  invoices: InvoiceSchema[];
   // relations
   @OneToMany(() => BuildingSchema, (building) => building.client, {
     cascade: true,
@@ -56,6 +61,10 @@ export class ClientSchema {
   @JoinColumn() // This is important for OneToOne relations to specify the owner side
   credit: ClientCreditSchema;
 
+  @OneToMany(() => PaymentSchema, (payment) => payment.client, {
+    cascade: true,
+  })
+  payments: PaymentSchema[];
   // Dates
   @CreateDateColumn()
   createdAt: Date;

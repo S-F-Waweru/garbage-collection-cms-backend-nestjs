@@ -15,6 +15,7 @@ import { ClientSchema } from '../../clients/client/infrastructure/perisistence/s
 import { PaymentSchema } from '../../payments/infrastructure/payment.schema';
 import { UserSchema } from '../../auth/infrastructure/persistence/schema/user.schema';
 import { InvoiceStatus } from '../application/models';
+import { Client } from '../../clients/client/domain/entities/client.entity';
 
 @Entity('invoices')
 @Index(['clientId', 'invoiceDate'])
@@ -87,9 +88,7 @@ export class InvoiceSchema {
   deletedAt?: Date;
 
   // Relationships (optional - for joins)
-  @ManyToOne(() => ClientSchema, {
-    cascade: true,
-  })
+  @ManyToOne(() => ClientSchema, (client) => client.invoices)
   @JoinColumn({ name: 'clientId' })
   client?: ClientSchema;
 

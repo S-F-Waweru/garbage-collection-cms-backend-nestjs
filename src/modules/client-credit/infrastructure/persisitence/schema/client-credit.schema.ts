@@ -8,7 +8,6 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Client } from '../../../../clients/client/domain/entities/client.entity';
 import { ClientSchema } from '../../../../clients/client/infrastructure/perisistence/schema/client.schema';
 
 @Entity('client_credits')
@@ -16,22 +15,22 @@ export class ClientCreditSchema {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ name: 'client_id', unique: true })
+  @Column('uuid')
   clientId: string;
 
-  @OneToOne(() => ClientSchema, { eager: true })
-  @JoinColumn({ name: 'client_id' })
-  client: Client;
+  @OneToOne(() => ClientSchema, (client) => client.credit)
+  @JoinColumn({ name: 'clientId' })
+  client: ClientSchema;
 
   @Column('decimal', { precision: 10, scale: 2, default: 0 })
   balance: number;
 
-  @CreateDateColumn({ name: 'created_at' })
+  @CreateDateColumn()
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'updated_at' })
+  @UpdateDateColumn()
   updatedAt: Date;
 
-  @DeleteDateColumn({ name: 'deleted_at', nullable: true })
-  deletedAt: Date;
+  @DeleteDateColumn()
+  deletedAt?: Date;
 }

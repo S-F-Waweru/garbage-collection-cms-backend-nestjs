@@ -37,8 +37,8 @@ export class CreateClientDto {
   lastName: string;
 
   @IsNotEmpty()
-  @IsString()
-  billingDate: string;
+  @IsInt()
+  billingDate: number;
 
   @IsNotEmpty()
   @IsEmail()
@@ -95,8 +95,8 @@ export class UpdateClientDto {
   paymentMethod?: PaymentMethod;
 
   @IsNotEmpty()
-  @IsString()
-  billingDate: string;
+  @IsInt()
+  billingDate: number;
 
   @IsOptional()
   @IsArray()
