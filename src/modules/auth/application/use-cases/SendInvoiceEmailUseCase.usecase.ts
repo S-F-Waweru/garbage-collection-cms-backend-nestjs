@@ -1,7 +1,7 @@
 import {
   BadRequestException,
   Inject,
-  Injectable,
+  Injectable, Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { IInvoiceRepository } from '../../../invoices/domain/invoice.repository.intreface';
@@ -23,6 +23,7 @@ export class SendInvoiceEmailUseCase {
     private readonly downloadPdfUseCase: DownloadInvoicePdfUseCase,
   ) {}
 
+  logger = new Logger(SendInvoiceEmailUseCase.name)
   async execute(invoiceId: string): Promise<void> {
     const invoice = await this.invoiceRepo.findById(invoiceId);
     if (!invoice) throw new NotFoundException('Invoice  Not found');
@@ -30,6 +31,11 @@ export class SendInvoiceEmailUseCase {
     if (invoice.status === InvoiceStatus.CANCELLED) {
       throw new BadRequestException('Invoice  Not found');
     }
+
+    if(invoice.isMailSent === true){
+      throw new BadRequestException('Email has Already been sent')
+    }
+
     const client = await this.clientRepo.findById(invoice.clientId);
     if (!client || !client.email)
       throw new NotFoundException('Client or client email Not Found');
@@ -37,10 +43,26 @@ export class SendInvoiceEmailUseCase {
     const pdfBuffer = await this.downloadPdfUseCase.execute(invoiceId);
 
     const clientEmail = new Email(client.email);
-    await this.emailService.sendInvoiceEmail(
-      clientEmail,
-      pdfBuffer,
-      invoice.invoiceNumber,
-    );
+    try {
+      await this.emailService.sendInvoiceEmail(
+          clientEmail,
+          pdfBuffer,
+          invoice.invoiceNumber,
+      );
+      invoice.setIsMailSent(true)
+      this.logger.debug(`After the Save  ====================================`)
+      this.logger.debug(invoice)
+      const savedInvoice =await this.invoiceRepo.save(invoice);
+      this.logger.debug(`After the Save  ====================================`)
+       this.logger.debug(savedInvoice)
+
+
+    }catch (error){
+      this.logger.error(error);
+      throw  new BadRequestException(`sending email failed`)
+    }
+
+
+
   }
 }

@@ -44,6 +44,9 @@ export class InvoiceSchema {
   @Column('date')
   dueDate: Date;
 
+  @Column("bool", {default: false})
+  isMailSent : boolean
+
   @Column('int')
   activeUnits: number;
 

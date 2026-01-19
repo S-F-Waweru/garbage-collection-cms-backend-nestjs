@@ -86,6 +86,7 @@ export class GenerateInvoiceUseCase {
       amountPaid: 0,
       balance: totalAfterCredit,
       status,
+      isMailSent :false,
       notes: dto.notes,
       createdBy: userId,
     });

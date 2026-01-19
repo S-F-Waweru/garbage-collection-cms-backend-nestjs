@@ -1,5 +1,5 @@
 // infrastructure/invoice.repository.ts
-import { Injectable } from '@nestjs/common';
+import {Injectable, Logger} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource, IsNull, DeepPartial, Not } from 'typeorm';
 import { Invoice } from '../domain/invoice.entity';
@@ -17,7 +17,7 @@ export class InvoiceRepository implements IInvoiceRepository {
     private readonly repo: Repository<InvoiceSchema>,
     private readonly dataSource: DataSource,
   ) {}
-
+logger = new Logger(InvoiceRepository.name)
   async getNextInvoiceNumber(): Promise<string> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -175,16 +175,17 @@ export class InvoiceRepository implements IInvoiceRepository {
     await this.repo.update(id, data);
     const saved = await this.findById(id);
 
+
     if (!saved) {
       return null;
     }
 
-    const result = this.toDomain(saved);
 
-    if (Array.isArray(result)) {
-      return result[0];
+
+    if (Array.isArray(saved)) {
+      return saved[0];
     }
-    return result;
+    return saved;
   }
 
   async existsForPeriod(
@@ -269,10 +270,13 @@ export class InvoiceRepository implements IInvoiceRepository {
       balance: Number(schema.balance),
       status: schema.status,
       notes: schema.notes,
+      isMailSent:schema.isMailSent,
       createdBy: schema.createdBy,
       createdAt: new Date(schema.createdAt),
       updatedAt: new Date(schema.updatedAt),
     });
+
+
 
     // ADD THESE LINES HERE:
     if (schema.client) {

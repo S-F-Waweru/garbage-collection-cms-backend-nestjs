@@ -18,6 +18,7 @@ interface InvoiceProps {
   amountPaid: number;
   balance: number;
   status: InvoiceStatus;
+  isMailSent: boolean;
   notes?: string;
   createdBy: string;
 
@@ -44,6 +45,7 @@ export class Invoice extends BaseEntity {
   private _status: InvoiceStatus;
   private _notes?: string;
   private _createdBy: string;
+  private _isMailSent?:boolean
 
   // Relationships (loaded on demand)
   private _client?: any;
@@ -68,8 +70,7 @@ export class Invoice extends BaseEntity {
     this._status = props.status;
     this._notes = props.notes;
     this._createdBy = props.createdBy;
-
-    // Set relationships if provided
+    this._isMailSent = props.isMailSent ?? false
     this._client = props.client;
     this._payments = props.payments;
     this._creator = props.creator;
@@ -91,7 +92,9 @@ export class Invoice extends BaseEntity {
   get billingPeriodEnd(): Date {
     return this._billingPeriodEnd;
   }
-
+  get isMailSent () {
+        return this._isMailSent
+    }
   get invoiceDate(): Date {
     return this._invoiceDate;
   }
@@ -168,6 +171,11 @@ export class Invoice extends BaseEntity {
 
   setStatus(newStatus: InvoiceStatus) {
     this._status = newStatus;
+  }
+
+  setIsMailSent(bool : boolean){
+    this._isMailSent = bool
+    this.touch()
   }
 
   // Helper - Check if relationships are loaded
@@ -468,6 +476,7 @@ export class Invoice extends BaseEntity {
       creditApplied: this._creditApplied,
       totalAmount: this._totalAmount,
       amountPaid: this._amountPaid,
+      isMailSent : this._isMailSent,
       balance: this._balance,
       status: this._status,
       notes: this._notes,

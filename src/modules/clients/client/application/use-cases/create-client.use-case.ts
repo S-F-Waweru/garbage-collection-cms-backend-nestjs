@@ -149,6 +149,7 @@ export class CreateClientUseCase {
         creditApplied: 0,
         totalAmount: Math.round(totalAmount * 100) / 100,
         amountPaid: 0,
+        isMailSent:false,
         balance: Math.round(totalAmount * 100) / 100,
         status: InvoiceStatus.PENDING,
         notes: 'Initial invoice generated on client creation',
