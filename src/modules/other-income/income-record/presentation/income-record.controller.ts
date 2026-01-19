@@ -20,6 +20,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { UseRoles } from 'nest-access-control';
 
 import {
   CreateIncomeRecordDto,
@@ -42,16 +43,21 @@ import { GetIncomeCategoryByIdUseCase } from '../../income-category/application/
 export class IncomeRecordController {
   logger = new Logger(IncomeRecordController.name);
   constructor(
-    private readonly createUseCase: CreateIncomeRecordUseCase,
-    private readonly updateUseCase: UpdateIncomeRecordUseCase,
-    private readonly deleteUseCase: DeleteIncomeRecordUseCase,
-    private readonly getByIdUseCase: GetIncomeCategoryByIdUseCase,
-    private readonly getAllUseCase: GetAllIncomeRecordsUseCase,
+      private readonly createUseCase: CreateIncomeRecordUseCase,
+      private readonly updateUseCase: UpdateIncomeRecordUseCase,
+      private readonly deleteUseCase: DeleteIncomeRecordUseCase,
+      private readonly getByIdUseCase: GetIncomeCategoryByIdUseCase,
+      private readonly getAllUseCase: GetAllIncomeRecordsUseCase,
   ) {}
   // -----------------------
   // GET all (paginated)
   // -----------------------
   @Get()
+  @UseRoles({
+    resource: 'other-income',
+    action: 'read',
+    possession: 'any',
+  })
   @ApiOperation({ summary: 'Get all income records (paginated)' })
   @ApiQuery({
     name: 'page',
@@ -70,8 +76,8 @@ export class IncomeRecordController {
     description: 'Income records fetched successfully',
   })
   async findAll(
-    @Query('page') page: string = '1',
-    @Query('limit') limit: string = '10',
+      @Query('page') page: string = '1',
+      @Query('limit') limit: string = '10',
   ) {
     return this.getAllUseCase.execute({
       page: Number(page),
@@ -83,6 +89,11 @@ export class IncomeRecordController {
   // GET by ID
   // -----------------------
   @Get(':id')
+  @UseRoles({
+    resource: 'other-income',
+    action: 'read',
+    possession: 'any',
+  })
   @ApiOperation({ summary: 'Get income record by ID' })
   @ApiParam({ name: 'id', example: 'uuid-of-income-record' })
   @ApiResponse({ status: 200, description: 'Income record found' })
@@ -96,8 +107,12 @@ export class IncomeRecordController {
   // -----------------------
   // CREATE
   // -----------------------
-  // @UseGuards(JwtAuthGuard)
   @Post()
+  @UseRoles({
+    resource: 'other-income',
+    action: 'create',
+    possession: 'any',
+  })
   @ApiOperation({ summary: 'Create a new income record' })
   @ApiBody({ type: CreateIncomeRecordDto })
   @ApiResponse({
@@ -105,8 +120,8 @@ export class IncomeRecordController {
     description: 'Income record created successfully',
   })
   create(
-    @CurrentUser() user: { userId: string },
-    @Body() dto: CreateIncomeRecordDto,
+      @CurrentUser() user: { userId: string },
+      @Body() dto: CreateIncomeRecordDto,
   ) {
     this.logger.debug('CreateIncomeRecordDto');
     this.logger.debug(dto);
@@ -117,6 +132,11 @@ export class IncomeRecordController {
   // UPDATE
   // -----------------------
   @Put(':id')
+  @UseRoles({
+    resource: 'other-income',
+    action: 'update',
+    possession: 'any',
+  })
   @ApiOperation({ summary: 'Update income record by ID' })
   @ApiParam({ name: 'id', example: 'uuid-of-income-record' })
   @ApiBody({ type: UpdateIncomeRecordDto })
@@ -133,6 +153,11 @@ export class IncomeRecordController {
   // DELETE
   // -----------------------
   @Delete(':id')
+  @UseRoles({
+    resource: 'other-income',
+    action: 'delete',
+    possession: 'any',
+  })
   @ApiOperation({ summary: 'Delete income record by ID' })
   @ApiParam({ name: 'id', example: 'uuid-of-income-record' })
   @ApiResponse({

@@ -5,7 +5,7 @@ export class Email {
   private _value: string;
 
   constructor(value: string) {
-    this._value = value;
+    this._value = value.toLowerCase().trim();
     this.validate();
   }
 

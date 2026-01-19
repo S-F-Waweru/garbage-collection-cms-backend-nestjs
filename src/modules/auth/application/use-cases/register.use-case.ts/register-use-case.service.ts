@@ -22,7 +22,7 @@ export class RegisterUseCase {
   logger = new Logger(RegisterUseCase.name);
 
   async execute(dto: RegisterDto) {
-    const { email, password, firstName, lastName } = dto;
+    const { email, password, firstName, lastName, role } = dto;
     const emailVO = new Email(email);
     const exists = await this.authRepository.findByEmail(emailVO);
     if (exists) throw new BadRequestException('User already exists');
@@ -32,7 +32,7 @@ export class RegisterUseCase {
       password ||
       process.env.DEFAULT_USER_PASSWORD ||
       'ChangeMe@123';
-    const user = User.create(email, userPassword, firstName, lastName);
+    const user = User.create(email, userPassword, firstName, lastName, role);
 
     this.logger.debug(user);
     this.logger.debug(userPassword);

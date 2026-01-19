@@ -19,6 +19,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { UseRoles } from 'nest-access-control';
 
 import {
   CreateLocationDto,
@@ -34,20 +35,24 @@ import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
 import { GetRawLocationsUSecase } from '../application/use-cases/getRawLocation.usecase';
 
 @ApiTags('Locations')
-// @UseGuards(JwtAuthGuard)
 @Controller('locations')
 export class LocationController {
   constructor(
-    private readonly createLocationUseCase: CreateNewLocationUseCase,
-    private readonly getLocationsUseCase: GetLocationListUseCase,
-    private readonly updateLocationUseCase: UpdateLocationUseCase,
-    private readonly deleteLocationUseCase: DeleteLocationUseCase,
-    private readonly getLocationByIdUseCase: GetLocationByIdUseCase,
-    private readonly getRawLocationUseCase: GetRawLocationsUSecase,
+      private readonly createLocationUseCase: CreateNewLocationUseCase,
+      private readonly getLocationsUseCase: GetLocationListUseCase,
+      private readonly updateLocationUseCase: UpdateLocationUseCase,
+      private readonly deleteLocationUseCase: DeleteLocationUseCase,
+      private readonly getLocationByIdUseCase: GetLocationByIdUseCase,
+      private readonly getRawLocationUseCase: GetRawLocationsUSecase,
   ) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @UseRoles({
+    resource: 'expenses',
+    action: 'create',
+    possession: 'any',
+  })
   @ApiOperation({ summary: 'Create a new location' })
   @ApiBody({ type: CreateLocationDto })
   @ApiResponse({ status: 201, description: 'Location created successfully' })
@@ -57,21 +62,32 @@ export class LocationController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
+  @UseRoles({
+    resource: 'expenses',
+    action: 'read',
+    possession: 'any',
+  })
   @ApiOperation({ summary: 'Get locations (paginated)' })
   @ApiQuery({ name: 'page', required: false, example: 1 })
   @ApiQuery({ name: 'limit', required: false, example: 10 })
   @ApiResponse({ status: 200, description: 'Locations fetched successfully' })
   async getLocations(
-    @Query('page') page: string = '1',
-    @Query('limit') limit: string = '10',
+      @Query('page') page: string = '1',
+      @Query('limit') limit: string = '10',
   ) {
     return this.getLocationsUseCase.execute({
       page: Number(page),
       limit: Number(limit),
     });
   }
+
   @Get('raw')
   @HttpCode(HttpStatus.OK)
+  @UseRoles({
+    resource: 'expenses',
+    action: 'read',
+    possession: 'any',
+  })
   @ApiOperation({ summary: 'Get locations No Pagination)' })
   @ApiResponse({ status: 200, description: 'Locations fetched successfully' })
   async getLocationsNoPagiantion() {
@@ -80,6 +96,11 @@ export class LocationController {
 
   @Get(':id')
   @HttpCode(HttpStatus.OK)
+  @UseRoles({
+    resource: 'expenses',
+    action: 'read',
+    possession: 'any',
+  })
   @ApiOperation({ summary: 'Get location by ID' })
   @ApiParam({ name: 'id', example: 'uuid-of-location' })
   @ApiResponse({ status: 200, description: 'Location found' })
@@ -90,19 +111,29 @@ export class LocationController {
 
   @Put(':id')
   @HttpCode(HttpStatus.OK)
+  @UseRoles({
+    resource: 'expenses',
+    action: 'update',
+    possession: 'any',
+  })
   @ApiOperation({ summary: 'Update location by ID' })
   @ApiParam({ name: 'id', example: 'uuid-of-location' })
   @ApiBody({ type: UpdateLocationDto })
   @ApiResponse({ status: 200, description: 'Location updated successfully' })
   async updateLocation(
-    @Param('id') id: string,
-    @Body() dto: UpdateLocationDto,
+      @Param('id') id: string,
+      @Body() dto: UpdateLocationDto,
   ) {
     return this.updateLocationUseCase.execute(id, dto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
+  @UseRoles({
+    resource: 'expenses',
+    action: 'delete',
+    possession: 'any',
+  })
   @ApiOperation({ summary: 'Delete location by ID' })
   @ApiParam({ name: 'id', example: 'uuid-of-location' })
   @ApiResponse({ status: 200, description: 'Location deleted successfully' })

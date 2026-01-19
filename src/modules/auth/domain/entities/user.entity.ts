@@ -89,6 +89,11 @@ export class User extends BaseEntity {
     this.touch();
   }
 
+  update (firstName : string, lastName : string){
+    this._firstName = firstName;
+    this._lastName = lastName;
+    this.touch();
+  }
   // Getters
   get email(): Email {
     return this._email;

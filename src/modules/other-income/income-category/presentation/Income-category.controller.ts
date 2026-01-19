@@ -18,6 +18,7 @@ import {
   ApiQuery,
   ApiBody,
 } from '@nestjs/swagger';
+import { UseRoles } from 'nest-access-control';
 
 import { CreateIncomeCategoryUseCase } from '../application/use-case/create-income-categoty.use-case';
 import { UpdateIncomeCategoryUseCase } from '../application/use-case/update-income-category.use-case';
@@ -35,14 +36,19 @@ import { IncomeCategory } from '../domain/income-category.entity';
 @Controller('income-categories')
 export class IncomeCategoryController {
   constructor(
-    private readonly createUseCase: CreateIncomeCategoryUseCase,
-    private readonly updateUseCase: UpdateIncomeCategoryUseCase,
-    private readonly deleteUseCase: DeleteIncomeCategoryUseCase,
-    private readonly getByIdUseCase: GetIncomeCategoryByIdUseCase,
-    private readonly listUseCase: ListIncomeCategoriesUseCase,
+      private readonly createUseCase: CreateIncomeCategoryUseCase,
+      private readonly updateUseCase: UpdateIncomeCategoryUseCase,
+      private readonly deleteUseCase: DeleteIncomeCategoryUseCase,
+      private readonly getByIdUseCase: GetIncomeCategoryByIdUseCase,
+      private readonly listUseCase: ListIncomeCategoriesUseCase,
   ) {}
 
   @Post()
+  @UseRoles({
+    resource: 'other-income',
+    action: 'create',
+    possession: 'any',
+  })
   @ApiOperation({ summary: 'Create a new income category' })
   @ApiBody({ type: CreateIncomeCategoryDto })
   @ApiResponse({
@@ -54,6 +60,11 @@ export class IncomeCategoryController {
   }
 
   @Get()
+  @UseRoles({
+    resource: 'other-income',
+    action: 'read',
+    possession: 'any',
+  })
   @ApiOperation({ summary: 'List all income categories (paginated)' })
   @ApiQuery({
     name: 'page',
@@ -72,8 +83,8 @@ export class IncomeCategoryController {
     description: 'Income categories fetched successfully',
   })
   async list(
-    @Query('page') page: string = '1',
-    @Query('limit') limit: string = '10',
+      @Query('page') page: string = '1',
+      @Query('limit') limit: string = '10',
   ) {
     return await this.listUseCase.execute({
       page: Number(page),
@@ -82,6 +93,11 @@ export class IncomeCategoryController {
   }
 
   @Get(':id')
+  @UseRoles({
+    resource: 'other-income',
+    action: 'read',
+    possession: 'any',
+  })
   @ApiOperation({ summary: 'Get income category by ID' })
   @ApiParam({ name: 'id', example: 'uuid-of-category' })
   @ApiResponse({
@@ -94,6 +110,11 @@ export class IncomeCategoryController {
   }
 
   @Put(':id')
+  @UseRoles({
+    resource: 'other-income',
+    action: 'update',
+    possession: 'any',
+  })
   @ApiOperation({ summary: 'Update income category by ID' })
   @ApiParam({ name: 'id', example: 'uuid-of-category' })
   @ApiBody({ type: UpdateIncomeCategoryDto })
@@ -107,6 +128,11 @@ export class IncomeCategoryController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
+  @UseRoles({
+    resource: 'other-income',
+    action: 'delete',
+    possession: 'any',
+  })
   @ApiOperation({ summary: 'Delete income category by ID' })
   @ApiParam({ name: 'id', example: 'uuid-of-category' })
   @ApiResponse({

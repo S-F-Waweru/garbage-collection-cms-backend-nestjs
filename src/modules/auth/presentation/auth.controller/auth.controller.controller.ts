@@ -14,11 +14,13 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiOperation,
+  ApiParam,
   ApiQuery,
   ApiResponse,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { UseRoles } from 'nest-access-control';
 
 import { RegisterUseCase } from '../../application/use-cases/register.use-case.ts/register-use-case.service';
 import { LoginUseCase } from '../../application/use-cases/login.use-case.ts/login.use-case';
@@ -26,7 +28,7 @@ import {
   ChangePasswordDto,
   ChangeRoleDTO,
   LoginDto,
-  RegisterDto,
+  RegisterDto, UpdateUserDto,
 } from '../../application/dto/auth.request.dto';
 import { ChangePasswordUseCase } from '../../application/use-cases/change-password.use-case/change-password-use-case.service';
 import { CurrentUser } from '../../../../shared/decorators/current-user.decorator';
@@ -37,19 +39,22 @@ import { ViewPaginatedUsersUsecase } from '../../application/use-cases/view-pagi
 import { UpdateRoleUsecase } from '../../application/use-cases/update-roles.usecase';
 import { ResetPasswordUseCase } from '../../application/use-cases/reset-password.usecase';
 import { RequestPasswordResetUseCase } from '../../application/use-cases/request-password-reset.usecase';
+import {UpdateUserUseCase} from "../../application/use-cases/update-user.use-case";
+
 
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(
-    private readonly registerUseCase: RegisterUseCase,
-    private readonly loginUseCase: LoginUseCase,
-    private readonly changePasswordUseCase: ChangePasswordUseCase,
-    private readonly refreshTokenUseCase: RefreshTokenUseCase,
-    private readonly getUsersUseCase: ViewPaginatedUsersUsecase,
-    private readonly updateRole: UpdateRoleUsecase,
-    private readonly requestPasswordResetUseCase: RequestPasswordResetUseCase,
-    private readonly resetPasswordUseCase: ResetPasswordUseCase,
+      private readonly registerUseCase: RegisterUseCase,
+      private readonly loginUseCase: LoginUseCase,
+      private readonly changePasswordUseCase: ChangePasswordUseCase,
+      private readonly refreshTokenUseCase: RefreshTokenUseCase,
+      private readonly getUsersUseCase: ViewPaginatedUsersUsecase,
+      private readonly updateRole: UpdateRoleUsecase,
+      private readonly requestPasswordResetUseCase: RequestPasswordResetUseCase,
+      private readonly resetPasswordUseCase: ResetPasswordUseCase,
+      private readonly updateUserUseCase: UpdateUserUseCase,
   ) {}
 
   logger = new Logger(AuthController.name);
@@ -59,6 +64,11 @@ export class AuthController {
   // ---------------------------
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
+  @UseRoles({
+    resource: 'user',
+    action: 'create',
+    possession: 'any',
+  })
   @ApiOperation({ summary: 'Register a new user' })
   @ApiBody({ type: RegisterDto })
   @ApiResponse({ status: 201, description: 'User registered successfully' })
@@ -84,7 +94,6 @@ export class AuthController {
   // ---------------------------
   // Change Password (Protected)
   // ---------------------------
-  // @UseGuards(JwtAuthGuard)
   @Post('change-password')
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
@@ -98,8 +107,8 @@ export class AuthController {
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   changePassword(
-    @CurrentUser() user: CurrentUserDto,
-    @Body() dto: ChangePasswordDto,
+      @CurrentUser() user: CurrentUserDto,
+      @Body() dto: ChangePasswordDto,
   ) {
     return this.changePasswordUseCase.execute(user.userId, dto);
   }
@@ -107,7 +116,6 @@ export class AuthController {
   // ---------------------------
   // Refresh Token (Public)
   // ---------------------------
-
   @Post('refresh')
   @Public()
   @HttpCode(HttpStatus.OK)
@@ -115,7 +123,7 @@ export class AuthController {
   @ApiOperation({
     summary: 'Refresh access token',
     description:
-      'Provide the refresh token in the Authorization header as: Bearer <refresh-token>',
+        'Provide the refresh token in the Authorization header as: Bearer <refresh-token>',
   })
   @ApiResponse({
     status: 200,
@@ -161,7 +169,6 @@ export class AuthController {
   // ---------------------------
   // Me (Protected)
   // ---------------------------
-  // @UseGuards(JwtAuthGuard)
   @Get('me')
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
@@ -179,15 +186,21 @@ export class AuthController {
       message: 'This is a protected route',
     };
   }
+
   @Get('users')
   @HttpCode(HttpStatus.OK)
+  @UseRoles({
+    resource: 'user',
+    action: 'read',
+    possession: 'any',
+  })
   @ApiOperation({ summary: 'Get Users (paginated)' })
   @ApiQuery({ name: 'page', required: false, example: 1 })
   @ApiQuery({ name: 'limit', required: false, example: 10 })
   @ApiResponse({ status: 200, description: 'Users fetched successfully' })
   async getUsers(
-    @Query('page') page: string = '1',
-    @Query('limit') limit: string = '10',
+      @Query('page') page: string = '1',
+      @Query('limit') limit: string = '10',
   ) {
     return this.getUsersUseCase.execute({
       page: Number(page),
@@ -195,17 +208,39 @@ export class AuthController {
     });
   }
 
+
+  @Patch('users/:id')
+  @UseRoles({
+    resource: 'user',
+    action: 'update',
+    possession: 'any',
+  })
+  @ApiOperation({ summary: 'Update user details (firstName, lastName)' })
+  @ApiParam({ name: 'id', description: 'User UUID' })
+  @ApiBody({ type: UpdateUserDto })
+  @ApiResponse({ status: 200, description: 'User updated successfully' })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  async updateUser(@Param('id') id: string, @Body() dto: UpdateUserDto) {
+    return this.updateUserUseCase.execute(id, dto);
+  }
+
   @Patch('users/:id/role')
+  @UseRoles({
+    resource: 'user',
+    action: 'update',
+    possession: 'any',
+  })
+  @ApiOperation({ summary: 'Update user role' })
+  @ApiParam({ name: 'id', description: 'User UUID' })
+  @ApiBody({ type: ChangeRoleDTO })
+  @ApiResponse({ status: 200, description: 'Role updated successfully' })
   async changeRole(
-    @CurrentUser() user: any,
-    @Param('id') targetUserId: string,
-    @Body() dto: ChangeRoleDTO,
+      @CurrentUser() user: any,
+      @Param('id') targetUserId: string,
+      @Body() dto: ChangeRoleDTO,
   ) {
     const loggedUserId = user.userId;
-
-    // Ensure the DTO userId matches the route parameter
     dto.userId = targetUserId;
-
     return await this.updateRole.execute(loggedUserId, dto);
   }
 }

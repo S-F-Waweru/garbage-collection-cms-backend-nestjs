@@ -8,6 +8,9 @@ import { IAuthRepository } from '../../domain/interfaces/auth.repository.interfa
 export interface JwtPayload {
   userId: string;
   email: string;
+  firstName: string;
+  lastName: string;
+  role: string;
 }
 
 @Injectable()
@@ -36,6 +39,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     return {
       userId: payload.userId,
       email: payload.email,
+      firstName: payload.firstName,
+      lastName: payload.lastName,
+      role: payload.role,
     };
   }
 }

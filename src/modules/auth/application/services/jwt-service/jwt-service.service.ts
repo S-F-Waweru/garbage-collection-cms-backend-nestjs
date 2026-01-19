@@ -6,6 +6,8 @@ import { Role } from '../../../policies/rbac.policy';
 export interface AccessTokenPayload {
   userId: string;
   email: string;
+  firstName: string,
+  lastName:string,
   role: Role;
   // permissions?: string[]; // Add later when you have permissions
 }

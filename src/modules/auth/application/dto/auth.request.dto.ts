@@ -8,6 +8,7 @@ import {
   IsNotEmpty,
 } from 'class-validator';
 import { Role } from '../../policies/rbac.policy';
+import {ApiProperty} from "@nestjs/swagger";
 
 export class LoginDto {
   @IsEmail()
@@ -73,4 +74,19 @@ export class ChangeRoleDTO {
   @IsEnum(Role, { message: 'Role must be one of: admin, accountant, director' })
   @IsNotEmpty({ message: 'Role is required' })
   role: Role;
+}
+
+
+export class UpdateUserDto {
+  @ApiProperty({ example: 'John' })
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(2)
+  firstName: string;
+
+  @ApiProperty({ example: 'Doe' })
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(2)
+  lastName: string;
 }

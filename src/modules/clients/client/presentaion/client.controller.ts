@@ -18,6 +18,7 @@ import {
   ApiQuery,
   ApiBody,
 } from '@nestjs/swagger';
+import { UseRoles } from 'nest-access-control';
 
 import {
   CreateClientDto,
@@ -36,15 +37,20 @@ import { FindAllClientsRawUseCase } from '../application/use-cases/find-raw-clie
 export class ClientController {
   private readonly logger = new Logger(ClientController.name);
   constructor(
-    private readonly createClientUseCase: CreateClientUseCase,
-    private readonly updateClientUseCase: UpdateClientUseCase,
-    private readonly deleteClientUseCase: DeleteClientUseCase,
-    private readonly findClientByIdUseCase: FindClientByIdUseCase,
-    private readonly findAllClientsUseCase: FindAllClientsUseCase,
-    private readonly findAllClientsRawUseCase: FindAllClientsRawUseCase,
+      private readonly createClientUseCase: CreateClientUseCase,
+      private readonly updateClientUseCase: UpdateClientUseCase,
+      private readonly deleteClientUseCase: DeleteClientUseCase,
+      private readonly findClientByIdUseCase: FindClientByIdUseCase,
+      private readonly findAllClientsUseCase: FindAllClientsUseCase,
+      private readonly findAllClientsRawUseCase: FindAllClientsRawUseCase,
   ) {}
 
   @Post()
+  @UseRoles({
+    resource: 'client',
+    action: 'create',
+    possession: 'any',
+  })
   @ApiOperation({ summary: 'Create a new client' })
   @ApiBody({ type: CreateClientDto })
   @ApiResponse({ status: 201, description: 'Client created successfully' })
@@ -55,33 +61,43 @@ export class ClientController {
   }
 
   @Get()
+  @UseRoles({
+    resource: 'client',
+    action: 'read',
+    possession: 'any',
+  })
   @ApiOperation({ summary: 'Get all clients (paginated)' })
   @ApiQuery({ name: 'page', required: false, example: 1 })
   @ApiQuery({ name: 'limit', required: false, example: 10 })
-  @ApiQuery({ name: 'searchTerm', required: false, type: String }) // Add this
+  @ApiQuery({ name: 'searchTerm', required: false, type: String })
   async findAll(
-    @Query('page') page: string = '1',
-    @Query('limit') limit: string = '10',
-    @Query('searchTerm') searchTerm?: string, // Add this
+      @Query('page') page: string = '1',
+      @Query('limit') limit: string = '10',
+      @Query('searchTerm') searchTerm?: string,
   ) {
     return this.findAllClientsUseCase.execute({
       page: parseInt(page, 10),
       limit: parseInt(limit, 10),
-      searchTerm, // Pass it here
+      searchTerm,
     });
   }
 
   @Get('raw')
+  @UseRoles({
+    resource: 'client',
+    action: 'read',
+    possession: 'any',
+  })
   @ApiOperation({ summary: 'Get all clients (paginated)' })
   @ApiQuery({ name: 'page', required: false, example: 1 })
   @ApiQuery({ name: 'limit', required: false, example: 10 })
   @ApiResponse({ status: 200, description: 'Clients fetched successfully' })
   async findAllNonPaginaited(
-    @Query('page') page: string = '1',
-    @Query('limit') limit: string = '10',
+      @Query('page') page: string = '1',
+      @Query('limit') limit: string = '10',
   ) {
     console.log(
-      `DEBUG reaching the find all controlller ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^`,
+        `DEBUG reaching the find all controlller ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^`,
     );
     return this.findAllClientsUseCase.execute({
       page: parseInt(page, 10),
@@ -90,6 +106,11 @@ export class ClientController {
   }
 
   @Get(':id')
+  @UseRoles({
+    resource: 'client',
+    action: 'read',
+    possession: 'any',
+  })
   @ApiOperation({ summary: 'Get client by ID' })
   @ApiParam({ name: 'id', example: 'a3f1c2d4-1234-4567-890a-bcdef1234567' })
   @ApiResponse({ status: 200, description: 'Client found' })
@@ -99,6 +120,11 @@ export class ClientController {
   }
 
   @Put(':id')
+  @UseRoles({
+    resource: 'client',
+    action: 'update',
+    possession: 'any',
+  })
   @ApiOperation({ summary: 'Update client by ID' })
   @ApiParam({ name: 'id', example: 'a3f1c2d4-1234-4567-890a-bcdef1234567' })
   @ApiBody({ type: UpdateClientDto })
@@ -109,6 +135,11 @@ export class ClientController {
   }
 
   @Delete(':id')
+  @UseRoles({
+    resource: 'client',
+    action: 'delete',
+    possession: 'any',
+  })
   @ApiOperation({ summary: 'Delete client by ID' })
   @ApiParam({ name: 'id', example: 'a3f1c2d4-1234-4567-890a-bcdef1234567' })
   @ApiResponse({ status: 200, description: 'Client deleted successfully' })

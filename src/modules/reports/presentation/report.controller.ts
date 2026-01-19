@@ -8,6 +8,7 @@ import {
   ApiQuery,
   ApiProduces,
 } from '@nestjs/swagger';
+import { UseRoles } from 'nest-access-control';
 import type { Response } from 'express';
 import {
   OutstandingBalanceReportDto,
@@ -38,22 +39,27 @@ import { GetInvoiceReportUseCase } from '../application/usecase/get-invoice-repo
 @Controller('reports')
 export class ReportController {
   constructor(
-    private readonly getOutstandingBalancesUseCase: GetOutstandingBalancesUseCase,
-    private readonly getRevenueReportUseCase: GetRevenueReportUseCase,
-    private readonly getPettyCashReportUseCase: GetPettyCashReportUseCase,
-    private readonly getOtherIncomeReportUseCase: GetOtherIncomeReportUseCase,
-    private readonly getSummaryStatisticsUseCase: GetSummaryStatisticsUseCase,
-    private readonly exportReportToExcelUseCase: ExportReportToExcelUseCase,
-    private readonly getExpenseIncomeChartUseCase: GetExpenseIncomeChartUseCase,
-    private readonly getPaymentReportUseCase: GetPaymentReportUseCase,
-    private readonly getInvoiceReportUsecase: GetInvoiceReportUseCase,
+      private readonly getOutstandingBalancesUseCase: GetOutstandingBalancesUseCase,
+      private readonly getRevenueReportUseCase: GetRevenueReportUseCase,
+      private readonly getPettyCashReportUseCase: GetPettyCashReportUseCase,
+      private readonly getOtherIncomeReportUseCase: GetOtherIncomeReportUseCase,
+      private readonly getSummaryStatisticsUseCase: GetSummaryStatisticsUseCase,
+      private readonly exportReportToExcelUseCase: ExportReportToExcelUseCase,
+      private readonly getExpenseIncomeChartUseCase: GetExpenseIncomeChartUseCase,
+      private readonly getPaymentReportUseCase: GetPaymentReportUseCase,
+      private readonly getInvoiceReportUsecase: GetInvoiceReportUseCase,
   ) {}
 
   @Get('outstanding-balances')
+  @UseRoles({
+    resource: 'invoices',
+    action: 'read',
+    possession: 'any',
+  })
   @ApiOperation({
     summary: 'Get outstanding balances report',
     description:
-      'Returns detailed breakdown of all outstanding invoices per client with payment status',
+        'Returns detailed breakdown of all outstanding invoices per client with payment status',
   })
   @ApiResponse({
     status: 200,
@@ -83,15 +89,20 @@ export class ReportController {
     };
 
     const result =
-      await this.getOutstandingBalancesUseCase.execute(parsedFilters);
+        await this.getOutstandingBalancesUseCase.execute(parsedFilters);
     return result.toObject();
   }
 
   @Get('revenue')
+  @UseRoles({
+    resource: 'invoices',
+    action: 'read',
+    possession: 'any',
+  })
   @ApiOperation({
     summary: 'Get revenue report',
     description:
-      'Returns revenue aggregated by client or location based on groupBy parameter',
+        'Returns revenue aggregated by client or location based on groupBy parameter',
   })
   @ApiResponse({
     status: 200,
@@ -135,17 +146,22 @@ export class ReportController {
     };
 
     const result = await this.getRevenueReportUseCase.execute(
-      filters.groupBy,
-      parsedFilters,
+        filters.groupBy,
+        parsedFilters,
     );
     return result.toObject();
   }
 
   @Get('petty-cash')
+  @UseRoles({
+    resource: 'expenses',
+    action: 'read',
+    possession: 'any',
+  })
   @ApiOperation({
     summary: 'Get petty cash summary report',
     description:
-      'Returns detailed petty cash transactions with balances and categories',
+        'Returns detailed petty cash transactions with balances and categories',
   })
   @ApiResponse({
     status: 200,
@@ -173,10 +189,15 @@ export class ReportController {
   }
 
   @Get('other-income')
+  @UseRoles({
+    resource: 'other-income',
+    action: 'read',
+    possession: 'any',
+  })
   @ApiOperation({
     summary: 'Get other income report',
     description:
-      'Returns aggregated income from sources like recycling with unit prices and totals',
+        'Returns aggregated income from sources like recycling with unit prices and totals',
   })
   @ApiResponse({
     status: 200,
@@ -200,15 +221,20 @@ export class ReportController {
     };
 
     const result =
-      await this.getOtherIncomeReportUseCase.execute(parsedFilters);
+        await this.getOtherIncomeReportUseCase.execute(parsedFilters);
     return result.toObject();
   }
 
   @Get('summary')
+  @UseRoles({
+    resource: 'invoices',
+    action: 'read',
+    possession: 'any',
+  })
   @ApiOperation({
     summary: 'Get summary statistics',
     description:
-      'Returns high-level summary statistics including clients, revenue, invoices, and balances',
+        'Returns high-level summary statistics including clients, revenue, invoices, and balances',
   })
   @ApiResponse({
     status: 200,
@@ -232,17 +258,22 @@ export class ReportController {
     };
 
     const result =
-      await this.getSummaryStatisticsUseCase.execute(parsedFilters);
+        await this.getSummaryStatisticsUseCase.execute(parsedFilters);
     return result.toObject();
   }
 
   @Get('export/:reportType')
+  @UseRoles({
+    resource: 'invoices',
+    action: 'read',
+    possession: 'any',
+  })
   @ApiOperation({
     summary: 'Export report to Excel',
     description: 'Exports the specified report type to Excel format (.xlsx)',
   })
   @ApiProduces(
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   )
   @ApiResponse({
     status: 200,
@@ -282,9 +313,9 @@ export class ReportController {
     description: 'For revenue reports: group by client or location',
   })
   async exportReport(
-    @Param('reportType') reportType: string,
-    @Query() filters: any,
-    @Res() res: Response,
+      @Param('reportType') reportType: string,
+      @Query() filters: any,
+      @Res() res: Response,
   ) {
     const parsedFilters = {
       startDate: filters.startDate ? new Date(filters.startDate) : undefined,
@@ -298,15 +329,15 @@ export class ReportController {
     switch (reportType) {
       case 'outstanding-balances':
         report =
-          await this.getOutstandingBalancesUseCase.execute(parsedFilters);
+            await this.getOutstandingBalancesUseCase.execute(parsedFilters);
         filename = `outstanding-balances-${new Date().toISOString().split('T')[0]}.xlsx`;
         break;
 
       case 'revenue':
         const groupBy = filters.groupBy || RevenueGroupBy.CLIENT;
         report = await this.getRevenueReportUseCase.execute(
-          groupBy,
-          parsedFilters,
+            groupBy,
+            parsedFilters,
         );
         filename = `revenue-${groupBy}-${new Date().toISOString().split('T')[0]}.xlsx`;
         break;
@@ -323,8 +354,8 @@ export class ReportController {
 
       case 'payments':
         report = await this.getPaymentReportUseCase.execute(parsedFilters);
-        console.log('Report type:', report.type); // Add this debug line
-        console.log('ReportType.PAYMENTS:', ReportType.PAYMENTS); // Add this debug line
+        console.log('Report type:', report.type);
+        console.log('ReportType.PAYMENTS:', ReportType.PAYMENTS);
         filename = `payments-${new Date().toISOString().split('T')[0]}.xlsx`;
         break;
 
@@ -348,23 +379,28 @@ export class ReportController {
     }
 
     const buffer = await this.exportReportToExcelUseCase.execute(
-      report.type as ReportType,
-      report.data,
+        report.type as ReportType,
+        report.data,
     );
 
     res.setHeader(
-      'Content-Type',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'Content-Type',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     );
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     res.send(buffer);
   }
 
   @Get('expense-income-chart')
+  @UseRoles({
+    resource: 'expenses',
+    action: 'read',
+    possession: 'any',
+  })
   @ApiOperation({
     summary: 'Get expense vs income chart data',
     description:
-      'Returns monthly totals for expenses and income for chart visualization',
+        'Returns monthly totals for expenses and income for chart visualization',
   })
   @ApiResponse({
     status: 200,
@@ -402,10 +438,15 @@ export class ReportController {
   }
 
   @Get('payments')
+  @UseRoles({
+    resource: 'payments',
+    action: 'read',
+    possession: 'any',
+  })
   @ApiOperation({
     summary: 'Get payments report',
     description:
-      'Returns all payments with client details and applied invoices',
+        'Returns all payments with client details and applied invoices',
   })
   @ApiResponse({
     status: 200,
@@ -441,7 +482,7 @@ export class ReportController {
   @ApiOperation({
     summary: 'Get invoices report',
     description:
-      'Returns all invoices with client details and applied invoices',
+        'Returns all invoices with client details and applied invoices',
   })
   @ApiResponse({
     status: 200,

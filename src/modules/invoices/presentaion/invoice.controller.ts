@@ -18,7 +18,8 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import * as express from 'express'; // Required to fix TS1272 metadata errors
+import { UseRoles } from 'nest-access-control';
+import * as express from 'express';
 
 import {
   GenerateInvoiceDto,
@@ -47,19 +48,24 @@ interface RequestWithUser extends Request {
 @Controller('invoices')
 export class InvoiceController {
   constructor(
-    private readonly generateInvoiceUseCase: GenerateInvoiceUseCase,
-    private readonly getInvoiceUseCase: GetInvoiceUseCase,
-    private readonly listInvoicesUseCase: ListInvoicesUseCase,
-    private readonly updateInvoiceStatusUseCase: UpdateInvoiceStatusUseCase,
-    private readonly listPaginatedUsecase: GetAllInvoicesPaginatedUseCase,
-    private readonly downloadPdfUseCase: DownloadInvoicePdfUseCase,
-    private readonly bulkDownloadUseCase: BulkDownloadInvoicesUseCase,
-    private readonly sendInvoiceEmailUseCase: SendInvoiceEmailUseCase,
-    private readonly invoiceCronService: InvoiceCronService,
+      private readonly generateInvoiceUseCase: GenerateInvoiceUseCase,
+      private readonly getInvoiceUseCase: GetInvoiceUseCase,
+      private readonly listInvoicesUseCase: ListInvoicesUseCase,
+      private readonly updateInvoiceStatusUseCase: UpdateInvoiceStatusUseCase,
+      private readonly listPaginatedUsecase: GetAllInvoicesPaginatedUseCase,
+      private readonly downloadPdfUseCase: DownloadInvoicePdfUseCase,
+      private readonly bulkDownloadUseCase: BulkDownloadInvoicesUseCase,
+      private readonly sendInvoiceEmailUseCase: SendInvoiceEmailUseCase,
+      private readonly invoiceCronService: InvoiceCronService,
   ) {}
 
   @Post('generate')
   @HttpCode(HttpStatus.CREATED)
+  @UseRoles({
+    resource: 'invoices',
+    action: 'create',
+    possession: 'any',
+  })
   @ApiOperation({ summary: 'Generate invoice for a client' })
   @ApiResponse({ status: 201, type: InvoiceResponseDto })
   async generate(@Body() dto: GenerateInvoiceDto, @Req() req: RequestWithUser) {
@@ -67,8 +73,12 @@ export class InvoiceController {
     return await this.generateInvoiceUseCase.execute(dto, userId);
   }
 
-  // FIXED: Renamed route to avoid collision with listAllPaginated
   @Get('')
+  @UseRoles({
+    resource: 'invoices',
+    action: 'read',
+    possession: 'any',
+  })
   @ApiOperation({ summary: 'List all invoices with filters' })
   @ApiResponse({ status: 200, type: [InvoiceResponseDto] })
   async list(@Query() query: ListInvoicesDto) {
@@ -81,13 +91,17 @@ export class InvoiceController {
     return await this.listInvoicesUseCase.execute(filters);
   }
 
-  // FIXED: Renamed route to avoid collision with list
   @Get('paginated')
+  @UseRoles({
+    resource: 'invoices',
+    action: 'read',
+    possession: 'any',
+  })
   @ApiOperation({ summary: 'List all invoices with pagination' })
   @ApiResponse({ status: 200 })
   async listAllPaginated(
-    @Query('page') page: string = '1',
-    @Query('limit') limit: string = '10',
+      @Query('page') page: string = '1',
+      @Query('limit') limit: string = '10',
   ) {
     return await this.listPaginatedUsecase.execute({
       page: parseInt(page, 10),
@@ -96,10 +110,15 @@ export class InvoiceController {
   }
 
   @Get(':id/download')
+  @UseRoles({
+    resource: 'invoices',
+    action: 'read',
+    possession: 'any',
+  })
   @ApiOperation({ summary: 'Download single invoice as PDF' })
   async downloadPdf(
-    @Param('id') id: string,
-    @Res() res: express.Response, // Explicitly using express namespace
+      @Param('id') id: string,
+      @Res() res: express.Response,
   ) {
     const buffer = await this.downloadPdfUseCase.execute(id);
 
@@ -109,16 +128,26 @@ export class InvoiceController {
       'Content-Length': buffer.length,
     });
 
-    // Send the buffer directly
     res.send(buffer);
   }
+
   @Post('invoices/:id/fix')
+  @UseRoles({
+    resource: 'invoices',
+    action: 'update',
+    possession: 'any',
+  })
   fixInvoice(@Param('id') id: string, @CurrentUser() user: any) {
     const userId = user.userId as string;
     return this.invoiceCronService.fixWrongInvoice(id, userId);
   }
 
   @Post(':id/send-email')
+  @UseRoles({
+    resource: 'invoices',
+    action: 'update',
+    possession: 'any',
+  })
   async sendInvoiceEmail(@Param('id') id: string) {
     await this.sendInvoiceEmailUseCase.execute(id);
     return { message: 'Invoice email sent successfully' };
@@ -126,10 +155,15 @@ export class InvoiceController {
 
   @Post('bulk-download')
   @HttpCode(HttpStatus.OK)
+  @UseRoles({
+    resource: 'invoices',
+    action: 'read',
+    possession: 'any',
+  })
   @ApiOperation({ summary: 'Download multiple invoices as ZIP' })
   async bulkDownload(
-    @Body('ids') ids: string[],
-    @Res() res: express.Response, // Explicitly using express namespace
+      @Body('ids') ids: string[],
+      @Res() res: express.Response,
   ) {
     const zipStream = await this.bulkDownloadUseCase.execute(ids);
 
@@ -138,20 +172,23 @@ export class InvoiceController {
       'Content-Disposition': `attachment; filename="Invoices_Batch_${Date.now()}.zip"`,
     });
 
-    // Pipe the archive stream to the response
     zipStream.pipe(res);
 
     zipStream.on('error', (err) => {
-      // Avoid calling res.status if headers are already sent
       if (!res.headersSent) {
         res
-          .status(HttpStatus.INTERNAL_SERVER_ERROR)
-          .send({ message: 'ZIP generation failed' });
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .send({ message: 'ZIP generation failed' });
       }
     });
   }
 
   @Get(':id')
+  @UseRoles({
+    resource: 'invoices',
+    action: 'read',
+    possession: 'any',
+  })
   @ApiOperation({ summary: 'Get invoice by ID' })
   @ApiResponse({ status: 200, type: InvoiceResponseDto })
   async getById(@Param('id') id: string) {
@@ -159,11 +196,16 @@ export class InvoiceController {
   }
 
   @Patch(':id/status')
+  @UseRoles({
+    resource: 'invoices',
+    action: 'update',
+    possession: 'any',
+  })
   @ApiOperation({ summary: 'Update invoice status' })
   @ApiResponse({ status: 200, type: InvoiceResponseDto })
   async updateStatus(
-    @Param('id') id: string,
-    @Body() dto: UpdateInvoiceStatusDto,
+      @Param('id') id: string,
+      @Body() dto: UpdateInvoiceStatusDto,
   ) {
     return await this.updateInvoiceStatusUseCase.execute(id, dto.status);
   }

@@ -17,6 +17,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { UseRoles } from 'nest-access-control';
 import {
   ListPaymentsDto,
   PaymentResponseDto,
@@ -35,24 +36,28 @@ export interface RequestwithUser extends Request {
 
 @ApiTags('Payments')
 @ApiBearerAuth()
-// @UseGuards(JwtAuthGuard)
 @Controller('payments')
 export class PaymentController {
   constructor(
-    private readonly recordPaymentUseCase: RecordPaymentUseCase,
-    private readonly getPaymentUseCase: GetPaymentUseCase,
-    private readonly listPaymentsUseCase: ListPaymentsUseCase,
-    private readonly listPaginatedUseCase: ListPaginatedPaymentsUseCase,
+      private readonly recordPaymentUseCase: RecordPaymentUseCase,
+      private readonly getPaymentUseCase: GetPaymentUseCase,
+      private readonly listPaymentsUseCase: ListPaymentsUseCase,
+      private readonly listPaginatedUseCase: ListPaginatedPaymentsUseCase,
   ) {}
 
   logger = new Logger(PaymentController.name);
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @UseRoles({
+    resource: 'payments',
+    action: 'create',
+    possession: 'any',
+  })
   @ApiOperation({
     summary: 'Record a new payment',
     description:
-      'Records payment and automatically applies it to oldest outstanding invoices (FIFO). Excess amount is stored as client credit.',
+        'Records payment and automatically applies it to oldest outstanding invoices (FIFO). Excess amount is stored as client credit.',
   })
   @ApiResponse({
     status: 201,
@@ -64,8 +69,8 @@ export class PaymentController {
     description: 'Bad request - Invalid payment data or client not found',
   })
   async recordPayment(
-    @Body() dto: RecordPaymentDto,
-    @CurrentUser() user: CurrentUserDto,
+      @Body() dto: RecordPaymentDto,
+      @CurrentUser() user: CurrentUserDto,
   ) {
     const userId = user.userId;
     const payment = await this.recordPaymentUseCase.execute(dto, userId);
@@ -73,10 +78,15 @@ export class PaymentController {
   }
 
   @Get()
+  @UseRoles({
+    resource: 'payments',
+    action: 'read',
+    possession: 'any',
+  })
   @ApiOperation({
     summary: 'List all payments with optional filters',
     description:
-      'Returns all payments with support for filtering by client, method, and date range',
+        'Returns all payments with support for filtering by client, method, and date range',
   })
   @ApiResponse({
     status: 200,
@@ -96,10 +106,15 @@ export class PaymentController {
   }
 
   @Get(':id')
+  @UseRoles({
+    resource: 'payments',
+    action: 'read',
+    possession: 'any',
+  })
   @ApiOperation({
     summary: 'Get payment by ID',
     description:
-      'Returns detailed payment information including invoice applications',
+        'Returns detailed payment information including invoice applications',
   })
   @ApiParam({ name: 'id', description: 'Payment UUID' })
   @ApiResponse({
@@ -117,10 +132,15 @@ export class PaymentController {
   }
 
   @Get('client/:clientId')
+  @UseRoles({
+    resource: 'payments',
+    action: 'read',
+    possession: 'any',
+  })
   @ApiOperation({
     summary: 'Get all payments for a specific client',
     description:
-      'Returns payment history for a client, ordered by payment date (newest first)',
+        'Returns payment history for a client, ordered by payment date (newest first)',
   })
   @ApiParam({ name: 'clientId', description: 'Client UUID' })
   @ApiResponse({
@@ -133,11 +153,16 @@ export class PaymentController {
   }
 
   @Get('all-paginated')
+  @UseRoles({
+    resource: 'payments',
+    action: 'read',
+    possession: 'any',
+  })
   @ApiOperation({ summary: 'List all payments with pagination' })
   @ApiResponse({ status: 200, type: [PaymentResponseDto] })
   async listAllPaginated(
-    @Query('page') page: string = '1',
-    @Query('limit') limit: string = '10',
+      @Query('page') page: string = '1',
+      @Query('limit') limit: string = '10',
   ) {
     this.logger.debug(`Reaching here.`);
     return await this.listPaginatedUseCase.execute({

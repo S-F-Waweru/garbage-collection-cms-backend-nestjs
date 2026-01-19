@@ -49,6 +49,8 @@ export class LoginUseCase {
     const accessToken = this.jwtService.generateAccessToken({
       userId: user.id,
       email: user.email.value,
+      firstName: user.firstName,
+      lastName: user.lastName,
       role: user.role,
     });
 

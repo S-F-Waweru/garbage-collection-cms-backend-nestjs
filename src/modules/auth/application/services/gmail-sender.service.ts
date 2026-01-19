@@ -206,7 +206,7 @@ export class GmailEmailService implements IEmailSenderService {
     } catch (error) {
       this.logger.error(`Failed to send email to ${to.value}`, error.stack);
     }
-    throw new Error('Failed to send email to ${to.value}`);');
+    // throw new Error('Failed to send email to ${to.value}`);');
   }
 
   async sendInvitationEmail(
