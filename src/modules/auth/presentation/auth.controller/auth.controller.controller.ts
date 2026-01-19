@@ -220,8 +220,13 @@ export class AuthController {
   @ApiBody({ type: UpdateUserDto })
   @ApiResponse({ status: 200, description: 'User updated successfully' })
   @ApiResponse({ status: 404, description: 'User not found' })
-  async updateUser(@Param('id') id: string, @Body() dto: UpdateUserDto) {
-    return this.updateUserUseCase.execute(id, dto);
+  async updateUser(
+      @CurrentUser() user: any,
+      @Param('id') id: string,
+      @Body() dto: UpdateUserDto) {
+
+    const loggedUserId = user.userId;
+    return this.updateUserUseCase.execute(loggedUserId, dto);
   }
 
   @Patch('users/:id/role')

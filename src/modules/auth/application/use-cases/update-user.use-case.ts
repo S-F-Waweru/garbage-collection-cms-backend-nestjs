@@ -1,5 +1,5 @@
 // application/use-cases/update-user.usecase.ts
-import {Inject, Injectable, NotFoundException} from '@nestjs/common';
+import {Inject, Injectable, Logger, NotFoundException} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../../domain/entities/user.entity';
@@ -13,8 +13,10 @@ export class UpdateUserUseCase {
         @Inject(IAuthRepository)
         private readonly userRepository: IAuthRepository
     ) {}
+    logger = new Logger(UpdateUserUseCase.name)
 
     async execute(userId: string, dto: UpdateUserDto) {
+        this.logger.debug(`userId  ========>`, userId)
         const user = await this.userRepository.findById(userId);
         if (!user) {
             throw new NotFoundException('User not found');
